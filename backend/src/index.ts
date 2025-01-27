@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 dotenv.config();
 import { Request, Response } from "express";
-import clientRouter from "./routers/clientRouter";
+import clientRouter from "./routers/clienteRouter";
 
 
 const app = express();
