@@ -32,29 +32,53 @@ clientRouter.get("/specific", async (req, res) => {
 
 clientRouter.post("/create", async (req, res) => {
   try {
+    const {
+      Nombre,
+      Numero_Documento,
+      Tipo_Documento,
+      Telefono,
+      Direccion,
+      Email,
+    } = req.body
+
+    if (!Nombre || !Numero_Documento) {
+      throw new ReferenceError("Name and Document Number are required")
+    }
+
     const clientCreated = await uploadClient({
-      Nombre: "Juan",
-      Numero_Documento: 123,
-      Telefono: 12345,
-      Tipo_Documento: 1,
+      Nombre: Nombre,
+      Numero_Documento: Numero_Documento,
+      Tipo_Documento: Tipo_Documento,
+      Telefono: Telefono,
+      Direccion: Direccion,
+      Email: Email,
     })
 
     res.status(201).json(clientCreated)
   } catch (e: unknown) {
-    res.status(500).json({
-      message: "This client already exists",
-    })
+    if (e instanceof ReferenceError) {
+      res.status(400).json({
+        message: e.message,
+      })
+    } else {
+      res.status(500).json({
+        message: "This client already exists",
+      })
+    }
   }
 })
 
 clientRouter.put("/update", (req, res) => {
-  updateClient({
-    id: 1,
-    Nombre: "Juan",
-    Numero_Documento: 123,
-    Telefono: 1234,
-    Tipo_Documento: 1,
-  })
+  const { Direccion, Email, Telefono, Numero_Documento, Tipo_Documento } =
+    req.body
+
+  try {
+    console.log("hola")
+  } catch (e: unknown) {
+    res.status(400).json({
+      message: "Error",
+    })
+  }
 
   res.status(200).json({
     message: "Client updated",

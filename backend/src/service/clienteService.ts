@@ -32,7 +32,27 @@ async function uploadClient(nuevoCliente) {
   }
 }
 
-async function updateClient(cliente) {
+async function updateClient(
+  numeroDocumento,
+  tipoDocumento,
+  cambios: { direccion: string; telefono: number; email: string }
+) {
+  const cliente: Database["public"]["Tables"]["Cliente"]["Update"] = await supabase
+    .from("Cliente")
+    .select()
+    .eq("Numero_Documento", numeroDocumento)
+    .eq("Tipo_Documento", tipoDocumento)
+    .single()[0]
+
+  if (cambios.direccion) {
+    cliente.Direccion = cambios.direccion
+  }
+  if (cambios.telefono) {
+    cliente.Telefono = cambios.telefono
+  }
+  if (cambios.email) {
+    cliente.Email = cambios.email
+  }
   const { error } = await supabase
     .from("Cliente")
     .update(cliente)
@@ -52,7 +72,12 @@ async function deleteClient(tipoDocumento, numeroDocumento) {
     })
     .select()
   if (data?.length === 0) {
-    throw new PostgrestError({message: "Client not found", details: "Client not found", hint: "", code: "404"})
+    throw new PostgrestError({
+      message: "Client not found",
+      details: "Client not found",
+      hint: "",
+      code: "404",
+    })
   }
   return data
 }
