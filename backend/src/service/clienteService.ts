@@ -1,11 +1,12 @@
 import { PostgrestError } from "@supabase/supabase-js"
 import supabase from "../supabase/client"
-import { TablesInsert, Database } from "../supabase/database.types"
+import { TablesInsert, Database, TablesUpdate } from "../supabase/database.types"
 
 async function getClientes() {
   const { data, error } = await supabase.from("Cliente").select("*")
   return data
 }
+
 
 async function getClientByDocument(tipoDocumento, numeroDocumento) {
   const { data, error } = await supabase
@@ -16,9 +17,10 @@ async function getClientByDocument(tipoDocumento, numeroDocumento) {
   if (error) {
     throw new Error(error.message)
   } else {
-    return data
+    return data as Database["public"]["Tables"]["Cliente"]["Update"][]
   }
 }
+
 
 async function uploadClient(nuevoCliente) {
   const { data, error } = await supabase
@@ -35,14 +37,9 @@ async function uploadClient(nuevoCliente) {
 async function updateClient(
   numeroDocumento,
   tipoDocumento,
-  cambios: { direccion: string; telefono: number; email: string }
+  cambios: { direccion: string; telefono: number; email: string },
 ) {
-  const cliente: Database["public"]["Tables"]["Cliente"]["Update"] = await supabase
-    .from("Cliente")
-    .select()
-    .eq("Numero_Documento", numeroDocumento)
-    .eq("Tipo_Documento", tipoDocumento)
-    .single()[0]
+  const cliente = (await getClientByDocument(tipoDocumento, numeroDocumento))[0]
 
   if (cambios.direccion) {
     cliente.Direccion = cambios.direccion
@@ -53,10 +50,15 @@ async function updateClient(
   if (cambios.email) {
     cliente.Email = cambios.email
   }
+
   const { error } = await supabase
     .from("Cliente")
     .update(cliente)
-    .match({ id: cliente.id })
+    .match({
+      Numero_Documento: numeroDocumento,
+      Tipo_Documento: tipoDocumento,
+    })
+
   if (error) {
     throw new Error(error.message)
   }

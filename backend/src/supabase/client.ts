@@ -3,8 +3,7 @@ import { Database } from "./database.types"
 
 // Create a single supabase client for interacting with your database
 const supabase = createClient<Database>(
-  // @ts-ignore
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
+  process.env.SUPABASE_URL as string,
+  process.env.SUPABASE_ANON_KEY as string
 )
 export default supabase

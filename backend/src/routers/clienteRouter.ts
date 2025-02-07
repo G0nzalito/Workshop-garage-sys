@@ -73,7 +73,7 @@ clientRouter.put("/update", (req, res) => {
     req.body
 
   try {
-    console.log("hola")
+    updateClient(Numero_Documento, Tipo_Documento, {direccion: Direccion, telefono: Telefono, email: Email})
   } catch (e: unknown) {
     res.status(400).json({
       message: "Error",
