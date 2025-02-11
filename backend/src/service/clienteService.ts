@@ -1,12 +1,14 @@
 import { PostgrestError } from "@supabase/supabase-js"
 import supabase from "../supabase/client"
-import { TablesInsert, Database, TablesUpdate } from "../supabase/database.types"
+import { Database } from "../supabase/database.types"
+
+type ClienteAInsertar = Database["public"]["Tables"]["Cliente"]["Insert"]
+type Cliente = Database["public"]["Tables"]["Cliente"]["Row"]
 
 async function getClientes() {
   const { data, error } = await supabase.from("Cliente").select("*")
-  return data
+  return data as Cliente[]
 }
-
 
 async function getClientByDocument(tipoDocumento, numeroDocumento) {
   const { data, error } = await supabase
@@ -14,15 +16,16 @@ async function getClientByDocument(tipoDocumento, numeroDocumento) {
     .select("*")
     .eq("Tipo_Documento", tipoDocumento)
     .eq("Numero_Documento", numeroDocumento)
+    .eq("Dado_de_baja", false)
+    .single()
   if (error) {
     throw new Error(error.message)
   } else {
-    return data as Database["public"]["Tables"]["Cliente"]["Update"][]
+    return data as Cliente
   }
 }
 
-
-async function uploadClient(nuevoCliente) {
+async function uploadClient(nuevoCliente: ClienteAInsertar) {
   const { data, error } = await supabase
     .from("Cliente")
     .insert(nuevoCliente)
@@ -30,16 +33,21 @@ async function uploadClient(nuevoCliente) {
   if (error) {
     throw error
   } else {
-    return data
+    return data as ClienteAInsertar[]
   }
 }
 
 async function updateClient(
   numeroDocumento,
   tipoDocumento,
-  cambios: { direccion: string; telefono: number; email: string },
+  cambios: {
+    direccion: string
+    telefono: number
+    email: string
+    numeroSocio: number
+  }
 ) {
-  const cliente = (await getClientByDocument(tipoDocumento, numeroDocumento))[0]
+  const cliente = await getClientByDocument(tipoDocumento, numeroDocumento)
 
   if (cambios.direccion) {
     cliente.Direccion = cambios.direccion
@@ -50,14 +58,14 @@ async function updateClient(
   if (cambios.email) {
     cliente.Email = cambios.email
   }
+  if (cambios.numeroSocio) {
+    cliente.Numero_Socio = cambios.numeroSocio
+  }
 
-  const { error } = await supabase
-    .from("Cliente")
-    .update(cliente)
-    .match({
-      Numero_Documento: numeroDocumento,
-      Tipo_Documento: tipoDocumento,
-    })
+  const { error } = await supabase.from("Cliente").update(cliente).match({
+    Numero_Documento: numeroDocumento,
+    Tipo_Documento: tipoDocumento,
+  })
 
   if (error) {
     throw new Error(error.message)

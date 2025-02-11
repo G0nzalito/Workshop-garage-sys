@@ -7,8 +7,11 @@ import {
   deleteClient,
 } from "../service/clienteService"
 import { PostgrestError } from "@supabase/supabase-js"
+import { Database } from "../supabase/database.types"
 
 const clientRouter = appExpress.Router()
+
+type ClienteAInsertar = Database["public"]["Tables"]["Cliente"]["Insert"]
 
 clientRouter.get("/all", async (req, res) => {
   const clientes = await getClientes()
@@ -19,14 +22,14 @@ clientRouter.get("/all", async (req, res) => {
 clientRouter.get("/specific", async (req, res) => {
   const { tipoDocumento, numeroDocumento } = req.body
 
-  const clientes = await getClientByDocument(tipoDocumento, numeroDocumento)
+  const cliente = await getClientByDocument(tipoDocumento, numeroDocumento)
 
-  if (clientes.length === 0) {
+  if (cliente) {
     res.status(404).json({
       message: "Client not found",
     })
   } else {
-    res.status(200).json(clientes)
+    res.status(200).json(cliente)
   }
 })
 
@@ -39,19 +42,21 @@ clientRouter.post("/create", async (req, res) => {
       Telefono,
       Direccion,
       Email,
+      Numero_Socio
     } = req.body
 
     if (!Nombre || !Numero_Documento) {
       throw new ReferenceError("Name and Document Number are required")
     }
 
-    const clientCreated = await uploadClient({
+    const clientCreated: ClienteAInsertar[] = await uploadClient({
       Nombre: Nombre,
       Numero_Documento: Numero_Documento,
       Tipo_Documento: Tipo_Documento,
       Telefono: Telefono,
       Direccion: Direccion,
       Email: Email,
+      Numero_Socio: Numero_Socio
     })
 
     res.status(201).json(clientCreated)
@@ -69,11 +74,11 @@ clientRouter.post("/create", async (req, res) => {
 })
 
 clientRouter.put("/update", (req, res) => {
-  const { Direccion, Email, Telefono, Numero_Documento, Tipo_Documento } =
+  const { Direccion, Email, Telefono, Numero_Documento, Tipo_Documento, Numero_Socio } =
     req.body
 
   try {
-    updateClient(Numero_Documento, Tipo_Documento, {direccion: Direccion, telefono: Telefono, email: Email})
+    updateClient(Numero_Documento, Tipo_Documento, {direccion: Direccion, telefono: Telefono, email: Email, numeroSocio: Numero_Socio})
   } catch (e: unknown) {
     res.status(400).json({
       message: "Error",

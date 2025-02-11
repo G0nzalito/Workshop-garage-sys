@@ -9,31 +9,154 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      Caja: {
+        Row: {
+          Cuotas: number | null
+          Dominio: string
+          Fecha: string
+          Forma_de_Pago: number
+          Fuente_MKT: number
+          N_Autorizacion: number | null
+          N_Cupon: number | null
+          N_Lote: number | null
+          Numero_Documento_Cliente: number
+          Operador_1: number | null
+          Operador_2: number | null
+          Sub_Total: number
+          Supervisor: number | null
+          Tarjeta: number | null
+          Tipo_de_comprobante: number | null
+          Tipo_Documento_Cliente: number
+          Turno: number
+          Vehiculo: string
+        }
+        Insert: {
+          Cuotas?: number | null
+          Dominio: string
+          Fecha?: string
+          Forma_de_Pago: number
+          Fuente_MKT: number
+          N_Autorizacion?: number | null
+          N_Cupon?: number | null
+          N_Lote?: number | null
+          Numero_Documento_Cliente: number
+          Operador_1?: number | null
+          Operador_2?: number | null
+          Sub_Total: number
+          Supervisor?: number | null
+          Tarjeta?: number | null
+          Tipo_de_comprobante?: number | null
+          Tipo_Documento_Cliente: number
+          Turno: number
+          Vehiculo: string
+        }
+        Update: {
+          Cuotas?: number | null
+          Dominio?: string
+          Fecha?: string
+          Forma_de_Pago?: number
+          Fuente_MKT?: number
+          N_Autorizacion?: number | null
+          N_Cupon?: number | null
+          N_Lote?: number | null
+          Numero_Documento_Cliente?: number
+          Operador_1?: number | null
+          Operador_2?: number | null
+          Sub_Total?: number
+          Supervisor?: number | null
+          Tarjeta?: number | null
+          Tipo_de_comprobante?: number | null
+          Tipo_Documento_Cliente?: number
+          Turno?: number
+          Vehiculo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Caja_Tipo_Documento_Cliente_Numero_Documento_Cliente_fkey"
+            columns: ["Tipo_Documento_Cliente", "Numero_Documento_Cliente"]
+            isOneToOne: false
+            referencedRelation: "Cliente"
+            referencedColumns: ["Tipo_Documento", "Numero_Documento"]
+          },
+          {
+            foreignKeyName: "Caja_Vehiculo_fkey"
+            columns: ["Vehiculo"]
+            isOneToOne: false
+            referencedRelation: "Vehiculo"
+            referencedColumns: ["Patente"]
+          },
+        ]
+      }
+      "Caja Contable": {
+        Row: {
+          Detalle: string | null
+          Fecha: string
+          Monto: number
+          Movimiento: number
+          Turno: number | null
+        }
+        Insert: {
+          Detalle?: string | null
+          Fecha?: string
+          Monto: number
+          Movimiento: number
+          Turno?: number | null
+        }
+        Update: {
+          Detalle?: string | null
+          Fecha?: string
+          Monto?: number
+          Movimiento?: number
+          Turno?: number | null
+        }
+        Relationships: []
+      }
+      Categorias: {
+        Row: {
+          Descripcion: string
+          id: number
+        }
+        Insert: {
+          Descripcion: string
+          id?: number
+        }
+        Update: {
+          Descripcion?: string
+          id?: number
+        }
+        Relationships: []
+      }
       Cliente: {
         Row: {
+          Dado_de_baja: boolean
           Direccion: string | null
           Email: string | null
           id: number
           Nombre: string
           Numero_Documento: number
+          Numero_Socio: number | null
           Telefono: number | null
           Tipo_Documento: number
         }
         Insert: {
+          Dado_de_baja?: boolean
           Direccion?: string | null
           Email?: string | null
           id?: number
           Nombre: string
           Numero_Documento: number
+          Numero_Socio?: number | null
           Telefono?: number | null
           Tipo_Documento?: number
         }
         Update: {
+          Dado_de_baja?: boolean
           Direccion?: string | null
           Email?: string | null
           id?: number
           Nombre?: string
           Numero_Documento?: number
+          Numero_Socio?: number | null
           Telefono?: number | null
           Tipo_Documento?: number
         }
@@ -44,10 +167,63 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Tipo_documento"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
-      Marca: {
+      Cobranzas: {
+        Row: {
+          Autorizacion: number | null
+          Cupon: number | null
+          Facturas_Canceladas: string | null
+          Fecha: string
+          Forma_de_Pago: number
+          Lote: number | null
+          Monto: number
+          Numero_Documento_Cliente: number
+          Observaciones: string | null
+          Tarjeta: number | null
+          Tipo_Documento_Cliente: number
+          Turno: number
+        }
+        Insert: {
+          Autorizacion?: number | null
+          Cupon?: number | null
+          Facturas_Canceladas?: string | null
+          Fecha?: string
+          Forma_de_Pago: number
+          Lote?: number | null
+          Monto: number
+          Numero_Documento_Cliente: number
+          Observaciones?: string | null
+          Tarjeta?: number | null
+          Tipo_Documento_Cliente: number
+          Turno: number
+        }
+        Update: {
+          Autorizacion?: number | null
+          Cupon?: number | null
+          Facturas_Canceladas?: string | null
+          Fecha?: string
+          Forma_de_Pago?: number
+          Lote?: number | null
+          Monto?: number
+          Numero_Documento_Cliente?: number
+          Observaciones?: string | null
+          Tarjeta?: number | null
+          Tipo_Documento_Cliente?: number
+          Turno?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Cobranzas_Tipo_Documento_Cliente_Numero_Documento_Cliente_fkey"
+            columns: ["Tipo_Documento_Cliente", "Numero_Documento_Cliente"]
+            isOneToOne: false
+            referencedRelation: "Cliente"
+            referencedColumns: ["Tipo_Documento", "Numero_Documento"]
+          },
+        ]
+      }
+      "Conceptos Facturas": {
         Row: {
           id: number
           Nombre: string
@@ -61,6 +237,200 @@ export type Database = {
           Nombre?: string
         }
         Relationships: []
+      }
+      "Consumos Stock": {
+        Row: {
+          Cantidad: number
+          Descripcion: string | null
+          Dominio: string
+          Fecha: string
+          KilometroXDia: number
+          Numero_Documento_Cliente: number
+          Producto: string
+          Proximo_Service: string
+          SubTotal: number
+          Tipo_Documento_Cliente: number
+          Vehiculo: string
+        }
+        Insert: {
+          Cantidad: number
+          Descripcion?: string | null
+          Dominio: string
+          Fecha?: string
+          KilometroXDia: number
+          Numero_Documento_Cliente: number
+          Producto: string
+          Proximo_Service: string
+          SubTotal: number
+          Tipo_Documento_Cliente: number
+          Vehiculo: string
+        }
+        Update: {
+          Cantidad?: number
+          Descripcion?: string | null
+          Dominio?: string
+          Fecha?: string
+          KilometroXDia?: number
+          Numero_Documento_Cliente?: number
+          Producto?: string
+          Proximo_Service?: string
+          SubTotal?: number
+          Tipo_Documento_Cliente?: number
+          Vehiculo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Consumos Stock_Producto_fkey"
+            columns: ["Producto"]
+            isOneToOne: false
+            referencedRelation: "Productos"
+            referencedColumns: ["Codigo"]
+          },
+          {
+            foreignKeyName: "Consumos Stock_Tipo_Documento_Cliente_Numero_Documento_Cli_fkey"
+            columns: ["Tipo_Documento_Cliente", "Numero_Documento_Cliente"]
+            isOneToOne: false
+            referencedRelation: "Cliente"
+            referencedColumns: ["Tipo_Documento", "Numero_Documento"]
+          },
+          {
+            foreignKeyName: "Consumos Stock_Vehiculo_fkey"
+            columns: ["Vehiculo"]
+            isOneToOne: false
+            referencedRelation: "Vehiculo"
+            referencedColumns: ["Patente"]
+          },
+        ]
+      }
+      Gastos: {
+        Row: {
+          Comprobante: number
+          Cuenta: string
+          Fecha: string
+          Monto: number
+          Observaciones: string | null
+          Turno: number
+        }
+        Insert: {
+          Comprobante: number
+          Cuenta: string
+          Fecha?: string
+          Monto: number
+          Observaciones?: string | null
+          Turno: number
+        }
+        Update: {
+          Comprobante?: number
+          Cuenta?: string
+          Fecha?: string
+          Monto?: number
+          Observaciones?: string | null
+          Turno?: number
+        }
+        Relationships: []
+      }
+      Historial_Precios: {
+        Row: {
+          Fecha_De_Cambio: string | null
+          Precio_Antiguo: number | null
+          Product_Id: string
+        }
+        Insert: {
+          Fecha_De_Cambio?: string | null
+          Precio_Antiguo?: number | null
+          Product_Id: string
+        }
+        Update: {
+          Fecha_De_Cambio?: string | null
+          Precio_Antiguo?: number | null
+          Product_Id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Historial_Precios_Product_Id_fkey"
+            columns: ["Product_Id"]
+            isOneToOne: true
+            referencedRelation: "Productos"
+            referencedColumns: ["Codigo"]
+          },
+        ]
+      }
+      Marca_de_Productos: {
+        Row: {
+          Dado_de_baja: boolean
+          id: number
+          Nombre: string
+        }
+        Insert: {
+          Dado_de_baja?: boolean
+          id?: number
+          Nombre: string
+        }
+        Update: {
+          Dado_de_baja?: boolean
+          id?: number
+          Nombre?: string
+        }
+        Relationships: []
+      }
+      Marca_de_Vehiculos: {
+        Row: {
+          Dada_de_baja: boolean | null
+          id: number
+          Nombre: string
+        }
+        Insert: {
+          Dada_de_baja?: boolean | null
+          id?: number
+          Nombre: string
+        }
+        Update: {
+          Dada_de_baja?: boolean | null
+          id?: number
+          Nombre?: string
+        }
+        Relationships: []
+      }
+      "Medios Pago": {
+        Row: {
+          id: number
+          Nombre: string
+        }
+        Insert: {
+          id?: number
+          Nombre: string
+        }
+        Update: {
+          id?: number
+          Nombre?: string
+        }
+        Relationships: []
+      }
+      Modelos: {
+        Row: {
+          id: number
+          Marca: number | null
+          Nombre: string
+        }
+        Insert: {
+          id?: number
+          Marca?: number | null
+          Nombre: string
+        }
+        Update: {
+          id?: number
+          Marca?: number | null
+          Nombre?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Modelos_Marca_fkey"
+            columns: ["Marca"]
+            isOneToOne: false
+            referencedRelation: "Marca_de_Vehiculos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       "Ordenes de trabajo": {
         Row: {
@@ -98,30 +468,127 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Cliente"
             referencedColumns: ["Tipo_Documento", "Numero_Documento"]
-          }
+          },
         ]
       }
       Productos: {
         Row: {
-          Categoria: number | null
+          Categoria: number
           Codigo: string
-          Nombre: string
+          Dado_de_baja: boolean
+          Descripcion: string
+          Marca: number
           Precio: number | null
+          Proveedor: number
           SubCategoria: number | null
         }
         Insert: {
-          Categoria?: number | null
+          Categoria: number
           Codigo: string
-          Nombre: string
+          Dado_de_baja?: boolean
+          Descripcion: string
+          Marca: number
           Precio?: number | null
+          Proveedor: number
           SubCategoria?: number | null
         }
         Update: {
-          Categoria?: number | null
+          Categoria?: number
           Codigo?: string
-          Nombre?: string
+          Dado_de_baja?: boolean
+          Descripcion?: string
+          Marca?: number
           Precio?: number | null
+          Proveedor?: number
           SubCategoria?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Productos_Categoria_fkey"
+            columns: ["Categoria"]
+            isOneToOne: false
+            referencedRelation: "Categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Productos_Marca_fkey"
+            columns: ["Marca"]
+            isOneToOne: false
+            referencedRelation: "Marca_de_Productos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Productos_Proveedor_fkey"
+            columns: ["Proveedor"]
+            isOneToOne: false
+            referencedRelation: "Proveedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Productos_SubCategoria_fkey"
+            columns: ["SubCategoria"]
+            isOneToOne: false
+            referencedRelation: "SubCategorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      Proveedores: {
+        Row: {
+          Dado_de_baja: boolean
+          id: number
+          Nombre: string
+        }
+        Insert: {
+          Dado_de_baja?: boolean
+          id?: number
+          Nombre: string
+        }
+        Update: {
+          Dado_de_baja?: boolean
+          id?: number
+          Nombre?: string
+        }
+        Relationships: []
+      }
+      SubCategorias: {
+        Row: {
+          Categoria: number | null
+          Descripción: string
+          id: number
+        }
+        Insert: {
+          Categoria?: number | null
+          Descripción: string
+          id?: number
+        }
+        Update: {
+          Categoria?: number | null
+          Descripción?: string
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "SubCategorias_Categoria_fkey"
+            columns: ["Categoria"]
+            isOneToOne: false
+            referencedRelation: "Categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      Tarjetas: {
+        Row: {
+          id: number
+          Nombre: string
+        }
+        Insert: {
+          id?: number
+          Nombre: string
+        }
+        Update: {
+          id?: number
+          Nombre?: string
         }
         Relationships: []
       }
@@ -147,6 +614,7 @@ export type Database = {
           Kilometros: number
           Marca: number
           Modelo: number
+          Motor: string
           Patente: string
         }
         Insert: {
@@ -155,6 +623,7 @@ export type Database = {
           Kilometros: number
           Marca: number
           Modelo: number
+          Motor: string
           Patente: string
         }
         Update: {
@@ -163,6 +632,7 @@ export type Database = {
           Kilometros?: number
           Marca?: number
           Modelo?: number
+          Motor?: string
           Patente?: string
         }
         Relationships: [
@@ -170,25 +640,28 @@ export type Database = {
             foreignKeyName: "Vehiculo_Marca_fkey"
             columns: ["Marca"]
             isOneToOne: false
-            referencedRelation: "Marca"
+            referencedRelation: "Marca_de_Vehiculos"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       Vehiculos_de_clientes: {
         Row: {
+          Fecha_Asignacion_Cliente: string
           ID: number
           Numero_Documento_Cliente: number | null
           Patente_Vehiculo: string
           Tipo_Documento_Cliente: number | null
         }
         Insert: {
+          Fecha_Asignacion_Cliente?: string
           ID?: number
           Numero_Documento_Cliente?: number | null
           Patente_Vehiculo: string
           Tipo_Documento_Cliente?: number | null
         }
         Update: {
+          Fecha_Asignacion_Cliente?: string
           ID?: number
           Numero_Documento_Cliente?: number | null
           Patente_Vehiculo?: string
@@ -208,7 +681,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Cliente"
             referencedColumns: ["Tipo_Documento", "Numero_Documento"]
-          }
+          },
         ]
       }
     }
@@ -236,7 +709,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -245,14 +718,14 @@ export type Tables<
     ? R
     : never
   : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-      PublicSchema["Views"])
-  ? (PublicSchema["Tables"] &
-      PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
-  : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -260,7 +733,7 @@ export type TablesInsert<
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
@@ -268,12 +741,12 @@ export type TablesInsert<
     ? I
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
-  : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -281,7 +754,7 @@ export type TablesUpdate<
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
@@ -289,12 +762,12 @@ export type TablesUpdate<
     ? U
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
     : never
-  : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -302,12 +775,12 @@ export type Enums<
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never
+    : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-  : never
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
@@ -317,9 +790,9 @@ export type CompositeTypes<
     schema: keyof Database
   }
     ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-  ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
