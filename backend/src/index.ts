@@ -5,7 +5,7 @@ dotenv.config()
 import { Request, Response } from "express"
 import clientRouter from "./routers/clienteRouter"
 import { vehiculoRouter } from "./routers/vehiculoRouter"
-import { marcaRouter } from "./routers/marcaRouter"
+import { marcaRouter } from "./routers/marcaVehiculoRouter"
 import { modeloRouter } from "./routers/modelosRouter"
 
 const app = express()

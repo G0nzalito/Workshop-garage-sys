@@ -8,7 +8,7 @@ import {
   uploadModelo,
 } from "../service/modelosService"
 import { Database } from "../supabase/database.types"
-import { getMarca_de_VehiculosByNombre } from "../service/marcaService"
+import { getMarca_de_VehiculosByNombre } from "../service/marcaVehiculoService"
 
 export const modeloRouter = appExpress.Router()
 
@@ -49,13 +49,12 @@ modeloRouter.get("/marca", async (req, res) => {
   const { nombre } = req.query
 
   if (nombre !== null) {
-    
-    try{
+    try {
       const Marca = await getMarca_de_VehiculosByNombre(nombre as string)
-  
+
       if (Marca.Dada_de_baja === false) {
         const modelos = await getModelosDeMarca(Marca.id)
-  
+
         if (modelos.length > 0) {
           res.status(200).json(modelos)
         } else {
@@ -64,7 +63,7 @@ modeloRouter.get("/marca", async (req, res) => {
       } else {
         res.status(406).json({ message: "Marca dada de baja" })
       }
-    }catch(e: unknown){
+    } catch (e: unknown) {
       res.status(404).json({ message: "Marca no encontrada" })
     }
   } else {

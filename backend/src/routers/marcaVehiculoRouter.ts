@@ -4,11 +4,12 @@ import {
   getMarca_de_VehiculosById,
   getMarca_de_Vehiculos,
   uploadMarca_de_Vehiculos,
-  enableMarca_de_vehiculos
-} from "../service/marcaService"
+  enableMarca_de_vehiculos,
+} from "../service/marcaVehiculoService"
 import { Database } from "../supabase/database.types"
 
-type MarcaAInsertar = Database["public"]["Tables"]["Marca_de_Vehiculos"]["Insert"]
+type MarcaAInsertar =
+  Database["public"]["Tables"]["Marca_de_Vehiculos"]["Insert"]
 type Marca = Database["public"]["Tables"]["Marca_de_Vehiculos"]["Row"]
 
 export const marcaRouter = appExpress.Router()

@@ -1,6 +1,6 @@
 import supabase from "../supabase/client"
 import { Database } from "../supabase/database.types"
-import { getMarca_de_VehiculosById } from "./marcaService"
+import { getMarca_de_VehiculosById } from "./marcaVehiculoService"
 
 type ModeloAInsertar = Database["public"]["Tables"]["Modelos"]["Insert"]
 type Modelo = Database["public"]["Tables"]["Modelos"]["Row"]
@@ -55,11 +55,12 @@ async function uploadModelo(nuevoModelo: ModeloAInsertar) {
     throw new ReferenceError("El modelo ya existe")
   } catch (e: unknown) {
     if (e instanceof ReferenceError === false) {
-
       const marca = await getMarca_de_VehiculosById(nuevoModelo.Marca as number)
 
       if (marca.Dada_de_baja === true) {
-        throw new ReferenceError("La marca a la que pertenece el modelo está dada de baja")
+        throw new ReferenceError(
+          "La marca a la que pertenece el modelo está dada de baja"
+        )
       }
 
       const { data, error } = await supabase
@@ -72,7 +73,7 @@ async function uploadModelo(nuevoModelo: ModeloAInsertar) {
       } else {
         return data as ModeloAInsertar
       }
-    }else{
+    } else {
       throw e
     }
   }
