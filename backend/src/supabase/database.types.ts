@@ -113,14 +113,17 @@ export type Database = {
       }
       Categorias: {
         Row: {
+          Dada_de_baja: boolean
           Descripcion: string
           id: number
         }
         Insert: {
+          Dada_de_baja?: boolean
           Descripcion: string
           id?: number
         }
         Update: {
+          Dada_de_baja?: boolean
           Descripcion?: string
           id?: number
         }
@@ -553,17 +556,20 @@ export type Database = {
       }
       SubCategorias: {
         Row: {
-          Categoria: number | null
+          Categoria: number
+          Dada_de_baja: boolean | null
           Descripción: string
           id: number
         }
         Insert: {
-          Categoria?: number | null
+          Categoria: number
+          Dada_de_baja?: boolean | null
           Descripción: string
           id?: number
         }
         Update: {
-          Categoria?: number | null
+          Categoria?: number
+          Dada_de_baja?: boolean | null
           Descripción?: string
           id?: number
         }

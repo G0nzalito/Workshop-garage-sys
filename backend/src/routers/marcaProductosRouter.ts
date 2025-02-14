@@ -1,29 +1,29 @@
 import appExpress from "express"
 import {
-  deleteMarca_de_Vehiculos,
-  getMarca_de_VehiculosById,
-  getMarca_de_Vehiculos,
-  uploadMarca_de_Vehiculos,
-  enableMarca_de_vehiculos,
-} from "../service/marcaVehiculoService"
+  deleteMarca_de_Productos,
+  getMarca_de_ProductosById,
+  getMarca_de_Productos,
+  uploadMarca_de_Productos,
+  enableMarca_de_Productos,
+} from "../service/marcaProductosService"
 import { Database } from "../supabase/database.types"
 
 type MarcaAInsertar =
-  Database["public"]["Tables"]["Marca_de_Vehiculos"]["Insert"]
-type Marca = Database["public"]["Tables"]["Marca_de_Vehiculos"]["Row"]
+  Database["public"]["Tables"]["Marca_de_Productos"]["Insert"]
+type Marca = Database["public"]["Tables"]["Marca_de_Productos"]["Row"]
 
-export const marcaVehiculoRouter = appExpress.Router()
+export const marcaProductosRouter = appExpress.Router()
 
-marcaVehiculoRouter.get("/all", async (req, res) => {
-  const marcas = await getMarca_de_Vehiculos()
+marcaProductosRouter.get("/all", async (req, res) => {
+  const marcas = await getMarca_de_Productos()
 
   res.status(200).json(marcas)
 })
 
-marcaVehiculoRouter.get("/specific", async (req, res) => {
+marcaProductosRouter.get("/specific", async (req, res) => {
   const { id } = req.body
 
-  const marca = await getMarca_de_VehiculosById(id)
+  const marca = await getMarca_de_ProductosById(id)
 
   if (marca) {
     res.status(200).json(marca)
@@ -32,7 +32,7 @@ marcaVehiculoRouter.get("/specific", async (req, res) => {
   }
 })
 
-marcaVehiculoRouter.post("/create", async (req, res) => {
+marcaProductosRouter.post("/create", async (req, res) => {
   try {
     const { Nombre } = req.body
 
@@ -40,7 +40,7 @@ marcaVehiculoRouter.post("/create", async (req, res) => {
       throw new ReferenceError("Nombre es requerido")
     }
 
-    const marca: MarcaAInsertar = await uploadMarca_de_Vehiculos({ Nombre })
+    const marca: MarcaAInsertar = await uploadMarca_de_Productos({ Nombre })
 
     res.status(201).json(marca)
   } catch (e: unknown) {
@@ -52,22 +52,22 @@ marcaVehiculoRouter.post("/create", async (req, res) => {
   }
 })
 
-marcaVehiculoRouter.put("/enable", async (req, res) => {
+marcaProductosRouter.put("/enable", async (req, res) => {
   const { Nombre } = req.body
 
   try {
-    const marca = await enableMarca_de_vehiculos(Nombre)
+    const marca = await enableMarca_de_Productos(Nombre)
     res.status(200).json(marca)
   } catch (e: unknown) {
     res.status(500).json({ message: "Error al habilitar la marca", error: e })
   }
 })
 
-marcaVehiculoRouter.delete("/delete", async (req, res) => {
+marcaProductosRouter.delete("/delete", async (req, res) => {
   const { Nombre } = req.body
 
   try {
-    const marca = await deleteMarca_de_Vehiculos(Nombre)
+    const marca = await deleteMarca_de_Productos(Nombre)
     res.status(200).json(marca)
   } catch (e: unknown) {
     res.status(500).json({ message: "Error al eliminar la marca", error: e })
