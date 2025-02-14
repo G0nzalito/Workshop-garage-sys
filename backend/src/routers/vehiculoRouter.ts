@@ -10,6 +10,7 @@ import { getClientByDocument } from "../service/clienteService"
 import { Database } from "../supabase/database.types"
 import { getModeloById } from "../service/modelosService"
 import { getMarca_de_VehiculosById } from "../service/marcaVehiculoService"
+import { PostgrestError } from "@supabase/supabase-js"
 
 type VehiculoAInsertar = Database["public"]["Tables"]["Vehiculo"]["Insert"]
 type Vehiculo = Database["public"]["Tables"]["Vehiculo"]["Row"]
@@ -24,7 +25,9 @@ async function cargarVehiculosAMostrar(vehiculos: Vehiculo[]) {
   let vehiculosAMostrar: VehiculoAMostrar[] = []
 
   for (const vehiculo of vehiculos) {
+    //@ts-expect-error Siempre va a existir la marca de un vehiculo
     const nombreMarca = (await getMarca_de_VehiculosById(vehiculo.Marca)).Nombre
+    //@ts-expect-error Siempre va a existir el modelo de un vehiculo
     const nombreModelo = (await getModeloById(vehiculo.Modelo)).Nombre
 
     const { Marca, Modelo, ...resto } = vehiculo
@@ -86,6 +89,10 @@ vehiculoRouter.post("/create", async (req, res) => {
       throw new ReferenceError("Todos los campos son requeridos")
     }
 
+    if(await getVehiculoByPatente(Patente)){
+      throw new ReferenceError("Patente Duplicada")
+    }
+
     const Vehiculo: VehiculoAInsertar = {
       Patente: Patente,
       Marca: Marca,
@@ -97,11 +104,19 @@ vehiculoRouter.post("/create", async (req, res) => {
 
     const modelo = await getModeloById(Modelo)
 
+    if (!modelo) {
+      throw new ReferenceError("Modelo no encontrado")
+    }
+
     if (modelo.Marca !== Marca) {
       throw new ReferenceError("El modelo no corresponde a la marca")
     }
 
     const cliente = await getClientByDocument(Tipo_Documento, Numero_Documento)
+
+    if (!cliente) {
+      throw new ReferenceError("Cliente no encontrado")
+    }
 
     await uploadVehiculo(Vehiculo, cliente)
 
@@ -109,7 +124,8 @@ vehiculoRouter.post("/create", async (req, res) => {
   } catch (e: unknown) {
     if (e instanceof ReferenceError) {
       res.status(400).json({ message: e.message })
-    } else {
+    }
+    else {
       res.status(500).json({ message: "Interal server error", e: e })
     }
   }

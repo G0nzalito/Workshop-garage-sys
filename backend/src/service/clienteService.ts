@@ -19,6 +19,9 @@ async function getClientByDocument(tipoDocumento, numeroDocumento) {
     .eq("Dado_de_baja", false)
     .single()
   if (error) {
+    if (error.code === "PGRST116") {
+      return null
+    }
     throw new Error(error.message)
   } else {
     return data as Cliente
@@ -48,6 +51,10 @@ async function updateClient(
   }
 ) {
   const cliente = await getClientByDocument(tipoDocumento, numeroDocumento)
+
+  if (!cliente) {
+    throw new ReferenceError("404 Cliente no encontrado")
+  }
 
   if (cambios.direccion) {
     cliente.Direccion = cambios.direccion

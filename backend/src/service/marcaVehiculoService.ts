@@ -17,6 +17,9 @@ async function getMarca_de_VehiculosById(id: number) {
     .eq("id", id)
     .single()
   if (error) {
+    if (error.code === "PGRST116") {
+      return null
+    }
     throw new Error(error.message)
   } else {
     return data as Marca_de_Vehiculos

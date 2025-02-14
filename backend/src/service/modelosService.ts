@@ -17,6 +17,9 @@ async function getModeloById(id: number) {
     .eq("id", id)
     .single()
   if (error) {
+    if (error.code === "PGRST116") {
+      return null
+    }
     throw new Error(error.message)
   } else {
     return data as Modelo
@@ -30,6 +33,9 @@ async function getModeloByNombre(nombre: string) {
     .eq("Nombre", nombre)
     .single()
   if (error) {
+    if (error.code === "PGRST116") {
+      return null
+    }
     throw error
   } else {
     return data as Modelo
@@ -56,6 +62,10 @@ async function uploadModelo(nuevoModelo: ModeloAInsertar) {
   } catch (e: unknown) {
     if (e instanceof ReferenceError === false) {
       const marca = await getMarca_de_VehiculosById(nuevoModelo.Marca as number)
+
+      if (!marca) {
+        throw new ReferenceError("La marca a la que pertenece el modelo no existe")
+      }
 
       if (marca.Dada_de_baja === true) {
         throw new ReferenceError(

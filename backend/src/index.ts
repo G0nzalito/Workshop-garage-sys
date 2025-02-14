@@ -3,10 +3,17 @@ import dotenv from "dotenv"
 import express from "express"
 dotenv.config()
 import { Request, Response } from "express"
+
+/// Routers
+
 import clientRouter from "./routers/clienteRouter"
 import { vehiculoRouter } from "./routers/vehiculoRouter"
 import { marcaRouter } from "./routers/marcaVehiculoRouter"
 import { modeloRouter } from "./routers/modelosRouter"
+import { categoriaRouter } from "./routers/categoriaRouter"
+import { subCategoriasRouter } from "./routers/subCategoriasRouter"
+import { proveedoresRouter } from "./routers/proveedoresRouter"
+
 
 const app = express()
 
@@ -20,6 +27,9 @@ app.use("/api/clientes", clientRouter)
 app.use("/api/vehiculos", vehiculoRouter)
 app.use("/api/marcas", marcaRouter)
 app.use("/api/modelos", modeloRouter)
+app.use("/api/categorias", categoriaRouter)
+app.use("/api/subcategorias", subCategoriasRouter)
+app.use("/api/proveedores", proveedoresRouter)
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({

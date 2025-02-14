@@ -21,6 +21,9 @@ async function getVehiculoByPatente(patente: string) {
     .eq("Patente", patente)
     .single()
   if (error) {
+    if (error.code === "PGRST116") {
+      return null
+    }
     throw new Error(error.message)
   } else {
     return data as Vehiculo
@@ -46,6 +49,9 @@ async function upodateKilometersOfVehiculo(
 ) {
   const vehiculo = await getVehiculoByPatente(patente)
 
+  if (!vehiculo) {
+    throw new ReferenceError("404 Vehiculo no encontrado")
+  }
   vehiculo.Kilometros += cambios.kilometros
 
   const { data, error } = await supabase
