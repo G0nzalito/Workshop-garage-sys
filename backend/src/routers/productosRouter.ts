@@ -6,6 +6,7 @@ import {
   getProductosByCodigo,
   updateProductos,
   uploadProductos,
+  aumentarStockProducto
 } from "../service/productosService"
 
 type ProductoAInsertar = Database["public"]["Tables"]["Productos"]["Insert"]
@@ -75,6 +76,21 @@ productosRouter.put("/update", async (req, res) => {
         Baja,
         Proveedor,
       })
+      res.status(200).json(productoActualizado)
+    } catch (error) {
+      res.status(500).json({ error })
+    }
+  }
+})
+
+productosRouter.put("/updateStock", async (req, res) => {
+  const { Codigo, Cantidad } = req.body
+
+  if (!Codigo || !Cantidad) {
+    res.status(400).json({ error: "Codigo and Cantidad are required" })
+  } else {
+    try {
+      const productoActualizado = await aumentarStockProducto(Codigo, Cantidad)
       res.status(200).json(productoActualizado)
     } catch (error) {
       res.status(500).json({ error })
