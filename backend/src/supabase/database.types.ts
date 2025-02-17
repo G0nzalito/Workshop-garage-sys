@@ -245,95 +245,46 @@ export type Database = {
         Row: {
           Cantidad: number
           Descripcion: string | null
-          Dominio: string
           Fecha: string
+          id: number
           KilometroXDia: number
-          Numero_Documento_Cliente: number
+          Orden_Trabajo: number
           Producto: string
           Proximo_Service: string
           SubTotal: number
-          Tipo_Documento_Cliente: number
-          Vehiculo: string
         }
         Insert: {
           Cantidad: number
           Descripcion?: string | null
-          Dominio: string
           Fecha?: string
+          id?: number
           KilometroXDia: number
-          Numero_Documento_Cliente: number
+          Orden_Trabajo: number
           Producto: string
           Proximo_Service: string
           SubTotal: number
-          Tipo_Documento_Cliente: number
-          Vehiculo: string
         }
         Update: {
           Cantidad?: number
           Descripcion?: string | null
-          Dominio?: string
           Fecha?: string
+          id?: number
           KilometroXDia?: number
-          Numero_Documento_Cliente?: number
+          Orden_Trabajo?: number
           Producto?: string
           Proximo_Service?: string
           SubTotal?: number
-          Tipo_Documento_Cliente?: number
-          Vehiculo?: string
         }
         Relationships: [
           {
-            foreignKeyName: "Consumos Stock_Producto_fkey"
-            columns: ["Producto"]
-            isOneToOne: false
-            referencedRelation: "Productos"
-            referencedColumns: ["Codigo"]
-          },
-          {
-            foreignKeyName: "Consumos Stock_Tipo_Documento_Cliente_Numero_Documento_Cli_fkey"
-            columns: ["Tipo_Documento_Cliente", "Numero_Documento_Cliente"]
-            isOneToOne: false
-            referencedRelation: "Cliente"
-            referencedColumns: ["Tipo_Documento", "Numero_Documento"]
-          },
-          {
-            foreignKeyName: "Consumos Stock_Vehiculo_fkey"
-            columns: ["Vehiculo"]
-            isOneToOne: false
-            referencedRelation: "Vehiculo"
-            referencedColumns: ["Patente"]
-          },
-        ]
-      }
-      "Detalle Ordenes de Trabajo": {
-        Row: {
-          Cantidad: number
-          id: number
-          OrdenTrabajo: number
-          Producto: string
-        }
-        Insert: {
-          Cantidad: number
-          id?: number
-          OrdenTrabajo: number
-          Producto: string
-        }
-        Update: {
-          Cantidad?: number
-          id?: number
-          OrdenTrabajo?: number
-          Producto?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "Detalle Ordenes de Trabajo_OrdenTrabajo_fkey"
-            columns: ["OrdenTrabajo"]
+            foreignKeyName: "Consumos Stock_Orden De Trabajo_fkey"
+            columns: ["Orden_Trabajo"]
             isOneToOne: false
             referencedRelation: "Ordenes de trabajo"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "Detalle Ordenes de Trabajo_Producto_fkey"
+            foreignKeyName: "Consumos Stock_Producto_fkey"
             columns: ["Producto"]
             isOneToOne: false
             referencedRelation: "Productos"
@@ -371,16 +322,19 @@ export type Database = {
       Historial_Precios: {
         Row: {
           Fecha_De_Cambio: string | null
+          id: number
           Precio_Antiguo: number | null
           Product_Id: string
         }
         Insert: {
           Fecha_De_Cambio?: string | null
+          id?: number
           Precio_Antiguo?: number | null
           Product_Id: string
         }
         Update: {
           Fecha_De_Cambio?: string | null
+          id?: number
           Precio_Antiguo?: number | null
           Product_Id?: string
         }
@@ -388,7 +342,7 @@ export type Database = {
           {
             foreignKeyName: "Historial_Precios_Product_Id_fkey"
             columns: ["Product_Id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "Productos"
             referencedColumns: ["Codigo"]
           },
@@ -520,7 +474,7 @@ export type Database = {
           Dado_de_baja: boolean
           Descripcion: string
           Marca: number
-          Precio: number | null
+          Precio: number
           Proveedor: number
           Stock: number
           SubCategoria: number | null
@@ -531,7 +485,7 @@ export type Database = {
           Dado_de_baja?: boolean
           Descripcion: string
           Marca: number
-          Precio?: number | null
+          Precio?: number
           Proveedor: number
           Stock?: number
           SubCategoria?: number | null
@@ -542,7 +496,7 @@ export type Database = {
           Dado_de_baja?: boolean
           Descripcion?: string
           Marca?: number
-          Precio?: number | null
+          Precio?: number
           Proveedor?: number
           Stock?: number
           SubCategoria?: number | null

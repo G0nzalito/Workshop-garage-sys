@@ -4,10 +4,14 @@ import { getCategoriaById } from "./categoriasService"
 import { getSubCategoriaById } from "./subCategoriasService"
 import { getMarca_de_ProductosById } from "./marcaProductosService"
 import { getProveedorById } from "./proveedoresService"
+import { convertirFechaLocal, getDateWithTimeZone } from "../support/supportFunctions"
 
 type ProductoAInsertar = Database["public"]["Tables"]["Productos"]["Insert"]
 type ProductoAActualizar = Database["public"]["Tables"]["Productos"]["Update"]
 type Producto = Database["public"]["Tables"]["Productos"]["Row"]
+
+type PrecioHistorialAInsertar =
+  Database["public"]["Tables"]["Historial_Precios"]["Insert"]
 
 async function getProductos() {
   const { data, error } = await supabase
@@ -35,12 +39,11 @@ async function getProductosByCodigo(codigo: string) {
 }
 
 async function uploadProductos(producto: ProductoAInsertar) {
-
-  if(!producto.Codigo){
+  if (!producto.Codigo) {
     throw new ReferenceError("Codigo no enviado")
-  }else{
+  } else {
     const productoExistente = await getProductosByCodigo(producto.Codigo)
-    if(productoExistente !== null){
+    if (productoExistente !== null) {
       throw new ReferenceError("Codigo ya existente")
     }
   }
@@ -110,22 +113,34 @@ async function updateProductos(
   if (productoACambiar === null) {
     throw new ReferenceError("Producto no encontrado")
   }
+  if (cambios.Proveedor) {
+    if ((await getProveedorById(cambios.Proveedor)) !== null) {
+      productoACambiar.Proveedor = cambios.Proveedor
+    } else {
+      throw new ReferenceError("Proveedor no encontrado")
+    }
+  }
 
   if (cambios.Descripcion) {
     productoACambiar.Descripcion = cambios.Descripcion
   }
-  if (cambios.Precio) {
-    productoACambiar.Precio = cambios.Precio
-  } else {
-    if (cambios.PorcentajeAumento && productoACambiar.Precio !== null) {
-      productoACambiar.Precio *= 1 + cambios.PorcentajeAumento / 100
-    }
-  }
   if (cambios.Baja) {
     productoACambiar.Dado_de_baja = cambios.Baja
   }
-  if (cambios.Proveedor) {
-    productoACambiar.Proveedor = cambios.Proveedor
+  if (cambios.Precio) {
+    const precioViejo = productoACambiar.Precio
+
+    productoACambiar.Precio = cambios.Precio
+
+    await guardarPrecioAntiguo(precioViejo, productoACambiar.Codigo)
+  } else {
+    if (cambios.PorcentajeAumento && productoACambiar.Precio !== null) {
+      const precioViejo = productoACambiar.Precio
+
+      productoACambiar.Precio *= 1 + cambios.PorcentajeAumento / 100
+
+      await guardarPrecioAntiguo(precioViejo, productoACambiar.Codigo)
+    }
   }
 
   const { data, error } = await supabase
@@ -155,13 +170,13 @@ async function deleteProductos(codigo: string) {
   }
 }
 
-async function  modificarStockProducto(codigo: string, cantidad: number) {
+async function modificarStockProducto(codigo: string, cantidad: number) {
   const producto = await getProductosByCodigo(codigo)
   if (producto === null) {
     throw new ReferenceError("Producto no encontrado")
   }
   producto.Stock += cantidad
-  
+
   const { data, error } = await supabase
     .from("Productos")
     .update(producto)
@@ -173,7 +188,22 @@ async function  modificarStockProducto(codigo: string, cantidad: number) {
   } else {
     return data as Producto
   }
-  
+}
+
+async function guardarPrecioAntiguo(precio: number, productId: string) {
+  const precioAntiguo: PrecioHistorialAInsertar = {
+    Product_Id: productId,
+    Precio_Antiguo: precio,
+    Fecha_De_Cambio: convertirFechaLocal(new Date()),
+  }
+
+  const { data, error } = await supabase
+    .from("Historial_Precios")
+    .insert(precioAntiguo)
+
+  if (error) {
+    throw error
+  }
 }
 
 export {
@@ -182,5 +212,5 @@ export {
   uploadProductos,
   updateProductos,
   deleteProductos,
-  modificarStockProducto
+  modificarStockProducto,
 }

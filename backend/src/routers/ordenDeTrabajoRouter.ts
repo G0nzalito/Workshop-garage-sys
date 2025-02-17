@@ -4,14 +4,16 @@ import {
   getOrdenDeTrabajoById,
   createOrdenTrabajo,
   agregarDetallesOrdenDeTrabajo,
+  completarOrdenDeTrabajo,
 } from "../service/ordenDeTrabajoService"
+import { getDateWithTimeZone, formatDateDashARG } from "../support/supportFunctions"
 import { Database } from "../supabase/database.types"
 
 type OrdenDeTrabajoAInsertar =
   Database["public"]["Tables"]["Ordenes de trabajo"]["Insert"]
 type OrdenDeTrabajo = Database["public"]["Tables"]["Ordenes de trabajo"]["Row"]
 type DetalleOrdenDeTrabajoAInsertar =
-  Database["public"]["Tables"]["Detalle Ordenes de Trabajo"]["Insert"]
+  Database["public"]["Tables"]["Consumos Stock"]["Insert"]
 
 interface ProductosCantidad {
   codigoProducto: string
@@ -21,6 +23,8 @@ interface ProductosCantidad {
 interface DetalleOrdenDeTrabajo {
   OrdenTrabajo: number
   Productos: ProductosCantidad[]
+  KilometrosXDia: number
+  Descripcion?: string
 }
 
 export const ordenDeTrabajoRouter = appExpress.Router()
@@ -56,12 +60,7 @@ ordenDeTrabajoRouter.post("/create", async (req, res) => {
     res.status(400).json({ error: "Todos los datos son requeridos" })
   } else {
     try {
-      const fechaCreacion = new Date()
-      const fechaLocalConZona = new Date(
-        fechaCreacion.toLocaleString("en-US", { timeZoneName: "short" })
-      )
-
-      const isoLocalString = fechaLocalConZona.toISOString()
+      const isoLocalString = getDateWithTimeZone(new Date())
       const orden: OrdenDeTrabajoAInsertar = {
         Fecha_creacion: isoLocalString,
         Numero_Documento_Cliente: Numero_Documento,
@@ -83,7 +82,12 @@ ordenDeTrabajoRouter.post("/create", async (req, res) => {
 })
 
 ordenDeTrabajoRouter.post("/addDetail", async (req, res) => {
-  const { OrdenTrabajo, Productos }: DetalleOrdenDeTrabajo = req.body
+  const {
+    KilometrosXDia,
+    OrdenTrabajo,
+    Productos,
+    Descripcion,
+  }: DetalleOrdenDeTrabajo = req.body
 
   if (!OrdenTrabajo || !Productos) {
     res.status(400).json({ error: "Todos los datos son requeridos" })
@@ -92,9 +96,14 @@ ordenDeTrabajoRouter.post("/addDetail", async (req, res) => {
       const detallesOrden: DetalleOrdenDeTrabajoAInsertar[] = []
       Productos.forEach((producto) => {
         const detalle: DetalleOrdenDeTrabajoAInsertar = {
-          OrdenTrabajo: OrdenTrabajo,
+          Orden_Trabajo: OrdenTrabajo,
           Producto: producto.codigoProducto,
           Cantidad: producto.cantidad,
+          KilometroXDia: KilometrosXDia,
+          Fecha: getDateWithTimeZone(new Date()),
+          Proximo_Service: formatDateDashARG(new Date()),
+          SubTotal: 0,
+          Descripcion: Descripcion ? Descripcion : "Sin comentarios",
         }
         detallesOrden.push(detalle)
       })
@@ -106,13 +115,34 @@ ordenDeTrabajoRouter.post("/addDetail", async (req, res) => {
       res
         .status(201)
         .json({ message: "Detalles agregados a orden", detallesOrdenCreadas })
-
     } catch (error) {
       if (error instanceof ReferenceError) {
         res.status(400).json({ message: error.message })
+      }else{
+        if (error instanceof SyntaxError) {
+          res.status(422).json({ message: error.message })
+        } else {
+          res.status(500).json(error)
+        }
       }
-      if (error instanceof SyntaxError) {
-        res.status(422).json({ message: error.message })
+    }
+  }
+})
+
+ordenDeTrabajoRouter.put("/complete", async (req, res) => {
+  const { id } = req.body
+
+  if (!id) {
+    res.status(400).json({ error: "Id is required" })
+  } else {
+    try {
+      const ordenCompletada = await completarOrdenDeTrabajo(id)
+      res
+        .status(200)
+        .json({ message: "Orden completada", Orden: ordenCompletada })
+    } catch (error: unknown) {
+      if (error instanceof ReferenceError) {
+        res.status(400).json({ message: error.message })
       } else {
         res.status(500).json(error)
       }
