@@ -3,6 +3,7 @@ import {
   getOrdenesDeTrabajoActivas,
   getOrdenDeTrabajoById,
   createOrdenTrabajo,
+  agregarDetallesOrdenDeTrabajo,
 } from "../service/ordenDeTrabajoService"
 import { Database } from "../supabase/database.types"
 
@@ -56,8 +57,13 @@ ordenDeTrabajoRouter.post("/create", async (req, res) => {
   } else {
     try {
       const fechaCreacion = new Date()
+      const fechaLocalConZona = new Date(
+        fechaCreacion.toLocaleString("en-US", { timeZoneName: "short" })
+      )
+
+      const isoLocalString = fechaLocalConZona.toISOString()
       const orden: OrdenDeTrabajoAInsertar = {
-        Fecha_creacion: fechaCreacion.toLocaleDateString(),
+        Fecha_creacion: isoLocalString,
         Numero_Documento_Cliente: Numero_Documento,
         Tipo_Documento_Cliente: Tipo_Documento,
         Patente_Vehiculo: Patente,
@@ -83,12 +89,6 @@ ordenDeTrabajoRouter.post("/addDetail", async (req, res) => {
     res.status(400).json({ error: "Todos los datos son requeridos" })
   } else {
     try {
-      // const detalle: DetalleOrdenDeTrabajoAInsertar = {
-      //   OrdenTrabajo: id,
-      //   Producto,
-      //   Cantidad
-      // }
-
       const detallesOrden: DetalleOrdenDeTrabajoAInsertar[] = []
       Productos.forEach((producto) => {
         const detalle: DetalleOrdenDeTrabajoAInsertar = {
@@ -99,9 +99,23 @@ ordenDeTrabajoRouter.post("/addDetail", async (req, res) => {
         detallesOrden.push(detalle)
       })
 
-      res.status(201).json(detallesOrden)
+      const detallesOrdenCreadas = await agregarDetallesOrdenDeTrabajo(
+        detallesOrden
+      )
+
+      res
+        .status(201)
+        .json({ message: "Detalles agregados a orden", detallesOrdenCreadas })
+
     } catch (error) {
-      res.status(500).json(error)
+      if (error instanceof ReferenceError) {
+        res.status(400).json({ message: error.message })
+      }
+      if (error instanceof SyntaxError) {
+        res.status(422).json({ message: error.message })
+      } else {
+        res.status(500).json(error)
+      }
     }
   }
 })

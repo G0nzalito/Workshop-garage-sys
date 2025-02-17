@@ -155,12 +155,13 @@ async function deleteProductos(codigo: string) {
   }
 }
 
-async function aumentarStockProducto(codigo: string, cantidad: number) {
+async function  modificarStockProducto(codigo: string, cantidad: number) {
   const producto = await getProductosByCodigo(codigo)
   if (producto === null) {
     throw new ReferenceError("Producto no encontrado")
   }
   producto.Stock += cantidad
+  
   const { data, error } = await supabase
     .from("Productos")
     .update(producto)
@@ -181,5 +182,5 @@ export {
   uploadProductos,
   updateProductos,
   deleteProductos,
-  aumentarStockProducto
+  modificarStockProducto
 }

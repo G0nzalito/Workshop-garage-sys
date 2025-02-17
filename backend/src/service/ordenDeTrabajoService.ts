@@ -2,6 +2,7 @@ import supabase from "../supabase/client"
 import { Database } from "../supabase/database.types"
 import { getClientByDocument } from "./clienteService"
 import { getVehiculoByPatente } from "./vehiculoService"
+import { getProductosByCodigo, modificarStockProducto } from "./productosService"
 
 type OrdenDeTrabajoAInsertar =
   Database["public"]["Tables"]["Ordenes de trabajo"]["Insert"]
@@ -44,7 +45,7 @@ async function createOrdenTrabajo(orden: OrdenDeTrabajoAInsertar) {
   if(!orden.Numero_Documento_Cliente || !orden.Tipo_Documento_Cliente){
     throw new ReferenceError("Falta el numero o tipo de documento del cliente")
   }else{
-    const cliente = await getClientByDocument(orden.Numero_Documento_Cliente, orden.Tipo_Documento_Cliente)
+    const cliente = await getClientByDocument(orden.Tipo_Documento_Cliente, orden.Numero_Documento_Cliente)
     if(cliente === null || cliente.Dado_de_baja === true){
       throw new ReferenceError("Cliente no encontrado")
     }
@@ -73,12 +74,46 @@ async function createOrdenTrabajo(orden: OrdenDeTrabajoAInsertar) {
 async function agregarDetallesOrdenDeTrabajo(
   detallesOrden: DetalleOrdenDeTrabajoAInsertar[]
 ) {
+
+  const orden = await getOrdenDeTrabajoById(detallesOrden[0].OrdenTrabajo)
+  if(!orden){
+    throw new ReferenceError("Orden de trabajo no encontrada")
+  }else{
+    if(orden.Completada === true){
+      throw new ReferenceError("Orden de trabajo ya completada")
+    }
+  }
+  const diccionario = {}
+
+  for (const detalle of detallesOrden){
+    if(diccionario.hasOwnProperty(detalle.Producto)){
+      diccionario[detalle.Producto] += detalle.Cantidad
+    }else{
+      diccionario[detalle.Producto] = detalle.Cantidad
+    }
+  }
+
+  for (const codigo in diccionario){
+    const producto = await getProductosByCodigo(codigo)
+    if(!producto){
+      throw new ReferenceError("Producto no encontrado")
+    }else{
+      if(producto.Stock < diccionario[codigo]){
+        throw new SyntaxError("Stock insuficiente")
+      }
+    }
+  }
+
   const { data, error } = await supabase
     .from("Detalle Ordenes de Trabajo")
     .insert(detallesOrden)
     .select()
   if (error) {
     throw error
+  }
+
+  for (const codigo in diccionario){
+    modificarStockProducto(codigo, -diccionario[codigo])
   }
   return data as DetalleOrdenDeTrabajoAInsertar[]
 }
@@ -103,4 +138,3 @@ export {
   agregarDetallesOrdenDeTrabajo,
   completarOrdenDeTrabajo,
 }
-// }

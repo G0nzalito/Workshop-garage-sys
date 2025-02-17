@@ -13,7 +13,7 @@ async function getClientes() {
 async function getClientByDocument(tipoDocumento, numeroDocumento) {
   const { data, error } = await supabase
     .from("Cliente")
-    .select("*")
+    .select('*')
     .eq("Tipo_Documento", tipoDocumento)
     .eq("Numero_Documento", numeroDocumento)
     .eq("Dado_de_baja", false)

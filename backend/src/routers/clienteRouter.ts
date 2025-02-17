@@ -24,7 +24,7 @@ clientRouter.get("/specific", async (req, res) => {
 
   const cliente = await getClientByDocument(tipoDocumento, numeroDocumento)
 
-  if (cliente) {
+  if (!cliente) {
     res.status(404).json({
       message: "Client not found",
     })
