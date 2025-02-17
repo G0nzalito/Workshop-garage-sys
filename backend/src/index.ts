@@ -15,6 +15,7 @@ import { subCategoriasRouter } from "./routers/subCategoriasRouter"
 import { proveedoresRouter } from "./routers/proveedoresRouter"
 import { marcaProductosRouter } from "./routers/marcaProductosRouter"
 import { productosRouter } from "./routers/productosRouter"
+import { ordenDeTrabajoRouter } from "./routers/ordenDeTrabajoRouter"
 
 
 const app = express()
@@ -34,6 +35,7 @@ app.use("/api/subcategorias", subCategoriasRouter)
 app.use("/api/proveedores", proveedoresRouter)
 app.use("/api/marcasProductos", marcaProductosRouter)
 app.use("/api/productos", productosRouter)  
+app.use("/api/ordenesDeTrabajo", ordenDeTrabajoRouter)
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({

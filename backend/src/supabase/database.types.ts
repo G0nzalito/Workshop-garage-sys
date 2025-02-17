@@ -305,6 +305,42 @@ export type Database = {
           },
         ]
       }
+      "Detalle Ordenes de Trabajo": {
+        Row: {
+          Cantidad: number
+          id: number
+          OrdenTrabajo: number
+          Producto: string
+        }
+        Insert: {
+          Cantidad: number
+          id?: number
+          OrdenTrabajo: number
+          Producto: string
+        }
+        Update: {
+          Cantidad?: number
+          id?: number
+          OrdenTrabajo?: number
+          Producto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Detalle Ordenes de Trabajo_OrdenTrabajo_fkey"
+            columns: ["OrdenTrabajo"]
+            isOneToOne: false
+            referencedRelation: "Ordenes de trabajo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Detalle Ordenes de Trabajo_Producto_fkey"
+            columns: ["Producto"]
+            isOneToOne: false
+            referencedRelation: "Productos"
+            referencedColumns: ["Codigo"]
+          },
+        ]
+      }
       Gastos: {
         Row: {
           Comprobante: number
@@ -437,25 +473,28 @@ export type Database = {
       }
       "Ordenes de trabajo": {
         Row: {
+          Completada: boolean
           Fecha_creacion: string
           id: number
-          Numero_Documento_Cliente: number | null
-          Patente_Vehiculo: string | null
-          Tipo_Documento_Cliente: number | null
+          Numero_Documento_Cliente: number
+          Patente_Vehiculo: string
+          Tipo_Documento_Cliente: number
         }
         Insert: {
+          Completada?: boolean
           Fecha_creacion?: string
           id?: number
-          Numero_Documento_Cliente?: number | null
-          Patente_Vehiculo?: string | null
-          Tipo_Documento_Cliente?: number | null
+          Numero_Documento_Cliente: number
+          Patente_Vehiculo: string
+          Tipo_Documento_Cliente: number
         }
         Update: {
+          Completada?: boolean
           Fecha_creacion?: string
           id?: number
-          Numero_Documento_Cliente?: number | null
-          Patente_Vehiculo?: string | null
-          Tipo_Documento_Cliente?: number | null
+          Numero_Documento_Cliente?: number
+          Patente_Vehiculo?: string
+          Tipo_Documento_Cliente?: number
         }
         Relationships: [
           {
