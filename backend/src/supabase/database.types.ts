@@ -12,7 +12,7 @@ export type Database = {
       Caja: {
         Row: {
           Cuotas: number | null
-          Dominio: string
+          Descripcion: string | null
           Fecha: string
           Forma_de_Pago: number
           Fuente_MKT: number
@@ -28,11 +28,11 @@ export type Database = {
           Tipo_de_comprobante: number | null
           Tipo_Documento_Cliente: number
           Turno: number
-          Vehiculo: string
+          Vehiculo: string | null
         }
         Insert: {
           Cuotas?: number | null
-          Dominio: string
+          Descripcion?: string | null
           Fecha?: string
           Forma_de_Pago: number
           Fuente_MKT: number
@@ -48,11 +48,11 @@ export type Database = {
           Tipo_de_comprobante?: number | null
           Tipo_Documento_Cliente: number
           Turno: number
-          Vehiculo: string
+          Vehiculo?: string | null
         }
         Update: {
           Cuotas?: number | null
-          Dominio?: string
+          Descripcion?: string | null
           Fecha?: string
           Forma_de_Pago?: number
           Fuente_MKT?: number
@@ -68,9 +68,30 @@ export type Database = {
           Tipo_de_comprobante?: number | null
           Tipo_Documento_Cliente?: number
           Turno?: number
-          Vehiculo?: string
+          Vehiculo?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "Caja_Forma_de_Pago_fkey"
+            columns: ["Forma_de_Pago"]
+            isOneToOne: false
+            referencedRelation: "Medios Pago"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Caja_Fuente_MKT_fkey"
+            columns: ["Fuente_MKT"]
+            isOneToOne: false
+            referencedRelation: "Fuente MKT"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Caja_Tarjeta_fkey"
+            columns: ["Tarjeta"]
+            isOneToOne: false
+            referencedRelation: "Tarjetas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "Caja_Tipo_Documento_Cliente_Numero_Documento_Cliente_fkey"
             columns: ["Tipo_Documento_Cliente", "Numero_Documento_Cliente"]
@@ -291,6 +312,21 @@ export type Database = {
             referencedColumns: ["Codigo"]
           },
         ]
+      }
+      "Fuente MKT": {
+        Row: {
+          id: number
+          Nombre: string
+        }
+        Insert: {
+          id?: number
+          Nombre: string
+        }
+        Update: {
+          id?: number
+          Nombre?: string
+        }
+        Relationships: []
       }
       Gastos: {
         Row: {

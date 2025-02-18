@@ -16,6 +16,7 @@ import { proveedoresRouter } from "./routers/proveedoresRouter"
 import { marcaProductosRouter } from "./routers/marcaProductosRouter"
 import { productosRouter } from "./routers/productosRouter"
 import { ordenDeTrabajoRouter } from "./routers/ordenDeTrabajoRouter"
+import { cajaRouter } from "./routers/cajaRouter"
 
 
 const app = express()
@@ -36,6 +37,7 @@ app.use("/api/proveedores", proveedoresRouter)
 app.use("/api/marcasProductos", marcaProductosRouter)
 app.use("/api/productos", productosRouter)  
 app.use("/api/ordenesDeTrabajo", ordenDeTrabajoRouter)
+app.use("/api/ventas", cajaRouter)
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
