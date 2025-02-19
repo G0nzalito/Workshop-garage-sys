@@ -114,23 +114,31 @@ export type Database = {
           Fecha: string
           Monto: number
           Movimiento: number
-          Turno: number | null
+          Turno: number
         }
         Insert: {
           Detalle?: string | null
           Fecha?: string
           Monto: number
           Movimiento: number
-          Turno?: number | null
+          Turno: number
         }
         Update: {
           Detalle?: string | null
           Fecha?: string
           Monto?: number
           Movimiento?: number
-          Turno?: number | null
+          Turno?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Caja Contable_Movimiento_fkey"
+            columns: ["Movimiento"]
+            isOneToOne: false
+            referencedRelation: "Conceptos Caja Contable"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       Categorias: {
         Row: {
@@ -247,6 +255,21 @@ export type Database = {
           },
         ]
       }
+      "Conceptos Caja Contable": {
+        Row: {
+          id: number
+          Nombre: string
+        }
+        Insert: {
+          id?: number
+          Nombre: string
+        }
+        Update: {
+          id?: number
+          Nombre?: string
+        }
+        Relationships: []
+      }
       "Conceptos Facturas": {
         Row: {
           id: number
@@ -313,6 +336,21 @@ export type Database = {
           },
         ]
       }
+      "Cuentas Gastos": {
+        Row: {
+          id: number
+          Nombre: string
+        }
+        Insert: {
+          id?: number
+          Nombre: string
+        }
+        Update: {
+          id?: number
+          Nombre?: string
+        }
+        Relationships: []
+      }
       "Fuente MKT": {
         Row: {
           id: number
@@ -330,30 +368,38 @@ export type Database = {
       }
       Gastos: {
         Row: {
-          Comprobante: number
-          Cuenta: string
+          Comprobante: boolean
+          Cuenta: number
           Fecha: string
           Monto: number
           Observaciones: string | null
           Turno: number
         }
         Insert: {
-          Comprobante: number
-          Cuenta: string
+          Comprobante?: boolean
+          Cuenta: number
           Fecha?: string
           Monto: number
           Observaciones?: string | null
           Turno: number
         }
         Update: {
-          Comprobante?: number
-          Cuenta?: string
+          Comprobante?: boolean
+          Cuenta?: number
           Fecha?: string
           Monto?: number
           Observaciones?: string | null
           Turno?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Gastos_Cuenta_fkey"
+            columns: ["Cuenta"]
+            isOneToOne: false
+            referencedRelation: "Cuentas Gastos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       Historial_Precios: {
         Row: {

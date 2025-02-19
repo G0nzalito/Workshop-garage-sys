@@ -1,5 +1,6 @@
 import supabase from "../supabase/client"
 import { Database } from "../supabase/database.types"
+import {createAsientoContable} from './cajaContableService'
 
 type Caja = Database["public"]["Tables"]["Caja"]["Row"]
 type CajaAInsertar = Database["public"]["Tables"]["Caja"]["Insert"]
@@ -26,7 +27,6 @@ async function getCajaDesdeFecha(fechaMinima: string, fechaMaxima?: string) {
     return data as Caja[]
 
   }else{
-      console.log(2)
       const { data: data2, error: error2 } = await supabase
         .from("Caja")
         .select("*")
@@ -50,6 +50,21 @@ async function registrarVenta(caja: CajaAInsertar) {
 
   if (error) {
     throw error
+  }
+
+  if(caja.Forma_de_Pago === 1){
+    const asiento = {
+      Monto: caja.Sub_Total,
+      Movimiento: 3,
+      Turno: caja.Turno,
+      Detalle: "Venta de productos en efectivo",
+      Fecha: caja.Fecha
+    }
+    try {
+      await createAsientoContable(asiento)
+    } catch (error) {
+      throw error
+    }
   }
   return data as Caja
 }

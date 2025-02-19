@@ -17,6 +17,8 @@ import { marcaProductosRouter } from "./routers/marcaProductosRouter"
 import { productosRouter } from "./routers/productosRouter"
 import { ordenDeTrabajoRouter } from "./routers/ordenDeTrabajoRouter"
 import { cajaRouter } from "./routers/cajaRouter"
+import { cajaContableRouter } from "./routers/cajaContableRouter"
+import { gastosRouter } from "./routers/gastosRouter"
 
 
 const app = express()
@@ -38,6 +40,8 @@ app.use("/api/marcasProductos", marcaProductosRouter)
 app.use("/api/productos", productosRouter)  
 app.use("/api/ordenesDeTrabajo", ordenDeTrabajoRouter)
 app.use("/api/ventas", cajaRouter)
+app.use("/api/cajaContable", cajaContableRouter)
+app.use("/api/gastos", gastosRouter)
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
