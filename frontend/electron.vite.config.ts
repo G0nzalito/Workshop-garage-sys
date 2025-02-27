@@ -2,7 +2,6 @@ import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 // eslint-disable-next-line prettier/prettier
-import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   main: {
@@ -17,6 +16,6 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
-    plugins: [react(), tailwindcss()]
+    plugins: [react()]
   }
 })

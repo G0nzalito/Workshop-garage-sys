@@ -1,4 +1,4 @@
-import appExpress from "express"
+import appExpress, {Request} from "express"
 import { Database } from "../supabase/database.types"
 import {
   deleteProductos,
@@ -6,7 +6,7 @@ import {
   getProductosByCodigo,
   updateProductos,
   uploadProductos,
-  modificarStockProducto
+  modificarStockProducto,
 } from "../service/productosService"
 
 type ProductoAInsertar = Database["public"]["Tables"]["Productos"]["Insert"]
@@ -23,14 +23,14 @@ productosRouter.get("/all", async (req, res) => {
   }
 })
 
-productosRouter.get("/specific", async (req, res) => {
-  const { Codigo } = req.body
+productosRouter.get("/specific?Codigo", async (req: Request, res) => {
+  const { Codigo } = req.query
 
   if (!Codigo) {
     res.status(400).json({ error: "Codigo is required" })
   } else {
     try {
-      const producto = await getProductosByCodigo(Codigo)
+      const producto = await getProductosByCodigo(Codigo as string)
       if (producto === null) {
         res.status(404).json({ error: "Producto no encontrado" })
       } else {
@@ -109,6 +109,21 @@ productosRouter.delete("/delete", async (req, res) => {
       res.status(204).end()
     } catch (error) {
       res.status(500).json({ error })
+    }
+  }
+})
+
+productosRouter.get("/hayStock?Codigo/:Cantidad", async (req, res) => {
+  const { Codigo, Cantidad } = req.query
+
+  const producto = await getProductosByCodigo(Codigo as string)
+  if (!producto) {
+    res.status(404).json({ error: "Producto no encontrado" })
+  } else {
+    if (producto.Stock >= parseFloat(Cantidad as string)) {
+      res.status(200).json({ message: "Hay stock suficiente" })
+    } else {
+      res.status(400).json({ error: "No hay stock suficiente" })
     }
   }
 })
