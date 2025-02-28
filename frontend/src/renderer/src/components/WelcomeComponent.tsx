@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
-import { X, CirclePlus, Drama } from 'lucide-react'
+import { X, CirclePlus, Drama, Key } from 'lucide-react'
 import { getProductoByCodigo, hayStockParaVenta } from '../../../servicies/productosService.js'
 import { Database } from '../../../types/database.types'
 
@@ -14,12 +14,13 @@ export default function WelcomeComponent(): JSX.Element {
     Codigo: '',
     Cantidad: ''
   })
+  const [total, setTotal] = useState(0)
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value
+      [name]: value.toUpperCase()
     }))
   }
 
@@ -84,24 +85,13 @@ export default function WelcomeComponent(): JSX.Element {
     )
   }
 
-  // const submitCode = async (e: string) => {
-  //   const producto = await obtenerProductos(e)
-  //   if (producto) {
-  //     setEncontrado(true)
-  //     return producto
-  //   } else {
-  //     setEncontrado(false)
-  //     return (
-  //       <div className="toast toast-center toast-middle">
-  //         <div className="alert alert-error">
-  //           <span>Producto no encontrado, revise el codigo que ingresó</span>
-  //         </div>
-  //       </div>
-  //     )
-  //   }
-  // }
-
-  useEffect(() => {}, [])
+  useEffect(() => {
+    let precioTotal = 0
+    productos.forEach((producto) => {
+      precioTotal += producto.Producto.Precio * producto.cantidad
+    })
+    setTotal(precioTotal)
+  }, [productos])
 
   return (
     <>
@@ -179,63 +169,36 @@ export default function WelcomeComponent(): JSX.Element {
                 <th></th>
               </tr>
             </thead>
-            {productos.length === 0 ? (
-              <tbody>
-                <tr>
-                  <td>
-                    <input
-                      type="text"
-                      name="Codigo"
-                      className="input input-bordered"
-                      placeholder="Codigo de producto"
-                      value={formData.Codigo}
-                      onChange={handleChange}
-                      required
-                    />
-                  </td>
-                  <td></td>
-                  <td>
-                    <input
-                      type="number"
-                      name="Cantidad"
-                      className="input input-bordered"
-                      placeholder="Cantidad"
-                      value={formData.Cantidad}
-                      onChange={handleChange}
-                      required
-                    />
-                  </td>
-                  <td></td>
-                  <td></td>
-                  <td>
-                    <button
-                      className="btn btn-soft btn-success"
-                      onClick={() => handleSubmit(formData)}
-                    >
-                      <CirclePlus />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            ) : (
-              <tbody>
-                {productos.map((producto) => {
-                  return (
-                    <tr key={producto.Producto.Codigo}>
-                      <td>{producto.Producto.Codigo}</td>
-                      <td>{producto.Producto.Descripcion}</td>
-                      <td>{producto.cantidad}</td>
-                      <td>{producto.Producto.Precio * producto.cantidad}</td>
-                      <td>
-                        <button className="btn btn-error">
-                          <X />
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-                <tr>
-                  <td>
+            <tbody>
+              {productos.map((producto, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{producto.Producto.Codigo}</td>
+                    <td>{producto.Producto.Descripcion}</td>
+                    <td>{producto.cantidad}</td>
+                    <td>{producto.Producto.Precio * producto.cantidad}</td>
+                    <td>
+                      <button
+                        className="btn btn-error"
+                        onClick={() => {
+                          setProductos(productos.filter((producto, index2) => index2 !== index))
+                        }}
+                      >
+                        <X />
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+              <tr>
+                <td>
+                  <form
+                    id="formVenta"
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      handleSubmit(formData)
+                    }}
+                  >
                     <input
                       type="text"
                       name="Codigo"
@@ -244,9 +207,16 @@ export default function WelcomeComponent(): JSX.Element {
                       value={formData.Codigo}
                       onChange={handleChange}
                     />
-                  </td>
-                  <td></td>
-                  <td>
+                  </form>
+                </td>
+                <td></td>
+                <td>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      handleSubmit(formData)
+                    }}
+                  >
                     <input
                       type="number"
                       name="Cantidad"
@@ -255,28 +225,32 @@ export default function WelcomeComponent(): JSX.Element {
                       value={formData.Cantidad}
                       onChange={handleChange}
                     />
-                  </td>
-                  <td></td>
-                  <td></td>
-                  <td>
-                    <button
-                      className="btn btn-soft btn-success"
-                      onClick={() => handleSubmit(formData)}
-                    >
-                      <CirclePlus />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            )}
+                  </form>
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                  <button className="btn btn-soft btn-success" form="formVenta">
+                    <CirclePlus />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
         <div className="text-right mt-2 pr-6 font-bold text-lg">
-          <div className="badge badge-soft badge-success badge-xl m-5">Total: $</div>
+          <div className="badge badge-soft badge-success badge-xl m-5">Total $: {total} </div>
         </div>
-        <div className="flex justify-start m-2.5 space-x-4">
-          <button className="btn btn-soft btn-accent gap-3">Cobrar</button>
-          <button className="btn btn-soft btn-error gap-3">Cancelar venta</button>
+        <div className="flex justify-start m-2.5 gap-4">
+          <button className="btn btn-soft btn-accent">Cobrar</button>
+          <button
+            className="btn btn-soft btn-error"
+            onClick={() => {
+              setProductos([])
+            }}
+          >
+            Cancelar venta
+          </button>
         </div>
       </div>
     </>

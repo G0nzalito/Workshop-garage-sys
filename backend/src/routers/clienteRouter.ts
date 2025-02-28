@@ -20,7 +20,7 @@ clientRouter.get("/all", async (req, res) => {
 })
 
 clientRouter.get("/specific", async (req, res) => {
-  const { tipoDocumento, numeroDocumento } = req.body
+  const { tipoDocumento, numeroDocumento } = req.query
 
   const cliente = await getClientByDocument(tipoDocumento, numeroDocumento)
 

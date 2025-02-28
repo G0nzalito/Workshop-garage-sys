@@ -8,7 +8,7 @@ export const getProductos = async () => {
 }
 
 export const getProductoByCodigo = async (codigo) => {
-  const response = await axios.get(`${API_URL}/specific:?Codigo=${codigo}`)
+  const response = await axios.get(`${API_URL}/specific`, { params: { Codigo: codigo } })
   if (response.status === 200) {
     return response.data
   } else {
@@ -21,7 +21,9 @@ export const getProductoByCodigo = async (codigo) => {
 }
 
 export const hayStockParaVenta = async (codigo, cantidad) => {
-  const response = await axios.get(`${API_URL}/hayStock:?Codigo=${codigo}&Cantidad=${cantidad}`)
+  const response = await axios.get(`${API_URL}/hayStock`, {
+    params: { Codigo: codigo, Cantidad: cantidad }
+  })
   if (response.status === 200) {
     return true
   } else {

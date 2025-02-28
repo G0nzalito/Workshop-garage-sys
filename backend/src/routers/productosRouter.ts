@@ -23,7 +23,7 @@ productosRouter.get("/all", async (req, res) => {
   }
 })
 
-productosRouter.get("/specific?Codigo", async (req: Request, res) => {
+productosRouter.get("/specific", async (req: Request, res) => {
   const { Codigo } = req.query
 
   if (!Codigo) {
@@ -113,7 +113,7 @@ productosRouter.delete("/delete", async (req, res) => {
   }
 })
 
-productosRouter.get("/hayStock?Codigo/:Cantidad", async (req, res) => {
+productosRouter.get("/hayStock", async (req, res) => {
   const { Codigo, Cantidad } = req.query
 
   const producto = await getProductosByCodigo(Codigo as string)
