@@ -33,6 +33,7 @@
     "lucide-react": "^0.475.0",
     "postcss": "^8.5.3",
     "postcss-loader": "^8.1.1",
+    "react-select": "^5.10.0",
     "tailwindcss": "^4.0.8",
     "wouter": "^3.6.0"
   },

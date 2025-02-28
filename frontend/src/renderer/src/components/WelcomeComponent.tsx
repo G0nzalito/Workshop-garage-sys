@@ -3,18 +3,19 @@ import { useLocation } from 'wouter'
 import { X, CirclePlus, Drama, Key } from 'lucide-react'
 import { getProductoByCodigo, hayStockParaVenta } from '../../../servicies/productosService.js'
 import { Database } from '../../../types/database.types'
+import CobroSinODT from '@renderer/components/Cobro/CobroSinODT.js'
 
 type Producto = Database['public']['Tables']['Productos']['Row']
 
 export default function WelcomeComponent(): JSX.Element {
   const [, setLocation] = useLocation()
   const [productos, setProductos] = useState<{ Producto: Producto; cantidad: number }[]>([])
-  const [encontrado, setEncontrado] = useState(false)
   const [formData, setFormData] = useState({
     Codigo: '',
     Cantidad: ''
   })
   const [total, setTotal] = useState(0)
+  const [cobrando, setCobrando] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -239,10 +240,17 @@ export default function WelcomeComponent(): JSX.Element {
           </table>
         </div>
         <div className="text-right mt-2 pr-6 font-bold text-lg">
-          <div className="badge badge-soft badge-success badge-xl m-5">Total $: {total} </div>
+          <div className="badge badge-soft badge-success badge-xl m-5">SubTotal $: {total} </div>
         </div>
         <div className="flex justify-start m-2.5 gap-4">
-          <button className="btn btn-soft btn-accent">Cobrar</button>
+          <button
+            className="btn btn-soft btn-accent"
+            onClick={() => {
+              setCobrando(true)
+            }}
+          >
+            Cobrar
+          </button>
           <button
             className="btn btn-soft btn-error"
             onClick={() => {
@@ -252,6 +260,7 @@ export default function WelcomeComponent(): JSX.Element {
             Cancelar venta
           </button>
         </div>
+        <CobroSinODT open={cobrando} onClose={() => setCobrando(false)} total={total}></CobroSinODT>
       </div>
     </>
   )

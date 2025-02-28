@@ -6,7 +6,12 @@ export default function ODTMain(): JSX.Element {
   return (
     <div>
       <h1>Ordenes de trabajo</h1>
-      <button className="" onClick={() => setLocation('/')}> Volver al inicio</button>
+
+      <button className="" onClick={() => setLocation('/')}>
+        {' '}
+        Volver al inicio
+      </button>
     </div>
   )
 }
+
