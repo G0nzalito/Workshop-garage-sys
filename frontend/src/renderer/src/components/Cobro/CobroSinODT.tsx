@@ -12,7 +12,7 @@ const customStyles = {
   control: (provided: any) => ({
     ...provided,
 
-    backgroundColor: 'black',
+    backgroundColor: 'burgundy ',
 
     borderColor: 'gray',
 
@@ -120,7 +120,7 @@ export default function CobroSinODT({
       {/* Este div es mi ventana emergente */}
 
       <div
-        className={`bg-blue-950 rounded-xl shadow p-6 transition-all ${open ? 'scale-100 opacity-100' : 'scale-125 opacity-0'}`}
+        className={`bg-accent-foreground outline-1 rounded-xl shadow p-6 transition-all ${open ? 'scale-100 opacity-100' : 'scale-125 opacity-0'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Aca va todo lo que quiero que se muestre en mi ventana emergente */}
@@ -140,7 +140,7 @@ export default function CobroSinODT({
             }}
             className="scroll"
           >
-            <div className="flex bg-blue-500 text-2xl justify-center m-4.5 p-1">
+            <div className="flex bg-[#2b2322] text-2xl justify-center m-4.5 p-1">
               <span className="flex justify-center items-center font-bold">Cliente: </span>
               <Select
                 className="rounded-lg m-2 bg-black/90 text-lg"
@@ -159,7 +159,7 @@ export default function CobroSinODT({
                 required
               ></Select>
             </div>
-            <div className="flex bg-blue-500 text-2xl justify-center m-4.5 p-1">
+            <div className="flex bg-[#2b2322] text-2xl justify-center m-4.5 p-1">
               <span className="flex justify-star items-center font-bold">Forma de pago: </span>
               <Select
                 className="rounded-lg m-2 bg-black/90 text-lg"
@@ -185,7 +185,7 @@ export default function CobroSinODT({
                 required
               ></Select>
             </div>
-            <div className="flex bg-blue-500 text-2xl justify-center m-4.5 p-1">
+            <div className="flex bg-[#2b2322] text-2xl justify-center m-4.5 p-1">
               <p className="text-lg">
                 <span className="text-2xl font-bold">Total: </span> {total} + interes si aplicara
               </p>
@@ -193,7 +193,7 @@ export default function CobroSinODT({
             {(formData.FormaDePago === 'TarjetaCredito' ||
               formData.FormaDePago === 'TarjetaDebito') && (
               <>
-                <div className="flex items-center bg-blue-500 text-2xl justify-center m-4.5 p-1 gap-2">
+                <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
                   <span className="text-2xl font-bold">Cuotas: </span>
                   <input
                     type="number"
@@ -205,7 +205,7 @@ export default function CobroSinODT({
                     required
                   />
                 </div>
-                <div className="flex items-center bg-blue-500 text-2xl justify-center m-4.5 p-1 gap-2">
+                <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
                   <span className="text-2xl font-bold">N° de cupon: </span>
                   <input
                     type="text"
@@ -217,7 +217,7 @@ export default function CobroSinODT({
                     required
                   />
                 </div>
-                <div className="flex items-center bg-blue-500 text-2xl justify-center m-4.5 p-1 gap-2">
+                <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
                   <span className="text-2xl font-bold">N° de lote: </span>
                   <input
                     type="text"
@@ -229,7 +229,7 @@ export default function CobroSinODT({
                     required
                   />
                 </div>
-                <div className="flex items-center bg-blue-500 text-2xl justify-center m-4.5 p-1 gap-2">
+                <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
                   <span className="text-2xl font-bold">Autorizacion: </span>
                   <input
                     type="text"
@@ -243,7 +243,7 @@ export default function CobroSinODT({
                 </div>
               </>
             )}
-            <div className="flex bg-blue-500 text-2xl justify-center m-4.5 p-1">
+            <div className="flex bg-[#2b2322] text-2xl justify-center m-4.5 p-1">
               <span className="flex justify-star items-center font-bold">Marketing: </span>
               <Select
                 className="rounded-lg m-2 bg-black/90 text-lg"
@@ -269,7 +269,7 @@ export default function CobroSinODT({
                 required
               ></Select>
             </div>
-            <div className="flex items-center bg-blue-500 text-2xl justify-center m-4.5 p-1 gap-2">
+            <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
               <span className="text-2xl font-bold">Operador 1: </span>
               <input
                 type="text"
@@ -281,7 +281,7 @@ export default function CobroSinODT({
                 required
               />
             </div>{' '}
-            <div className="flex items-center bg-blue-500 text-2xl justify-center m-4.5 p-1 gap-2">
+            <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
               <span className="text-2xl font-bold">Operador 2: </span>
               <input
                 type="text"
@@ -292,7 +292,7 @@ export default function CobroSinODT({
                 onChange={handleChange}
               />
             </div>
-            <div className="flex items-center bg-blue-500 text-2xl justify-center m-4.5 p-1 gap-2">
+            <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
               <span className="text-2xl font-bold">Supervisor: </span>
               <input
                 type="text"
@@ -307,7 +307,7 @@ export default function CobroSinODT({
           </form>
         </div>
         <div className="flex justify-end items-end  justify-items-end gap-4 m-5">
-          <button className="btn btn-soft btn-accent">
+          <button className="btn btn-soft btn-success">
             <span className="font-semibold text-2xl">Cobrar</span>
           </button>
         </div>

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
-import { X, CirclePlus, Drama, Key } from 'lucide-react'
+import { X, CirclePlus } from 'lucide-react'
 import { getProductoByCodigo, hayStockParaVenta } from '../../../servicies/productosService.js'
 import { Database } from '../../../types/database.types'
 import CobroSinODT from '@renderer/components/Cobro/CobroSinODT.js'
+import { toast } from 'sonner'
 
 type Producto = Database['public']['Tables']['Productos']['Row']
 
@@ -17,7 +18,7 @@ export default function WelcomeComponent(): JSX.Element {
   const [total, setTotal] = useState(0)
   const [cobrando, setCobrando] = useState(false)
 
-  const handleChange = (e) => {
+  const handleChange = (e): void => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
@@ -25,65 +26,50 @@ export default function WelcomeComponent(): JSX.Element {
     }))
   }
 
-  const getProductos = async (data): null => {
-    const producto: Producto = await getProductoByCodigo(data.Codigo)
-    if (producto) {
-      if (await hayStockParaVenta(producto.Codigo, data.Cantidad)) {
-        if (productos.length > 0) {
-          setProductos([...productos, { Producto: producto, cantidad: data.Cantidad }])
-        } else {
-          setProductos([{ Producto: producto, cantidad: data.Cantidad }])
+  const getProductos = async (data): Promise<void> => {
+    try {
+      const producto: Producto = await getProductoByCodigo(data.Codigo)
+
+      if (producto) {
+        try {
+          const hayStock = await hayStockParaVenta(producto.Codigo, data.Cantidad)
+          if (hayStock) {
+            if (productos.length > 0) {
+              setProductos([...productos, { Producto: producto, cantidad: data.Cantidad }])
+            } else {
+              setProductos([{ Producto: producto, cantidad: data.Cantidad }])
+            }
+            toast.success('Producto agregado con exito', {
+              description: 'Figura en la tabla',
+              duration: 3000
+            })
+          }
+        } catch (noProductos) {
+          console.error(noProductos)
+          toast.error('No hay stock suficiente', {
+            description: 'No se puede agregar el producto',
+            duration: 3000
+          })
         }
       }
+    } catch (err) {
+      console.error(err)
+      toast.error('Producto no encontrado', {
+        description: 'No se puede agregar el producto',
+        duration: 3000
+      })
     }
   }
 
-  const addRow = () => {
-    return (
-      <tr>
-        <td>
-          <button className="btn" onClick={() => addRow()}>
-            <CirclePlus />
-          </button>
-        </td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-      </tr>
-    )
-  }
-
-  const handleSubmit = (data): JSX.Element => {
+  const handleSubmit = (data): void => {
     try {
-      console.log(data)
       //@ts-ignore no va a ser nulo, no seas bobo
       getProductos(data).then(() => {
-        return (
-          <div className="toast toast-center toast-middle">
-            <div className="alert alert-error">
-              <span>Producto encontrado, se agrego a la tabla</span>
-            </div>
-          </div>
-        )
+        console.log('Producto agregado')
       })
     } catch (err) {
-      return (
-        <div className="toast toast-center toast-middle">
-          <div className="alert alert-error">
-            <span>Producto no encontrado, revise el codigo que ingresó</span>
-          </div>
-        </div>
-      )
+      console.error(err)
     }
-    return (
-      <div className="toast toast-center toast-middle">
-        <div className="alert alert-error">
-          <span>Producto no encontrado, revise el codigo que ingresó</span>
-        </div>
-      </div>
-    )
   }
 
   useEffect(() => {
@@ -96,69 +82,8 @@ export default function WelcomeComponent(): JSX.Element {
 
   return (
     <>
-      <div className="flex justify-between p-4">
-        <div className="badge badge-soft badge-info badge-xl">
-          <h1 className="text-lg">Sistema de gestion de lubricentro</h1>
-        </div>
-        <div className="flex items-end justify-end">
-          <button
-            className="btn btn-outline m-1"
-            onClick={() => {
-              setLocation('/ordenesDeTrabajo')
-            }}
-          >
-            {' '}
-            Ordenes de trabajo
-          </button>
-          <button
-            className="btn btn-outline m-1"
-            onClick={() => {
-              setLocation('/ordenesDeTrabajo')
-            }}
-          >
-            {' '}
-            Clientes
-          </button>
-          <button
-            className="btn btn-outline m-1"
-            onClick={() => {
-              setLocation('/ordenesDeTrabajo')
-            }}
-          >
-            {' '}
-            Productos
-          </button>
-          <button
-            className="btn btn-outline m-1"
-            onClick={() => {
-              setLocation('/ordenesDeTrabajo')
-            }}
-          >
-            {' '}
-            Vehiculos
-          </button>
-          <button
-            className="btn btn-outline m-1"
-            onClick={() => {
-              setLocation('/ordenesDeTrabajo')
-            }}
-          >
-            {' '}
-            Administrativo
-          </button>
-          <button
-            className="btn btn-outline m-1"
-            onClick={() => {
-              setLocation('/ordenesDeTrabajo')
-            }}
-          >
-            {' '}
-            Gastos
-          </button>
-        </div>
-      </div>
-      <div className="p-24 m-2.5 ">
-        <div className="overflow-x-auto rounded-box border border-base-content/5 bg-">
+      <div className="p-24 bg-base-100 text-white">
+        <div className="overflow-x-auto rounded-box border border-base-content/5">
           <table className="table">
             {/* head */}
             <thead>
@@ -221,7 +146,7 @@ export default function WelcomeComponent(): JSX.Element {
                     <input
                       type="number"
                       name="Cantidad"
-                      className="input input-bordered"
+                      className="input input-bordered [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                       placeholder="Cantidad"
                       value={formData.Cantidad}
                       onChange={handleChange}
@@ -244,7 +169,7 @@ export default function WelcomeComponent(): JSX.Element {
         </div>
         <div className="flex justify-start m-2.5 gap-4">
           <button
-            className="btn btn-soft btn-accent"
+            className="btn btn-soft btn-success"
             onClick={() => {
               setCobrando(true)
             }}
