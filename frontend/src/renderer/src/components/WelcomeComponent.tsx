@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { X, CirclePlus } from 'lucide-react'
-import { getProductoByCodigo, hayStockParaVenta } from '../../../servicies/productosService.js'
+import { getProductoByCodigo, hayStockParaVenta } from '../../../servicies/productosService'
 import { Database } from '../../../types/database.types'
 import CobroSinODT from '@renderer/components/Cobro/CobroSinODT.js'
 import { toast } from 'sonner'
+import { useConsts } from '@renderer/Contexts/clienteContext'
+import { getClientes } from '../../../servicies/clientesService'
+import { getFormasPago } from '../../../servicies/formaPagoService'
 
 type Producto = Database['public']['Tables']['Productos']['Row']
 
@@ -17,6 +20,8 @@ export default function WelcomeComponent(): JSX.Element {
   })
   const [total, setTotal] = useState(0)
   const [cobrando, setCobrando] = useState(false)
+
+  const { setClientes, setFormasPago } = useConsts()
 
   const handleChange = (e): void => {
     const { name, value } = e.target
@@ -79,6 +84,15 @@ export default function WelcomeComponent(): JSX.Element {
     })
     setTotal(precioTotal)
   }, [productos])
+
+  useEffect(() => {
+    getClientes().then((clientes) => {
+      setClientes(clientes)
+    })
+    getFormasPago().then((formasPago) => {
+      setFormasPago(formasPago)
+    })
+  }, [])
 
   return (
     <>

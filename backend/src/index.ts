@@ -19,6 +19,7 @@ import { ordenDeTrabajoRouter } from "./routers/ordenDeTrabajoRouter"
 import { cajaRouter } from "./routers/cajaRouter"
 import { cajaContableRouter } from "./routers/cajaContableRouter"
 import { gastosRouter } from "./routers/gastosRouter"
+import { formaPagoRouter } from "./routers/formaPagoRouter"
 
 
 const app = express()
@@ -42,6 +43,7 @@ app.use("/api/ordenesDeTrabajo", ordenDeTrabajoRouter)
 app.use("/api/ventas", cajaRouter)
 app.use("/api/cajaContable", cajaContableRouter)
 app.use("/api/gastos", gastosRouter)
+app.use("/api/formaPago", formaPagoRouter)
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*'); // Permite todos los orígenes

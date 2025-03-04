@@ -20,7 +20,9 @@
       "@/*": [
         "./*"
       ],
-      "@components/*": ["./components/*"]
+      "@components/*": ["./components/*"],
+      "@types": ["./src/types/database.types.ts"],
+      "@servicies": ["src/servicies"],
     }
   }
 }

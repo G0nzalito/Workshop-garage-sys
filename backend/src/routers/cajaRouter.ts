@@ -20,9 +20,9 @@ cajaRouter.get("/all", async (req, res) => {
 })
 
 cajaRouter.get("/specific", async (req, res) => {
-  const { fechaMinima, fechaMaxima } = req.body
+  const { fechaMinima, fechaMaxima } = req.query
 
-  const caja = await getCajaDesdeFecha(fechaMinima, fechaMaxima)
+  const caja = await getCajaDesdeFecha(fechaMinima as string, fechaMaxima as string)
 
   if (caja) {
     res.status(200).json(caja)

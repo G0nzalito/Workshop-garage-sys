@@ -1,3 +1,4 @@
+import { useConsts } from '@renderer/Contexts/clienteContext'
 import { X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -92,6 +93,7 @@ export default function CobroSinODT({
   const [cliente, setCliente] = useState()
   const [formaPago, setFormaPaga] = useState()
   const [marketing, setMarketing] = useState()
+  const { clientes, formasPago } = useConsts()
 
   const handleChange = (e): undefined => {
     const { name, value } = e.target
@@ -124,7 +126,7 @@ export default function CobroSinODT({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Aca va todo lo que quiero que se muestre en mi ventana emergente */}
-        <div className='flex justify-between items-center'>
+        <div className="flex justify-between items-center">
           <h2 className=" text-3xl flex justify-start justify-items-start p-4">
             Venta sin Orden de trabajo
           </h2>
@@ -145,13 +147,18 @@ export default function CobroSinODT({
               <Select
                 className="rounded-lg m-2 bg-black/90 text-lg"
                 name="Cliente"
-                options={[
-                  { value: 'Cliente1', name: 'Cliente 1', label: 'Cliente 1 (45243172 - CUIT)' },
+                // options={[
+                //   { value: 'Cliente1', name: 'Cliente 1', label: 'Cliente 1 (45243172 - CUIT)' },
 
-                  { value: 'Cliente2', name: 'Cliente 2', label: 'Cliente 2 (24241960 - DNI)' },
+                //   { value: 'Cliente2', name: 'Cliente 2', label: 'Cliente 2 (24241960 - DNI)' },
 
-                  { value: 'Cliente3', name: 'Cliente 3', label: 'Cliente 3 (23108507 - DNI)' }
-                ]}
+                //   { value: 'Cliente3', name: 'Cliente 3', label: 'Cliente 3 (23108507 - DNI)' }
+                // ]}
+                options={clientes.map((cliente) => ({
+                  value: cliente.id,
+                  name: cliente.Nombre,
+                  label: `${cliente.Nombre} (${cliente.Numero_Documento} - ${cliente.Tipo_Documento === 2 ? 'CUIT' : 'DNI'})`
+                }))}
                 onChange={(e) => handleSelectChange(e, setCliente, 'Cliente')}
                 value={cliente}
                 styles={customStyles}
@@ -164,20 +171,25 @@ export default function CobroSinODT({
               <Select
                 className="rounded-lg m-2 bg-black/90 text-lg"
                 name="FormaDePago"
-                options={[
-                  { value: 'Efectivo', name: 'Efectivo', label: 'Efectivo (0% interes)' },
-                  { value: 'Cheque', name: 'Tarjeta', label: 'Cheque (0% interes)' },
-                  {
-                    value: 'TarjetaDebito',
-                    name: 'Tarjeta',
-                    label: 'Tarjeta de Debito (5% interes)'
-                  },
-                  {
-                    value: 'TarjetaCredito',
-                    name: 'Tarjeta',
-                    label: 'Tarjeta de Credito (8% interes)'
-                  }
-                ]}
+                // options={[
+                //   { value: 'Efectivo', name: 'Efectivo', label: 'Efectivo (0% interes)' },
+                //   { value: 'Cheque', name: 'Tarjeta', label: 'Cheque (0% interes)' },
+                //   {
+                //     value: 'TarjetaDebito',
+                //     name: 'Tarjeta',
+                //     label: 'Tarjeta de Debito (5% interes)'
+                //   },
+                //   {
+                //     value: 'TarjetaCredito',
+                //     name: 'Tarjeta',
+                //     label: 'Tarjeta de Credito (8% interes)'
+                //   }
+                // ]}
+                options={formasPago.map((formaPago) => ({
+                  value: formaPago.id,
+                  name: formaPago.Nombre,
+                  label: `${formaPago.Nombre} (${formaPago.Interes}% interes)`
+                }))}
                 onChange={(e) => handleSelectChange(e, setFormaPaga, 'FormaDePago')}
                 value={formaPago}
                 styles={customStyles}
@@ -315,4 +327,3 @@ export default function CobroSinODT({
     </div>
   )
 }
-

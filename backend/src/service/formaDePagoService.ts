@@ -19,4 +19,15 @@ async function getFormaDePagoById(id: number) {
   return data as FormaDePago;
 }
 
-export { getFormaDePagoById };
+async function getFormasDePago(){
+  const { data, error } = await supabase
+    .from("Medios Pago")
+    .select("*")
+  if (error) {
+    throw error;
+  }
+  console.log(data)
+  return data as FormaDePago[];
+}
+
+export { getFormaDePagoById, getFormasDePago };

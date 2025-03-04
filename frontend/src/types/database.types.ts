@@ -472,14 +472,17 @@ export type Database = {
       "Medios Pago": {
         Row: {
           id: number
+          Interes: number
           Nombre: string
         }
         Insert: {
           id?: number
+          Interes?: number
           Nombre: string
         }
         Update: {
           id?: number
+          Interes?: number
           Nombre?: string
         }
         Relationships: []
@@ -639,19 +642,19 @@ export type Database = {
         Row: {
           Categoria: number
           Dada_de_baja: boolean | null
-          Descripción: string
+          Descripci├│n: string
           id: number
         }
         Insert: {
           Categoria: number
           Dada_de_baja?: boolean | null
-          Descripción: string
+          Descripci├│n: string
           id?: number
         }
         Update: {
           Categoria?: number
           Dada_de_baja?: boolean | null
-          Descripción?: string
+          Descripci├│n?: string
           id?: number
         }
         Relationships: [
@@ -696,7 +699,7 @@ export type Database = {
       }
       Vehiculo: {
         Row: {
-          Año: number
+          A├▒o: number
           id: number
           Kilometros: number
           Marca: number
@@ -705,7 +708,7 @@ export type Database = {
           Patente: string
         }
         Insert: {
-          Año: number
+          A├▒o: number
           id?: number
           Kilometros: number
           Marca: number
@@ -714,7 +717,7 @@ export type Database = {
           Patente: string
         }
         Update: {
-          Año?: number
+          A├▒o?: number
           id?: number
           Kilometros?: number
           Marca?: number
