@@ -5,9 +5,9 @@ import { getProductoByCodigo, hayStockParaVenta } from '../../../servicies/produ
 import { Database } from '../../../types/database.types'
 import CobroSinODT from '@renderer/components/Cobro/CobroSinODT.js'
 import { toast } from 'sonner'
-import { useConsts } from '@renderer/Contexts/clienteContext'
+import { useConsts } from '@renderer/Contexts/constsContext'
 import { getClientes } from '../../../servicies/clientesService'
-import { getFormasPago } from '../../../servicies/formaPagoService'
+import { getFormasPago, getTarjetas, getMarketing } from '../../../servicies/formaPagoService'
 
 type Producto = Database['public']['Tables']['Productos']['Row']
 
@@ -21,7 +21,7 @@ export default function WelcomeComponent(): JSX.Element {
   const [total, setTotal] = useState(0)
   const [cobrando, setCobrando] = useState(false)
 
-  const { setClientes, setFormasPago } = useConsts()
+  const { setClientes, setFormasPago, setTarjetas, setMarketing } = useConsts()
 
   const handleChange = (e): void => {
     const { name, value } = e.target
@@ -92,6 +92,12 @@ export default function WelcomeComponent(): JSX.Element {
     getFormasPago().then((formasPago) => {
       formasPago.sort((a, b) => a.id - b.id)
       setFormasPago(formasPago)
+    })
+    getTarjetas().then((tarjetas) => {
+      setTarjetas(tarjetas)
+    })
+    getMarketing().then((marketing) => {
+      setMarketing(marketing)
     })
   }, [])
 

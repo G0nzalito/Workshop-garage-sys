@@ -642,19 +642,19 @@ export type Database = {
         Row: {
           Categoria: number
           Dada_de_baja: boolean | null
-          Descripci├│n: string
+          Descripción: string
           id: number
         }
         Insert: {
           Categoria: number
           Dada_de_baja?: boolean | null
-          Descripci├│n: string
+          Descripción: string
           id?: number
         }
         Update: {
           Categoria?: number
           Dada_de_baja?: boolean | null
-          Descripci├│n?: string
+          Descripción?: string
           id?: number
         }
         Relationships: [
@@ -699,7 +699,7 @@ export type Database = {
       }
       Vehiculo: {
         Row: {
-          A├▒o: number
+          Año: number
           id: number
           Kilometros: number
           Marca: number
@@ -708,7 +708,7 @@ export type Database = {
           Patente: string
         }
         Insert: {
-          A├▒o: number
+          Año: number
           id?: number
           Kilometros: number
           Marca: number
@@ -717,7 +717,7 @@ export type Database = {
           Patente: string
         }
         Update: {
-          A├▒o?: number
+          Año?: number
           id?: number
           Kilometros?: number
           Marca?: number

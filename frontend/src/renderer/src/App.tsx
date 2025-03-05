@@ -3,7 +3,7 @@ import WelcomeComponent from '@renderer/components/WelcomeComponent'
 import ODTMain from '@renderer/components/Ordenes de trabajo/ODTMain'
 import { Toaster } from '../../../components/ui/sonner'
 import NavBar from '@renderer/specificComponents/Navbar'
-import { ConstsProvider } from '@renderer/Contexts/clienteContext'
+import { ConstsProvider } from '@renderer/Contexts/constsContext'
 
 function App(): JSX.Element {
   // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')

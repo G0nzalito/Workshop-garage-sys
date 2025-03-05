@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const URL = 'http://localhost:4001/api/ventas'
 
-export const generarCobroSinODT = async ({
+async function generarCobroSinODT({
   Forma_de_pago,
   Fuente_MKT,
   Numero_Documento_Cliente,
@@ -15,7 +15,7 @@ export const generarCobroSinODT = async ({
   Operador_1,
   Operador_2,
   Supervisor
-}) => {
+}) {
   if (
     !Forma_de_pago ||
     !Fuente_MKT ||
@@ -52,4 +52,6 @@ export const generarCobroSinODT = async ({
     throw new Error(`Error al generar cobro: ${response.statusText}`)
   }
 }
+
+export { generarCobroSinODT }
 

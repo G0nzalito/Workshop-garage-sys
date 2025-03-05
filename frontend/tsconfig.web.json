@@ -8,7 +8,7 @@
     "src/servicies/**/*",
     "src/types/**/*",
     "components/**/*"
-, "lib"  ],
+, "lib", "src/servicies/cobroService.js"  ],
   "compilerOptions": {
     "composite": true,
     "jsx": "react-jsx",
@@ -22,7 +22,7 @@
       ],
       "@components/*": ["./components/*"],
       "@types": ["./src/types/database.types.ts"],
-      "@servicies": ["src/servicies"],
+      "@servicies/*": ["src/servicies/*"],
     }
   }
 }
