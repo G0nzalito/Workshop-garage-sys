@@ -90,6 +90,7 @@ export default function WelcomeComponent(): JSX.Element {
       setClientes(clientes)
     })
     getFormasPago().then((formasPago) => {
+      formasPago.sort((a, b) => a.id - b.id)
       setFormasPago(formasPago)
     })
   }, [])

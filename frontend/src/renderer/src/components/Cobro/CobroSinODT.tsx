@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 import Select from 'react-select'
+import { toast } from 'sonner'
 
 const customStyles = {
   container: (provided: any) => ({
@@ -67,9 +68,9 @@ export default function CobroSinODT({
   const [formData, setFormData] = useState({
     Cliente: '',
 
-    FormaDePago: '',
+    FormaDePago: 0,
 
-    Total: '',
+    Total: 0,
 
     Tarjeta: '',
 
@@ -108,9 +109,64 @@ export default function CobroSinODT({
   const handleSelectChange = (selectedOption, setFunction, formDataName): undefined => {
     setFunction(selectedOption)
     handleChange({ target: { name: formDataName, value: selectedOption.value } })
+    if (formDataName === 'FormaDePago') {
+      setFormData((prevData) => ({
+        ...prevData,
+        Total: parseFloat(
+          (
+            total *
+            (1 +
+              formasPago.filter((formaPago) => formaPago.id === selectedOption.value)[0].Interes /
+                100)
+          ).toFixed(2)
+        )
+      }))
+    }
   }
 
-  console.log(formaPago)
+  const handleSubmit = (): undefined => {
+    formData.Total = total
+    let falta = false
+    for (const entry in formData) {
+      if (formData.FormaDePago !== 2 && formData.FormaDePago !== 3) {
+        console.log('Entre por cash')
+        if (
+          entry !== 'Cuotas' &&
+          entry !== 'N_Cupon' &&
+          entry !== 'N_Autorizacion' &&
+          entry !== 'N_Lote' &&
+          entry !== 'Tarjeta'
+        ) {
+          if (formData[entry] === '' || formData[entry] === 0 || formData[entry] === 'Falta') {
+            falta = true
+            setFormData((prevData) => ({
+              ...prevData,
+              [entry]: 'Falta'
+            }))
+          }
+        }
+      } else {
+        console.log('Entre por tarjeta')
+        if (formData[entry] === '' || formData[entry] === 0 || formData[entry] === 'Falta') {
+          falta = true
+          setFormData((prevData) => ({
+            ...prevData,
+            [entry]: 'Falta'
+          }))
+        }
+      }
+    }
+
+    console.log(falta)
+    console.log(formData)
+
+    if (!falta) {
+      // Llamar a la API para cobrar
+      console.log('Cobrando')
+    }
+  }
+
+  console.log(formData.Total)
 
   return (
     // Este div es mi fondo
@@ -138,9 +194,10 @@ export default function CobroSinODT({
           <form
             onSubmit={(e) => {
               e.preventDefault()
-              console.log('me ejecuté')
+              handleSubmit()
             }}
             className="scroll"
+            id="formCobroSinODT"
           >
             <div className="flex bg-[#2b2322] text-2xl justify-center m-4.5 p-1">
               <span className="flex justify-center items-center font-bold">Cliente: </span>
@@ -155,7 +212,7 @@ export default function CobroSinODT({
                 //   { value: 'Cliente3', name: 'Cliente 3', label: 'Cliente 3 (23108507 - DNI)' }
                 // ]}
                 options={clientes.map((cliente) => ({
-                  value: cliente.id,
+                  value: `${cliente.Numero_Documento} - ${cliente.Tipo_Documento}`,
                   name: cliente.Nombre,
                   label: `${cliente.Nombre} (${cliente.Numero_Documento} - ${cliente.Tipo_Documento === 2 ? 'CUIT' : 'DNI'})`
                 }))}
@@ -163,8 +220,12 @@ export default function CobroSinODT({
                 value={cliente}
                 styles={customStyles}
                 placeholder="Seleccione cliente"
-                required
               ></Select>
+              {formData.Cliente === 'Falta' && (
+                <span className="text-red-500">
+                  Por favor, seleccione un cliente en el campo superior
+                </span>
+              )}
             </div>
             <div className="flex bg-[#2b2322] text-2xl justify-center m-4.5 p-1">
               <span className="flex justify-star items-center font-bold">Forma de pago: </span>
@@ -194,17 +255,60 @@ export default function CobroSinODT({
                 value={formaPago}
                 styles={customStyles}
                 placeholder="Seleccione forma de pago"
-                required
               ></Select>
+              {formData.FormaDePago === 0 && (
+                <p className="text-red-500">
+                  Por favor, seleccione una forma de pago en el campo superior
+                </p>
+              )}
             </div>
             <div className="flex bg-[#2b2322] text-2xl justify-center m-4.5 p-1">
               <p className="text-lg">
-                <span className="text-2xl font-bold">Total: </span> {total} + interes si aplicara
+                <span className="text-2xl font-bold">Total: </span>{' '}
+                {formData.FormaDePago !== 0
+                  ? `${total} + ${formasPago.filter((formaPago) => formaPago.id === formData.FormaDePago)[0].Interes} = 
+                  ${(total * (1 + formasPago.filter((formaPago) => formaPago.id === formData.FormaDePago)[0].Interes / 100)).toFixed(2)}`
+                  : 'Seleccione primero un metodo de pago'}
               </p>
             </div>
-            {(formData.FormaDePago === 'TarjetaCredito' ||
-              formData.FormaDePago === 'TarjetaDebito') && (
+            {(formData.FormaDePago === 2 || formData.FormaDePago === 3) && (
               <>
+                <div className="flex bg-[#2b2322] text-2xl justify-center m-4.5 p-1">
+                  <span className="flex justify-star items-center font-bold">Tarjeta: </span>
+                  <Select
+                    className="rounded-lg m-2 bg-black/90 text-lg"
+                    name="FormaDePago"
+                    // options={[
+                    //   { value: 'Efectivo', name: 'Efectivo', label: 'Efectivo (0% interes)' },
+                    //   { value: 'Cheque', name: 'Tarjeta', label: 'Cheque (0% interes)' },
+                    //   {
+                    //     value: 'TarjetaDebito',
+                    //     name: 'Tarjeta',
+                    //     label: 'Tarjeta de Debito (5% interes)'
+                    //   },
+                    //   {
+                    //     value: 'TarjetaCredito',
+                    //     name: 'Tarjeta',
+                    //     label: 'Tarjeta de Credito (8% interes)'
+                    //   }
+                    // ]}
+                    options={formasPago.map((formaPago) => ({
+                      value: formaPago.id,
+                      name: formaPago.Nombre,
+                      label: `${formaPago.Nombre} (${formaPago.Interes}% interes)`
+                    }))}
+                    onChange={(e) => handleSelectChange(e, setFormaPaga, 'FormaDePago')}
+                    value={formaPago}
+                    styles={customStyles}
+                    placeholder="Seleccione forma de pago"
+                  ></Select>
+                  {formData.Tarjeta === 'Falta' && (
+                    <span className="text-red-500">
+                      Por favor, seleccione una forma de pago en el campo superior
+                    </span>
+                  )}
+                </div>
+                {/* Poner las tarjetas acá */}
                 <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
                   <span className="text-2xl font-bold">Cuotas: </span>
                   <input
@@ -214,8 +318,12 @@ export default function CobroSinODT({
                     placeholder="Cantidad de cuotas"
                     value={formData.Cuotas}
                     onChange={handleChange}
-                    required
                   />
+                  {formData.Cuotas === 'Falta' && (
+                    <span className="text-red-500">
+                      Por favor, ingrese las cuotas en el campo superior
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
                   <span className="text-2xl font-bold">N° de cupon: </span>
@@ -226,8 +334,12 @@ export default function CobroSinODT({
                     placeholder="Cupon"
                     value={formData.N_Cupon}
                     onChange={handleChange}
-                    required
                   />
+                  {formData.N_Cupon === 'Falta' && (
+                    <span className="text-red-500">
+                      Por favor, ingrese el cupón de pago en el campo superior
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
                   <span className="text-2xl font-bold">N° de lote: </span>
@@ -238,11 +350,15 @@ export default function CobroSinODT({
                     placeholder="Lote"
                     value={formData.N_Lote}
                     onChange={handleChange}
-                    required
                   />
+                  {formData.N_Lote === 'Falta' && (
+                    <span className="text-red-500">
+                      Por favor, ingrese el numero de lote en el campo superior
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
-                  <span className="text-2xl font-bold">Autorizacion: </span>
+                  <span className="text-2xl font-bold">Autorización: </span>
                   <input
                     type="text"
                     name="N_Autorizacion"
@@ -250,8 +366,12 @@ export default function CobroSinODT({
                     placeholder="Autorizacion"
                     value={formData.N_Autorizacion}
                     onChange={handleChange}
-                    required
                   />
+                  {formData.N_Autorizacion === 'Falta' && (
+                    <span className="text-red-500">
+                      Por favor, ingrese el numero de autorización en el campo superior
+                    </span>
+                  )}
                 </div>
               </>
             )}
@@ -278,8 +398,12 @@ export default function CobroSinODT({
                 value={marketing}
                 styles={customStyles}
                 placeholder="Seleccione medio de reconocimiento del cliente"
-                required
               ></Select>
+              {formData.Marketing === 'Falta' && (
+                <span className="text-red-500">
+                  Por favor, ingrese el medio de marketing en el campo superior
+                </span>
+              )}
             </div>
             <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
               <span className="text-2xl font-bold">Operador 1: </span>
@@ -290,8 +414,12 @@ export default function CobroSinODT({
                 placeholder="Operador 1"
                 value={formData.Operador1}
                 onChange={handleChange}
-                required
               />
+              {formData.Operador1 === 'Falta' && (
+                <span className="text-red-500">
+                  Por favor, ingrese el nombre del vendedor en el campo superior
+                </span>
+              )}
             </div>{' '}
             <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
               <span className="text-2xl font-bold">Operador 2: </span>
@@ -303,6 +431,12 @@ export default function CobroSinODT({
                 value={formData.Operador2}
                 onChange={handleChange}
               />
+              {formData.Operador2 === 'Falta' && (
+                <span className="text-red-500">
+                  Por favor, ingrese el nombre de el co-vendedor en el campo superior, o ingrese
+                  ninguno en caso de que no haya
+                </span>
+              )}
             </div>
             <div className="flex items-center bg-[#2b2322] text-2xl justify-center m-4.5 p-1 gap-2">
               <span className="text-2xl font-bold">Supervisor: </span>
@@ -313,13 +447,22 @@ export default function CobroSinODT({
                 placeholder="Supervisor"
                 value={formData.Supervisor}
                 onChange={handleChange}
-                required
               />
+              {formData.Supervisor === 'Falta' && (
+                <p className="flex text-red-500">
+                  Por favor, ingrese el nombre del supervisor a cargo en el campo superior
+                </p>
+              )}
             </div>
           </form>
         </div>
         <div className="flex justify-end items-end  justify-items-end gap-4 m-5">
-          <button className="btn btn-soft btn-success">
+          <button
+            className="btn btn-soft btn-success"
+            onClick={() => {
+              document.getElementById('formCobroSinODT').requestSubmit()
+            }}
+          >
             <span className="font-semibold text-2xl">Cobrar</span>
           </button>
         </div>
