@@ -7,13 +7,18 @@ import CobroSinODT from '@renderer/components/Cobro/CobroSinODT.js'
 import { toast } from 'sonner'
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { getClientes } from '../../../servicies/clientesService'
-import { getFormasPago, getTarjetas, getMarketing } from '../../../servicies/formaPagoService'
+import {
+  getFormasPago,
+  getTarjetas,
+  getMarketing,
+  getComprobantes
+} from '../../../servicies/formaPagoService'
 
 type Producto = Database['public']['Tables']['Productos']['Row']
 
 export default function WelcomeComponent(): JSX.Element {
   const [, setLocation] = useLocation()
-  const [productos, setProductos] = useState<{ Producto: Producto; cantidad: number }[]>([])
+  const [cesta, setCesta] = useState<{ Producto: Producto; cantidad: number }[]>([])
   const [formData, setFormData] = useState({
     Codigo: '',
     Cantidad: ''
@@ -21,7 +26,7 @@ export default function WelcomeComponent(): JSX.Element {
   const [total, setTotal] = useState(0)
   const [cobrando, setCobrando] = useState(false)
 
-  const { setClientes, setFormasPago, setTarjetas, setMarketing } = useConsts()
+  const { setClientes, setFormasPago, setTarjetas, setMarketing, setComprobantes } = useConsts()
 
   const handleChange = (e): void => {
     const { name, value } = e.target
@@ -33,16 +38,47 @@ export default function WelcomeComponent(): JSX.Element {
 
   const getProductos = async (data): Promise<void> => {
     try {
+      const itemExistente = cesta.find((item) => item.Producto.Codigo === data.Codigo)
+
+      if (itemExistente) {
+        console.log(parseFloat(itemExistente.cantidad) + parseFloat(data.Cantidad))
+        console.log(itemExistente.Producto.Stock)
+
+        if (
+          parseFloat(itemExistente.cantidad) + parseFloat(data.Cantidad) >
+          itemExistente.Producto.Stock
+        ) {
+          toast.error('No hay stock suficiente', {
+            description: 'No se puede agregar el producto',
+            duration: 3000
+          })
+          return
+        }
+
+        setCesta(
+          cesta.map((item) => {
+            if (item.Producto.Codigo === data.Codigo) {
+              return {
+                Producto: item.Producto,
+                cantidad: parseFloat(item.cantidad) + parseFloat(data.Cantidad)
+              }
+            }
+            return item
+          })
+        )
+        return
+      }
+
       const producto: Producto = await getProductoByCodigo(data.Codigo)
 
       if (producto) {
         try {
           const hayStock = await hayStockParaVenta(producto.Codigo, data.Cantidad)
           if (hayStock) {
-            if (productos.length > 0) {
-              setProductos([...productos, { Producto: producto, cantidad: data.Cantidad }])
+            if (cesta.length > 0) {
+              setCesta([...cesta, { Producto: producto, cantidad: data.Cantidad }])
             } else {
-              setProductos([{ Producto: producto, cantidad: data.Cantidad }])
+              setCesta([{ Producto: producto, cantidad: data.Cantidad }])
             }
             toast.success('Producto agregado con exito', {
               description: 'Figura en la tabla',
@@ -68,6 +104,13 @@ export default function WelcomeComponent(): JSX.Element {
 
   const handleSubmit = (data): void => {
     try {
+      if (parseFloat(data.Cantidad) < 0) {
+        toast.error('Cantidad invalida', {
+          description: 'No intente agregar cantidad negativa de un producto',
+          duration: 3000
+        })
+        return
+      }
       //@ts-ignore no va a ser nulo, no seas bobo
       getProductos(data).then(() => {
         console.log('Producto agregado')
@@ -79,11 +122,11 @@ export default function WelcomeComponent(): JSX.Element {
 
   useEffect(() => {
     let precioTotal = 0
-    productos.forEach((producto) => {
+    cesta.forEach((producto) => {
       precioTotal += producto.Producto.Precio * producto.cantidad
     })
     setTotal(precioTotal)
-  }, [productos])
+  }, [cesta])
 
   useEffect(() => {
     getClientes().then((clientes) => {
@@ -98,6 +141,9 @@ export default function WelcomeComponent(): JSX.Element {
     })
     getMarketing().then((marketing) => {
       setMarketing(marketing)
+    })
+    getComprobantes().then((comprobantes) => {
+      setComprobantes(comprobantes)
     })
   }, [])
 
@@ -117,7 +163,7 @@ export default function WelcomeComponent(): JSX.Element {
               </tr>
             </thead>
             <tbody>
-              {productos.map((producto, index) => {
+              {cesta.map((producto, index) => {
                 return (
                   <tr key={index}>
                     <td>{producto.Producto.Codigo}</td>
@@ -128,7 +174,7 @@ export default function WelcomeComponent(): JSX.Element {
                       <button
                         className="btn btn-error"
                         onClick={() => {
-                          setProductos(productos.filter((producto, index2) => index2 !== index))
+                          setCesta(cesta.filter((producto, index2) => index2 !== index))
                         }}
                       >
                         <X />
@@ -200,13 +246,19 @@ export default function WelcomeComponent(): JSX.Element {
           <button
             className="btn btn-soft btn-error"
             onClick={() => {
-              setProductos([])
+              setCesta([])
             }}
           >
             Cancelar venta
           </button>
         </div>
-        <CobroSinODT open={cobrando} onClose={() => setCobrando(false)} total={total} productos={productos}></CobroSinODT>
+        <CobroSinODT
+          open={cobrando}
+          onClose={() => setCobrando(false)}
+          total={total}
+          productos={cesta}
+          setProductos={setCesta}
+        ></CobroSinODT>
       </div>
     </>
   )

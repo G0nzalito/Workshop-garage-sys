@@ -5,6 +5,8 @@ const URLCaja = 'http://localhost:4001/api/ventas'
 
 async function generarCobroSinODT({
   Forma_de_Pago,
+  Tarjeta,
+  Cuotas,
   Fuente_MKT,
   Numero_Documento_Cliente,
   Tipo_Documento_Cliente,
@@ -15,7 +17,8 @@ async function generarCobroSinODT({
   N_Lote,
   Operador_1,
   Operador_2,
-  Supervisor
+  Supervisor,
+  Descripcion
 }) {
   if (
     !Forma_de_Pago ||
@@ -38,6 +41,8 @@ async function generarCobroSinODT({
       data[entry] = arguments[0][entry]
     }
   }
+
+  console.log('data', data)
 
   const response = await axios.post(`${URLCaja}/create`, {
     data: data

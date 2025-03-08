@@ -5,6 +5,7 @@ type Cliente = Database['public']['Tables']['Cliente']['Row']
 type FormaDePago = Database['public']['Tables']['Medios Pago']['Row']
 type Tarjeta = Database['public']['Tables']['Tarjetas']['Row']
 type Marketing = Database['public']['Tables']['Fuente MKT']['Row']
+type Comprobantes = Database['public']['Tables']['Conceptos Facturas']['Row']
 
 type ClientesContextData = {
   clientes: Cliente[]
@@ -15,6 +16,8 @@ type ClientesContextData = {
   setTarjetas: React.Dispatch<React.SetStateAction<Tarjeta[]>>
   marketing: Marketing[]
   setMarketing: React.Dispatch<React.SetStateAction<Marketing[]>>
+  comprobantes: Comprobantes[]
+  setComprobantes: React.Dispatch<React.SetStateAction<Comprobantes[]>>
 }
 
 export const ConstContext = createContext<ClientesContextData | undefined>(undefined)
@@ -24,6 +27,7 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [formasPago, setFormasPago] = useState<FormaDePago[]>([])
   const [tarjetas, setTarjetas] = useState<Tarjeta[]>([])
   const [marketing, setMarketing] = useState<Marketing[]>([])
+  const [comprobantes, setComprobantes] = useState<Comprobantes[]>([])
 
   return (
     <ConstContext.Provider
@@ -35,7 +39,9 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         tarjetas,
         setTarjetas,
         marketing,
-        setMarketing
+        setMarketing,
+        comprobantes,
+        setComprobantes
       }}
     >
       {children}

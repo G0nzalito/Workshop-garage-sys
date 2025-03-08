@@ -1,6 +1,6 @@
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { X } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { generarCobroSinODT } from '../../../../servicies/cobroService.js'
 import { modificarStockProducto } from '../../../../servicies/productosService.js'
 
@@ -65,12 +65,14 @@ export default function CobroSinODT({
   open,
   onClose,
   total,
-  productos
+  productos,
+  setProductos
 }: {
   open: boolean
   onClose: () => void
   total: number
   productos: { Producto: Producto; Cantidad: number }[]
+  setProductos: React.Dispatch<React.SetStateAction<{ Producto: Producto; Cantidad: number }[]>>
 }): JSX.Element {
   const [formData, setFormData] = useState({
     Cliente: '',
@@ -95,14 +97,16 @@ export default function CobroSinODT({
 
     Operador2: '',
 
-    Supervisor: ''
+    Supervisor: '',
+
+    Descripcion: ''
   })
 
   const [cliente, setCliente] = useState()
   const [formaPago, setFormaPaga] = useState()
   const [marketing, setMarketing] = useState()
   const [tarjeta, setTarjeta] = useState()
-  const { clientes, formasPago, tarjetas, marketing: marketingOptions } = useConsts()
+  const { clientes, formasPago, tarjetas, marketing: marketingOptions, comprobantes } = useConsts()
 
   const handleChange = (e): undefined => {
     const { name, value } = e.target
@@ -117,25 +121,27 @@ export default function CobroSinODT({
   const handleSelectChange = (selectedOption, setFunction, formDataName): undefined => {
     setFunction(selectedOption)
     handleChange({ target: { name: formDataName, value: selectedOption.value } })
-    if (formDataName === 'FormaDePago') {
-      setFormData((prevData) => ({
-        ...prevData,
-        Total: parseFloat(
-          (
-            total *
-            (1 +
-              formasPago.filter((formaPago) => formaPago.id === selectedOption.value)[0].Interes /
-                100)
-          ).toFixed(2)
-        )
-      }))
-    }
+    // if (formDataName === 'FormaDePago') {
+    //   setFormData((prevData) => ({
+    //     ...prevData,
+    //     Total: parseFloat(
+    //       (
+    //         total *
+    //         (1 +
+    //           formasPago.filter((formaPago) => formaPago.id === selectedOption.value)[0].Interes /
+    //             100)
+    //       ).toFixed(2)
+    //     )
+    //   }))
+    // }
   }
 
   const handleSubmit = async (): Promise<undefined> => {
     formData.Total = total
     let falta = false
     for (const entry in formData) {
+      if (entry === 'Descripcion') continue
+
       if (formData.FormaDePago !== 2 && formData.FormaDePago !== 3) {
         // console.log('Entre por cash')
         if (
@@ -169,6 +175,8 @@ export default function CobroSinODT({
       // Llamar a la API para cobrar
       const response = await generarCobroSinODT({
         Forma_de_Pago: formData.FormaDePago,
+        Tarjeta: formData.Tarjeta,
+        Cuotas: formData.Cuotas,
         Fuente_MKT: formData.Marketing,
         Numero_Documento_Cliente: parseInt(formData.Cliente.split(' - ')[0]),
         Tipo_Documento_Cliente: parseInt(formData.Cliente.split(' - ')[1]),
@@ -179,17 +187,19 @@ export default function CobroSinODT({
         N_Lote: formData.N_Lote,
         Operador_1: formData.Operador1,
         Operador_2: formData.Operador2,
-        Supervisor: formData.Supervisor
+        Supervisor: formData.Supervisor,
+        Descripcion: formData.Descripcion
       })
-      console.log('cobrando')
-
-      console.log(response)
 
       if (response === 201) {
         console.log('Cobro exitoso')
-        productos.forEach((producto) => {console.log(producto)})
+        productos.forEach((producto) => {
+          console.log(producto)
+        })
         await modificarStockProducto(productos)
         console.log('Stock modificado')
+        setProductos([])
+        onClose()
       }
     }
     toast.success('Venta realizada con exito', {
@@ -517,6 +527,19 @@ export default function CobroSinODT({
                     Por favor, ingrese el nombre del supervisor a cargo en el campo superior
                   </p>
                 )}
+              </div>
+            </div>
+            <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
+              <div className="flex justify-center items-center text-2xl">
+                <span className="text-2xl font-bold">Comentarios: </span>
+                <input
+                  type="text"
+                  name="Descripcion"
+                  className="input input-bordered appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  placeholder="Descripcion"
+                  value={formData.Descripcion}
+                  onChange={handleChange}
+                />
               </div>
             </div>
           </form>

@@ -4,6 +4,7 @@ import ODTMain from '@renderer/components/Ordenes de trabajo/ODTMain'
 import { Toaster } from '../../../components/ui/sonner'
 import NavBar from '@renderer/specificComponents/Navbar'
 import { ConstsProvider } from '@renderer/Contexts/constsContext'
+import ProductosMain from '@renderer/components/Productos/ProductosMain'
 
 function App(): JSX.Element {
   // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
@@ -17,19 +18,12 @@ function App(): JSX.Element {
           <Switch>
             <Route path="/" component={WelcomeComponent} />
             <Route path="/OrdenesDeTrabajo" component={ODTMain} />
+            {/* Productos */}
+            <Route path="/Productos" component={ProductosMain}/>
           </Switch>
         </main>
         <Toaster
           closeButton
-          toastOptions={{
-            classNames: {
-              toast: 'alert', // Clase base
-              success: 'alert-success', // Clase para toasts de éxito
-              error: 'alert-error', // Clase para toasts de error
-              warning: 'alert-warning', // Clase para toasts de advertencia
-              info: 'alert-info' // Clase para toasts de información
-            }
-          }}
         />
       </>
     </ConstsProvider>

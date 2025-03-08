@@ -28,3 +28,12 @@ export const getMarketing = async () => {
     throw new Error(`Error al obtener marketing: ${response.statusText}`)
   }
 }
+
+export const getComprobantes = async () => {
+  const response = await axios.get(`${URL}/comprobantes`)
+  if (response.status === 200) {
+    return response.data
+  } else {
+    throw new Error(`Error al obtener comprobantes: ${response.statusText}`)
+  }
+}
