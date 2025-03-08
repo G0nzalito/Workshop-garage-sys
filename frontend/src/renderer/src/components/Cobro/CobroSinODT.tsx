@@ -1,10 +1,12 @@
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { X } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { generarCobroSinODT } from '@/src/servicies/cobroService'
+import { generarCobroSinODT } from '../../../../servicies/cobroService.js'
+import { modificarStockProducto } from '../../../../servicies/productosService.js'
 
 import Select from 'react-select'
 import { toast } from 'sonner'
+import { Database } from '@/src/types/database.types.js'
 
 const customStyles = {
   container: (provided: any) => ({
@@ -57,14 +59,18 @@ const customStyles = {
   })
 }
 
+type Producto = Database['public']['Tables']['Productos']['Row']
+
 export default function CobroSinODT({
   open,
   onClose,
-  total
+  total,
+  productos
 }: {
   open: boolean
   onClose: () => void
   total: number
+  productos: { Producto: Producto; Cantidad: number }[]
 }): JSX.Element {
   const [formData, setFormData] = useState({
     Cliente: '',
@@ -126,12 +132,12 @@ export default function CobroSinODT({
     }
   }
 
-  const handleSubmit = (): undefined => {
+  const handleSubmit = async (): Promise<undefined> => {
     formData.Total = total
     let falta = false
     for (const entry in formData) {
       if (formData.FormaDePago !== 2 && formData.FormaDePago !== 3) {
-        console.log('Entre por cash')
+        // console.log('Entre por cash')
         if (
           entry !== 'Cuotas' &&
           entry !== 'N_Cupon' &&
@@ -148,7 +154,7 @@ export default function CobroSinODT({
           }
         }
       } else {
-        console.log('Entre por tarjeta')
+        // console.log('Entre por tarjeta')
         if (formData[entry] === '' || formData[entry] === 0 || formData[entry] === 'Falta') {
           falta = true
           setFormData((prevData) => ({
@@ -161,9 +167,35 @@ export default function CobroSinODT({
 
     if (!falta) {
       // Llamar a la API para cobrar
-      generarCobroSinODT()
-      console.log()
+      const response = await generarCobroSinODT({
+        Forma_de_Pago: formData.FormaDePago,
+        Fuente_MKT: formData.Marketing,
+        Numero_Documento_Cliente: parseInt(formData.Cliente.split(' - ')[0]),
+        Tipo_Documento_Cliente: parseInt(formData.Cliente.split(' - ')[1]),
+        Sub_Total: total,
+        Turno: 1,
+        N_Autorizacion: formData.N_Autorizacion,
+        N_Cupon: formData.N_Cupon,
+        N_Lote: formData.N_Lote,
+        Operador_1: formData.Operador1,
+        Operador_2: formData.Operador2,
+        Supervisor: formData.Supervisor
+      })
+      console.log('cobrando')
+
+      console.log(response)
+
+      if (response === 201) {
+        console.log('Cobro exitoso')
+        productos.forEach((producto) => {console.log(producto)})
+        await modificarStockProducto(productos)
+        console.log('Stock modificado')
+      }
     }
+    toast.success('Venta realizada con exito', {
+      description: 'Se ha cobrado la venta',
+      duration: 3000
+    })
   }
 
   return (
@@ -213,7 +245,7 @@ export default function CobroSinODT({
                   options={clientes.map((cliente) => ({
                     value: `${cliente.Numero_Documento} - ${cliente.Tipo_Documento}`,
                     name: cliente.Nombre,
-                    label: `${cliente.Nombre} (${cliente.Numero_Documento} - ${cliente.Tipo_Documento === 2 ? 'CUIT' : 'DNI'})`
+                    label: `${cliente.Nombre} ${cliente.Numero_Documento === -1 ? ` ` : `(${cliente.Numero_Documento} - ${cliente.Tipo_Documento === 2 ? 'CUIT' : 'DNI'})`}`
                   }))}
                   onChange={(e) => handleSelectChange(e, setCliente, 'Cliente')}
                   value={cliente}

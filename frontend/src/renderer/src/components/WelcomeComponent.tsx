@@ -206,7 +206,7 @@ export default function WelcomeComponent(): JSX.Element {
             Cancelar venta
           </button>
         </div>
-        <CobroSinODT open={cobrando} onClose={() => setCobrando(false)} total={total}></CobroSinODT>
+        <CobroSinODT open={cobrando} onClose={() => setCobrando(false)} total={total} productos={productos}></CobroSinODT>
       </div>
     </>
   )

@@ -1,3 +1,4 @@
+import { data } from 'autoprefixer'
 import axios from 'axios'
 
 const API_URL = 'http://localhost:4001/api/productos'
@@ -28,5 +29,27 @@ export const hayStockParaVenta = async (codigo, cantidad) => {
     return true
   } else {
     return false
+  }
+}
+
+export const modificarStockProducto = async (productos) => {
+  const Productos = []
+
+  for (const producto of productos) {
+    Productos.push({
+      Codigo: producto.Producto.Codigo,
+      Cantidad: -producto.cantidad
+    })
+  }
+
+  const response = await axios.put(`${API_URL}/updateStock`, {
+    data: {
+      Productos: Productos
+    } 
+  })
+  if (response.status === 200) {
+    return response.data
+  } else {
+    return response.statusText
   }
 }

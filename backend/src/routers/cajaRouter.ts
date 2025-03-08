@@ -33,7 +33,10 @@ cajaRouter.get("/specific", async (req, res) => {
 
 cajaRouter.post("/create", async (req, res) => {
   try {
-    const venta: CajaAInsertar = req.body
+    const venta: CajaAInsertar = req.body.data
+
+    console.log(venta)
+
 
     if (
       venta.Forma_de_Pago === undefined ||

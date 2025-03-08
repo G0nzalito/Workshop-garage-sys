@@ -14,6 +14,11 @@ type Producto = Database["public"]["Tables"]["Productos"]["Row"]
 
 export const productosRouter = appExpress.Router()
 
+type ProductoStock = {
+  Codigo: string
+  Cantidad: number
+}
+
 productosRouter.get("/all", async (req, res) => {
   try {
     const productos = await getProductos()
@@ -84,14 +89,20 @@ productosRouter.put("/update", async (req, res) => {
 })
 
 productosRouter.put("/updateStock", async (req, res) => {
-  const { Codigo, Cantidad } = req.body
+  const { Productos }: {Productos: ProductoStock[]} = req.body.data
 
-  if (!Codigo || !Cantidad) {
-    res.status(400).json({ error: "Codigo and Cantidad are required" })
+  console.log('Body', req.body)
+
+  if (Productos.length === 0) {
+    res.status(400).json({ error: "No fueron enviados productos" })
   } else {
     try {
-      const productoActualizado = await modificarStockProducto(Codigo, Cantidad)
-      res.status(200).json(productoActualizado)
+      Productos.forEach(async (producto) => {
+        console.log('producto', producto)
+        await modificarStockProducto(producto.Codigo, producto.Cantidad)
+
+      })
+      res.status(200).json('Los productos fueron actualizados con exito')
     } catch (error) {
       res.status(500).json({ error })
     }

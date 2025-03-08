@@ -35,7 +35,6 @@ async function getTarjetas() {
   if (error) {
     throw error
   }
-  console.log('data', data)
   return data as Database["public"]["Tables"]["Tarjetas"]["Row"][]
   
 }
