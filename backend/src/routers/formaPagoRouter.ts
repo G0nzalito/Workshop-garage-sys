@@ -1,6 +1,7 @@
 import appExpress from "express"
 import { Database } from "../supabase/database.types"
 import {
+  getComprobantes,
   getFormaDePagoById,
   getFormasDePago,
   getMarketing,
@@ -47,4 +48,14 @@ formaPagoRouter.get("/marketing", async (req, res) => {
   } else {
     res.status(404).json({ message: "No se encontraron fuentes de marketing" })
   }
+})
+
+formaPagoRouter.get("/comprobantes", async (req, res) => {
+  const comprobantes = await getComprobantes()
+
+  if (comprobantes) {
+    res.status(200).json(comprobantes)
+  } else {
+    res.status(404).json({ message: "No se encontraron comprobantes" })
+  } 
 })

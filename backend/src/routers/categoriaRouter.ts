@@ -1,5 +1,5 @@
 import appExpress from "express"
-import {getCategoriaById, getCategorias, uploadCategoria} from "../service/categoriasService"
+import {getCategoriaActiva, getCategoriaById, getCategorias, uploadCategoria} from "../service/categoriasService"
 import { Database } from "../supabase/database.types"
 
 type Categoria = Database["public"]["Tables"]["Categorias"]["Row"]
@@ -9,6 +9,12 @@ export const categoriaRouter = appExpress.Router()
 categoriaRouter.get("/all", async (req, res) => {
 
   const categorias: Categoria[] = await getCategorias()
+
+  res.status(200).json(categorias)
+})
+
+categoriaRouter.get("/active", async (req, res) => {
+  const categorias = await getCategoriaActiva()
 
   res.status(200).json(categorias)
 })

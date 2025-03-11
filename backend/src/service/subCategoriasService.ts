@@ -30,6 +30,7 @@ async function getSubCategoriaByCategoria(categoria: number) {
     .from("SubCategorias")
     .select("*")
     .eq("Categoria", categoria)
+    .eq("Dada_de_baja", false)
   if (error) {
     throw error
   } else {

@@ -6,6 +6,9 @@ type FormaDePago = Database['public']['Tables']['Medios Pago']['Row']
 type Tarjeta = Database['public']['Tables']['Tarjetas']['Row']
 type Marketing = Database['public']['Tables']['Fuente MKT']['Row']
 type Comprobantes = Database['public']['Tables']['Conceptos Facturas']['Row']
+type MarcasProductos = Database['public']['Tables']['Marca_de_Productos']['Row']
+type Proveedores = Database['public']['Tables']['Proveedores']['Row']
+type Categoria = Database['public']['Tables']['Categorias']['Row']
 
 type ClientesContextData = {
   clientes: Cliente[]
@@ -18,6 +21,12 @@ type ClientesContextData = {
   setMarketing: React.Dispatch<React.SetStateAction<Marketing[]>>
   comprobantes: Comprobantes[]
   setComprobantes: React.Dispatch<React.SetStateAction<Comprobantes[]>>
+  marcasProductos: MarcasProductos[]
+  setMarcasProductos: React.Dispatch<React.SetStateAction<MarcasProductos[]>>
+  proveedores: Proveedores[]
+  setProveedores: React.Dispatch<React.SetStateAction<Proveedores[]>>
+  categorias: Categoria[]
+  setCategorias: React.Dispatch<React.SetStateAction<Categoria[]>>
 }
 
 export const ConstContext = createContext<ClientesContextData | undefined>(undefined)
@@ -28,6 +37,9 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [tarjetas, setTarjetas] = useState<Tarjeta[]>([])
   const [marketing, setMarketing] = useState<Marketing[]>([])
   const [comprobantes, setComprobantes] = useState<Comprobantes[]>([])
+  const [marcasProductos, setMarcasProductos] = useState<MarcasProductos[]>([])
+  const [proveedores, setProveedores] = useState<Proveedores[]>([])
+  const [categorias, setCategorias] = useState<Categoria[]>([])
 
   return (
     <ConstContext.Provider
@@ -41,7 +53,13 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         marketing,
         setMarketing,
         comprobantes,
-        setComprobantes
+        setComprobantes,
+        marcasProductos,
+        setMarcasProductos,
+        proveedores,
+        setProveedores,
+        categorias,
+        setCategorias
       }}
     >
       {children}

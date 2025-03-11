@@ -33,7 +33,7 @@ proveedoresRouter.get("/specific", async (req, res) => {
   }
 })
 
-proveedoresRouter.put("/active", async (req, res) => {
+proveedoresRouter.get("/active", async (req, res) => {
   const proveedores = await getProveedorActivo()
 
   res.status(200).json(proveedores)

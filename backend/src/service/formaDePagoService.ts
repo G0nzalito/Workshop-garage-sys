@@ -49,4 +49,14 @@ async function getMarketing(){
   return data as Marketing[];
 }
 
-export { getFormaDePagoById, getFormasDePago, getTarjetas, getMarketing };
+async function getComprobantes(){
+  const { data, error } = await supabase
+    .from("Conceptos Facturas")
+    .select("*")
+  if (error) {
+    throw error;
+  }
+  return data as Database["public"]["Tables"]["Conceptos Facturas"]["Row"][];
+}
+
+export { getFormaDePagoById, getFormasDePago, getTarjetas, getMarketing, getComprobantes };

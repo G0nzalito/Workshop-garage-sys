@@ -10,6 +10,15 @@ async function getCategorias() {
   return data as Categoria[]
 }
 
+async function getCategoriaActiva() {
+  const { data, error } = await supabase
+    .from("Categorias")
+    .select("*")
+    .eq("Dada_de_baja", false)
+  return data as Categoria[]
+
+}
+
 async function getCategoriaById(id: number) {
   const { data, error } = await supabase
     .from("Categorias")
@@ -41,4 +50,4 @@ async function uploadCategoria(nuevaCategoria: CategoriaAInsertar) {
   return data as Categoria
 }
 
-export { getCategorias, getCategoriaById, uploadCategoria }
+export { getCategorias, getCategoriaById, uploadCategoria, getCategoriaActiva }

@@ -20,10 +20,10 @@ subCategoriasRouter.get("/all", async (req, res) => {
 })
 
 subCategoriasRouter.get("/specific", async (req, res) => {
-  const { id, Categoria } = req.body
+  const { id, Categoria } = req.query
 
   if (id) {
-    const subCategoria = await getSubCategoriaById(id)
+    const subCategoria = await getSubCategoriaById(parseInt(id as string))
     if (subCategoria) {
       res.status(200).json(subCategoria)
     } else {
@@ -31,7 +31,7 @@ subCategoriasRouter.get("/specific", async (req, res) => {
     }
   } else {
     if (Categoria) {
-      const subCategoria = await getSubCategoriaByCategoria(Categoria)
+      const subCategoria = await getSubCategoriaByCategoria(parseInt(Categoria as string))
       if (subCategoria) {
         res.status(200).json(subCategoria)
       } else {
