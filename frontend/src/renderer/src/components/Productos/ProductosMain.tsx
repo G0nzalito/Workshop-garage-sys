@@ -4,12 +4,15 @@ import { getMarcasProductos } from '../../../../servicies/marcaProductoService.j
 import { getProveedoresActivos } from '../../../../servicies/proveedoresService.js'
 import {
   getCategoriasProductos,
-  getSubCategoriasProductosByCategoria
+  getSubCategoriasProductosByCategoria,
+  getSubCategoriasProductos
 } from '../../../../servicies/categoriasYSubCategoriasService.js'
+import { obtenerFiltrados, getProductoByCodigo } from '../../../../servicies/productosService.js'
 import { Database } from '@/src/types/database.types.js'
 import Select from 'react-select'
 
 type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
+type Productos = Database['public']['Tables']['Productos']['Row']
 
 const customStyles = {
   container: (provided: any) => ({
@@ -68,6 +71,7 @@ type formFiltros = {
   categoria: number
   subcategoria: number
   proveedor: number
+  codigo: string
 }
 
 export default function ProductosMain(): JSX.Element {
@@ -84,15 +88,23 @@ export default function ProductosMain(): JSX.Element {
   const [categoria, setCategoria] = useState()
   const [subcategoriaSelec, setSubcategoriaSelec] = useState()
   const [subCategorias, setSubCategorias] = useState<SubCategoria[]>([])
+  const [productos, setProductos] = useState<Productos[]>()
 
   const handleChange = (e): undefined => {
     const { name, value } = e.target
+    if (name === 'codigo') {
+      setFormData((prevData) => ({
+        ...prevData,
 
-    setFormData((prevData) => ({
-      ...prevData,
+        [name]: value.toUpperCase()
+      }))
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
 
-      [name]: value
-    }))
+        [name]: value
+      }))
+    }
   }
 
   const handleSelectChange = (selectedOption, setFunction, formDataName): undefined => {
@@ -105,7 +117,8 @@ export default function ProductosMain(): JSX.Element {
     marca: 0,
     categoria: 0,
     subcategoria: 0,
-    proveedor: 0
+    proveedor: 0,
+    codigo: ''
   })
 
   useEffect(() => {
@@ -118,6 +131,10 @@ export default function ProductosMain(): JSX.Element {
     getCategoriasProductos().then((data) => {
       setCategorias(data)
     })
+    getSubCategoriasProductos().then((data) => {
+      setSubCategorias(data)
+    })
+
   }, [])
 
   useEffect(() => {
@@ -133,7 +150,8 @@ export default function ProductosMain(): JSX.Element {
       marca: 0,
       categoria: 0,
       subcategoria: 0,
-      proveedor: 0
+      proveedor: 0,
+      codigo: ''
     })
     //@ts-ignore si funciona, dejemoslo como está
     setMarca({ value: 0, label: 'Selecciona una marca...' })
@@ -143,11 +161,30 @@ export default function ProductosMain(): JSX.Element {
     setCategoria({ value: 0, label: 'Selecciona una categoría...' })
     //@ts-ignore si funciona, dejemoslo como está
     setSubcategoriaSelec({ value: 0, label: 'Selecciona una subcategoría...' })
+    //@ts-ignore si funciona, dejemoslo como está
+    setProductos()
   }
 
   const handleFilter = (e) => {
     e.preventDefault()
-    console.log(formdata)
+
+    const filtros = {
+      Descripcion: formdata.descripcion,
+      Marca: formdata.marca,
+      Categoria: formdata.categoria,
+      SubCategoria: formdata.subcategoria,
+      Proveedor: formdata.proveedor
+    }
+
+    if (formdata.codigo !== '') {
+      getProductoByCodigo(formdata.codigo).then((data) => {
+        setProductos([data])
+      })
+      return
+    }
+    obtenerFiltrados(filtros).then((data) => {
+      setProductos(data)
+    })
   }
 
   return (
@@ -161,6 +198,17 @@ export default function ProductosMain(): JSX.Element {
         <div className="flex gap-2">
           <form onSubmit={handleFilter} className="flex flex-row gap-3" id="formBusquedaProductos">
             <fieldset>
+              <legend className="fieldset-legend"> Codigo Producto:</legend>
+              <input
+                type="text"
+                className="input input-md outline-1 w-60"
+                placeholder="Ingresa la descripción..."
+                name="codigo"
+                onChange={handleChange}
+                value={formdata.codigo}
+              />
+            </fieldset>
+            <fieldset>
               <legend className="fieldset-legend"> Descripción:</legend>
               <input
                 type="text"
@@ -168,6 +216,7 @@ export default function ProductosMain(): JSX.Element {
                 placeholder="Ingresa la descripción..."
                 name="descripcion"
                 onChange={handleChange}
+                value={formdata.descripcion}
               />
             </fieldset>
             <fieldset>
@@ -249,16 +298,62 @@ export default function ProductosMain(): JSX.Element {
       <div className="divider"></div>
       <div>LISTA DE PRODUCTOS</div>
       <div>
-        <table className='table'>
-          <th>Código</th>
-          <th>Descripción</th>  
-          <th>Precio</th>  
-          <th>Categoría</th>  
-          <th>SubCategoría</th>  
-          <th>Marca</th>  
-          <th>Proveedor</th>
-          <th>Stock</th>  
-        </table> 
+        {productos ? (
+          <table className="table outline-1">
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Categoría</th>
+            <th>SubCategoría</th>
+            <th>Marca</th>
+            <th>Proveedor</th>
+            <th>Stock</th>
+            <tbody>
+              {productos.length > 0 ? (
+                productos.map((producto) => {
+                  return (
+                    <tr key={producto.Codigo}>
+                      <td>{producto.Codigo}</td>
+                      <td>{producto.Descripcion}</td>
+                      <td>{producto.Precio}</td>
+                      <td>
+                        {
+                          categorias.find((categoria) => categoria.id === producto.Categoria)
+                            ?.Descripcion
+                        }
+                      </td>
+                      <td>
+                        {producto.SubCategoria
+                          ? subCategorias.find(
+                              (subCategoria) => subCategoria.id === producto.SubCategoria
+                            )?.Descripción
+                          : 'No posee Sub categoria'}
+                      </td>
+                      <td>
+                        {marcasProductos.find((marca) => marca.id === producto.Marca)?.Nombre}
+                      </td>
+                      <td>
+                        {
+                          proveedores.find((proveedor) => proveedor.id === producto.Proveedor)
+                            ?.Nombre
+                        }
+                      </td>
+                      <td>{producto.Stock}</td>
+                    </tr>
+                  )
+                })
+              ) : (
+                <tr>
+                  <td colSpan={8}>No se encontraron productos</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        ) : (
+          <div className="flex justify-center items-center text-2xl">
+            <h2>Realize una busqueda filtrada para encontrar los productos</h2>
+          </div>
+        )}
       </div>
     </div>
   )

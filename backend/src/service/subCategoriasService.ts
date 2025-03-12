@@ -1,11 +1,20 @@
 import supabase from "../supabase/client"
 import { Database } from "../supabase/database.types"
 
-type SubCategoriaAInsertar = Database["public"]["Tables"]["SubCategorias"]["Insert"]
+type SubCategoriaAInsertar =
+  Database["public"]["Tables"]["SubCategorias"]["Insert"]
 type SubCategoria = Database["public"]["Tables"]["SubCategorias"]["Row"]
 
 async function getSubCategorias() {
   const { data, error } = await supabase.from("SubCategorias").select("*")
+  return data as SubCategoria[]
+}
+
+async function getSubCategoriasActivas() {
+  const { data, error } = await supabase
+    .from("SubCategorias")
+    .select("*")
+    .eq("Dada_de_baja", false)
   return data as SubCategoria[]
 }
 
@@ -50,4 +59,10 @@ async function uploadSubCategoria(nuevaSubCategoria: SubCategoriaAInsertar) {
   return data as SubCategoria
 }
 
-export { getSubCategorias, getSubCategoriaById, uploadSubCategoria, getSubCategoriaByCategoria }
+export {
+  getSubCategorias,
+  getSubCategoriaById,
+  uploadSubCategoria,
+  getSubCategoriaByCategoria,
+  getSubCategoriasActivas
+}

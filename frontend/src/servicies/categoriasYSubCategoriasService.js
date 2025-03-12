@@ -20,3 +20,12 @@ export const getSubCategoriasProductosByCategoria = async (categoria) => {
     throw new Error(`Error al obtener subcategorias: ${response.statusText}`)
   }
 }
+
+export const getSubCategoriasProductos = async () => {
+  const response = await axios.get(`${URLSubCategorias}/active`)
+  if (response.status === 200) {
+    return response.data
+  } else {
+    throw new Error(`Error al obtener subcategorias: ${response.statusText}`)
+  }
+}

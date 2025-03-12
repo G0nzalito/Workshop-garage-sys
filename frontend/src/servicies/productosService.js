@@ -53,3 +53,13 @@ export const modificarStockProducto = async (productos) => {
     return response.statusText
   }
 }
+
+export const obtenerFiltrados = async (filtros) => {
+  console.log('Filtros:', filtros)
+  const response = await axios.get(`${API_URL}/filter`, { params: filtros })
+  if (response.status === 200) {
+    return response.data
+  } else {
+    return response.statusText
+  }
+}

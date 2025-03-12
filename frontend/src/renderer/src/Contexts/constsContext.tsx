@@ -9,6 +9,7 @@ type Comprobantes = Database['public']['Tables']['Conceptos Facturas']['Row']
 type MarcasProductos = Database['public']['Tables']['Marca_de_Productos']['Row']
 type Proveedores = Database['public']['Tables']['Proveedores']['Row']
 type Categoria = Database['public']['Tables']['Categorias']['Row']
+type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
 
 type ClientesContextData = {
   clientes: Cliente[]
@@ -27,6 +28,8 @@ type ClientesContextData = {
   setProveedores: React.Dispatch<React.SetStateAction<Proveedores[]>>
   categorias: Categoria[]
   setCategorias: React.Dispatch<React.SetStateAction<Categoria[]>>
+  subCategorias: SubCategoria[]
+  setSubCategorias: React.Dispatch<React.SetStateAction<SubCategoria[]>>
 }
 
 export const ConstContext = createContext<ClientesContextData | undefined>(undefined)
@@ -40,6 +43,7 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [marcasProductos, setMarcasProductos] = useState<MarcasProductos[]>([])
   const [proveedores, setProveedores] = useState<Proveedores[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
+  const [subCategorias, setSubCategorias] = useState<SubCategoria[]>([])
 
   return (
     <ConstContext.Provider
@@ -59,7 +63,9 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         proveedores,
         setProveedores,
         categorias,
-        setCategorias
+        setCategorias,
+        subCategorias,
+        setSubCategorias
       }}
     >
       {children}

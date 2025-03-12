@@ -4,6 +4,7 @@ import {
   getSubCategoriaById,
   uploadSubCategoria,
   getSubCategoriaByCategoria,
+  getSubCategoriasActivas,
 } from "../service/subCategoriasService"
 import { Database } from "../supabase/database.types"
 
@@ -15,6 +16,12 @@ type SubCategoria = Database["public"]["Tables"]["SubCategorias"]["Row"]
 
 subCategoriasRouter.get("/all", async (req, res) => {
   const subCategorias: SubCategoria[] = await getSubCategorias()
+
+  res.status(200).json(subCategorias)
+})
+
+subCategoriasRouter.get("/active", async (req, res) => {
+  const subCategorias: SubCategoria[] = await getSubCategoriasActivas()
 
   res.status(200).json(subCategorias)
 })
@@ -31,7 +38,9 @@ subCategoriasRouter.get("/specific", async (req, res) => {
     }
   } else {
     if (Categoria) {
-      const subCategoria = await getSubCategoriaByCategoria(parseInt(Categoria as string))
+      const subCategoria = await getSubCategoriaByCategoria(
+        parseInt(Categoria as string)
+      )
       if (subCategoria) {
         res.status(200).json(subCategoria)
       } else {

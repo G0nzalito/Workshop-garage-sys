@@ -4,7 +4,10 @@ import { getCategoriaById } from "./categoriasService"
 import { getSubCategoriaById } from "./subCategoriasService"
 import { getMarca_de_ProductosById } from "./marcaProductosService"
 import { getProveedorById } from "./proveedoresService"
-import { convertirFechaLocal, getDateWithTimeZone } from "../support/supportFunctions"
+import {
+  convertirFechaLocal,
+  getDateWithTimeZone,
+} from "../support/supportFunctions"
 
 type ProductoAInsertar = Database["public"]["Tables"]["Productos"]["Insert"]
 type ProductoAActualizar = Database["public"]["Tables"]["Productos"]["Update"]
@@ -36,6 +39,39 @@ async function getProductosByCodigo(codigo: string) {
       return data[0] as Producto
     }
   }
+}
+
+async function getProductosFiltrados(
+  descripcion: string,
+  cateogria: number,
+  subCategoria: number,
+  marca: number,
+  proveedor: number
+) {
+  let query = supabase.from("Productos").select("*")
+
+  if (descripcion !== "") {
+    query = query.like("Descripcion", `%${descripcion}%`)
+  }
+  if (cateogria !== 0) {
+    query = query.eq("Categoria", cateogria)
+  }
+  if (subCategoria !== 0) {
+    query = query.eq("SubCategoria", subCategoria)
+  }
+  if (marca !== 0) {
+    query = query.eq("Marca", marca)
+  }
+  if (proveedor !== 0) {
+    query = query.eq("Proveedor", proveedor)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw error
+  }
+  return data as Producto[]
 }
 
 async function uploadProductos(producto: ProductoAInsertar) {
@@ -213,4 +249,5 @@ export {
   updateProductos,
   deleteProductos,
   modificarStockProducto,
+  getProductosFiltrados,
 }

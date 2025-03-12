@@ -1,4 +1,4 @@
-import appExpress, {Request} from "express"
+import appExpress, { Request } from "express"
 import { Database } from "../supabase/database.types"
 import {
   deleteProductos,
@@ -7,6 +7,7 @@ import {
   updateProductos,
   uploadProductos,
   modificarStockProducto,
+  getProductosFiltrados,
 } from "../service/productosService"
 
 type ProductoAInsertar = Database["public"]["Tables"]["Productos"]["Insert"]
@@ -22,6 +23,32 @@ type ProductoStock = {
 productosRouter.get("/all", async (req, res) => {
   try {
     const productos = await getProductos()
+    res.status(200).json(productos)
+  } catch (error) {
+    res.status(500).json({ error })
+  }
+})
+
+productosRouter.get("/filter", async (req, res) => {
+  try {
+    const { Descripcion, Categoria, SubCategoria, Marca, Proveedor } = req.query
+
+    const descripcion = Descripcion ? (Descripcion as string) : ""
+    const categoria = Categoria ? parseInt(Categoria as string) : 0
+    const subCategoria = SubCategoria ? parseInt(SubCategoria as string) : 0
+    const marca = Marca ? parseInt(Marca as string) : 0
+    const proveedor = Proveedor ? parseInt(Proveedor as string) : 0
+
+    const productos = await getProductosFiltrados(
+      descripcion,
+      categoria,
+      subCategoria,
+      marca,
+      proveedor
+    )
+
+    console.log('Productos', productos)
+
     res.status(200).json(productos)
   } catch (error) {
     res.status(500).json({ error })
@@ -89,20 +116,19 @@ productosRouter.put("/update", async (req, res) => {
 })
 
 productosRouter.put("/updateStock", async (req, res) => {
-  const { Productos }: {Productos: ProductoStock[]} = req.body.data
+  const { Productos }: { Productos: ProductoStock[] } = req.body.data
 
-  console.log('Body', req.body)
+  console.log("Body", req.body)
 
   if (Productos.length === 0) {
     res.status(400).json({ error: "No fueron enviados productos" })
   } else {
     try {
       Productos.forEach(async (producto) => {
-        console.log('producto', producto)
+        console.log("producto", producto)
         await modificarStockProducto(producto.Codigo, producto.Cantidad)
-
       })
-      res.status(200).json('Los productos fueron actualizados con exito')
+      res.status(200).json("Los productos fueron actualizados con exito")
     } catch (error) {
       res.status(500).json({ error })
     }
