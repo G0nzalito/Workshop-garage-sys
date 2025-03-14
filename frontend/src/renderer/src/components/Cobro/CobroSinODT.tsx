@@ -201,11 +201,16 @@ export default function CobroSinODT({
         setProductos([])
         onClose()
       }
+      toast.success('Venta realizada con exito', {
+        description: 'Se ha cobrado la venta',
+        duration: 3000
+      })
+    } else {
+      toast.error('Error al realizar la venta', {
+        description: 'Por favor complete todos los campos',
+        duration: 3000
+      })
     }
-    toast.success('Venta realizada con exito', {
-      description: 'Se ha cobrado la venta',
-      duration: 3000
-    })
   }
 
   return (
@@ -236,311 +241,258 @@ export default function CobroSinODT({
               e.preventDefault()
               handleSubmit()
             }}
-            className="scroll"
+            className="grid grid-cols-[180px_1fr] gap-y-4 p-4 max-w-2xl mx-auto"
             id="formCobroSinODT"
           >
-            <div className="flex-col items-center m-4 p-1 bg-[#2b2322]">
-              <div className="flex justify-center items-center text-2xl">
-                <span className="flex justify-center items-center font-bold">Cliente: </span>
-                <Select
-                  className="rounded-lg m-2 bg-black/90 text-lg"
-                  name="Cliente"
-                  // options={[
-                  //   { value: 'Cliente1', name: 'Cliente 1', label: 'Cliente 1 (45243172 - CUIT)' },
+            {/* Cliente */}
+            <span className="text-right pr-4 self-center font-bold">Cliente:</span>
+            <div className="flex flex-col">
+              <Select
+                className="rounded-lg bg-black/90 text-lg w-full"
+                name="Cliente"
+                options={clientes.map((cliente) => ({
+                  value: `${cliente.Numero_Documento} - ${cliente.Tipo_Documento}`,
+                  name: cliente.Nombre,
+                  label: `${cliente.Nombre} ${cliente.Numero_Documento === -1 ? ` ` : `(${cliente.Numero_Documento} - ${cliente.Tipo_Documento === 2 ? 'CUIT' : 'DNI'})`}`
+                }))}
+                onChange={(e) => handleSelectChange(e, setCliente, 'Cliente')}
+                value={cliente}
+                styles={customStyles}
+                placeholder="Seleccione cliente"
+              />
+              {formData.Cliente === 'Falta' && (
+                <span className="text-red-500 text-xs mt-1">
+                  Por favor, seleccione un cliente en el campo superior
+                </span>
+              )}
+            </div>
 
-                  //   { value: 'Cliente2', name: 'Cliente 2', label: 'Cliente 2 (24241960 - DNI)' },
+            {/* Forma de pago */}
+            <span className="text-right pr-4 self-center font-bold">Forma de pago:</span>
+            <div className="flex flex-col">
+              <Select
+                className="rounded-lg bg-black/90 text-lg w-full"
+                name="FormaDePago"
+                options={formasPago.map((formaPago) => ({
+                  value: formaPago.id,
+                  name: formaPago.Nombre,
+                  label: `${formaPago.Nombre} (${formaPago.Interes}% interes)`
+                }))}
+                onChange={(e) => handleSelectChange(e, setFormaPaga, 'FormaDePago')}
+                value={formaPago}
+                styles={customStyles}
+                placeholder="Seleccione forma de pago"
+              />
+              {(formData.FormaDePago === 0 || formData.FormaDePago === 'Falta') && (
+                <p className="text-red-500 text-xs mt-1">
+                  Por favor, seleccione una forma de pago en el campo superior
+                </p>
+              )}
+            </div>
 
-                  //   { value: 'Cliente3', name: 'Cliente 3', label: 'Cliente 3 (23108507 - DNI)' }
-                  // ]}
-                  options={clientes.map((cliente) => ({
-                    value: `${cliente.Numero_Documento} - ${cliente.Tipo_Documento}`,
-                    name: cliente.Nombre,
-                    label: `${cliente.Nombre} ${cliente.Numero_Documento === -1 ? ` ` : `(${cliente.Numero_Documento} - ${cliente.Tipo_Documento === 2 ? 'CUIT' : 'DNI'})`}`
-                  }))}
-                  onChange={(e) => handleSelectChange(e, setCliente, 'Cliente')}
-                  value={cliente}
-                  styles={customStyles}
-                  placeholder="Seleccione cliente"
-                ></Select>
-              </div>
-              <div className="flex  justify-center">
-                {formData.Cliente === 'Falta' && (
-                  <span className="text-red-500 text-xs">
-                    Por favor, seleccione un cliente en el campo superior
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="flex-col items-center m-4 p-1 grid-cols-1 bg-[#2b2322]">
-              <div className="flex justify-center items-center text-2xl">
-                <span className="font-bold">Forma de pago: </span>
-                <Select
-                  className="rounded-lg m-2 bg-black/90 text-lg"
-                  name="FormaDePago"
-                  options={formasPago.map((formaPago) => ({
-                    value: formaPago.id,
-                    name: formaPago.Nombre,
-                    label: `${formaPago.Nombre} (${formaPago.Interes}% interes)`
-                  }))}
-                  onChange={(e) => handleSelectChange(e, setFormaPaga, 'FormaDePago')}
-                  value={formaPago}
-                  styles={customStyles}
-                  placeholder="Seleccione forma de pago"
-                />
-              </div>
-              <div className="flex justify-center">
-                {(formData.FormaDePago === 0 || formData.FormaDePago === 'Falta') && (
-                  <p className="text-red-500 text-xs mt-1">
-                    Por favor, seleccione una forma de pago en el campo superior
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex bg-[#2b2322] text-2xl justify-center m-4.5 p-1">
-              <p className="text-lg">
-                <span className="text-2xl font-bold">Total: </span>{' '}
-                {formData.FormaDePago !== 0 && formData.FormaDePago !== 'Falta'
-                  ? `${total} + ${formasPago.filter((formaPago) => formaPago.id === formData.FormaDePago)[0].Interes} = 
-                  ${(total * (1 + formasPago.filter((formaPago) => formaPago.id === formData.FormaDePago)[0].Interes / 100)).toFixed(2)}`
-                  : 'Seleccione primero un metodo de pago'}
-              </p>
-            </div>
+            {/* Total */}
+            <span className="text-right pr-4 self-center font-bold">Total:</span>
+            <p className="text-lg self-center">
+              {formData.FormaDePago !== 0 && formData.FormaDePago !== 'Falta'
+                ? `${total} + ${formasPago.filter((formaPago) => formaPago.id === formData.FormaDePago)[0].Interes} = 
+      ${(total * (1 + formasPago.filter((formaPago) => formaPago.id === formData.FormaDePago)[0].Interes / 100)).toFixed(2)}`
+                : 'Seleccione primero un metodo de pago'}
+            </p>
+
+            {/* Sección condicional para tarjetas */}
             {(formData.FormaDePago === 2 || formData.FormaDePago === 3) && (
               <>
-                <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
-                  <div className="flex justify-center items-center text-2xl">
-                    <span className="flex justify-star items-center font-bold">Tarjeta: </span>
-                    <Select
-                      className="rounded-lg m-2 bg-black/90 text-lg"
-                      name="FormaDePago"
-                      // options={[
-                      //   { value: 'Efectivo', name: 'Efectivo', label: 'Efectivo (0% interes)' },
-                      //   { value: 'Cheque', name: 'Tarjeta', label: 'Cheque (0% interes)' },
-                      //   {
-                      //     value: 'TarjetaDebito',
-                      //     name: 'Tarjeta',
-                      //     label: 'Tarjeta de Debito (5% interes)'
-                      //   },
-                      //   {
-                      //     value: 'TarjetaCredito',
-                      //     name: 'Tarjeta',
-                      //     label: 'Tarjeta de Credito (8% interes)'
-                      //   }
-                      // ]}
-                      options={tarjetas.map((tarjeta) => ({
-                        value: tarjeta.id,
-                        name: tarjeta.Nombre,
-                        label: `${tarjeta.Nombre}`
-                      }))}
-                      onChange={(e) => handleSelectChange(e, setTarjeta, 'Tarjeta')}
-                      value={tarjeta}
-                      styles={customStyles}
-                      placeholder="Seleccione la tarjeta"
-                    ></Select>
-                  </div>
-                  <div className="flex justify-center">
-                    {formData.Tarjeta === 'Falta' && (
-                      <span className="text-red-500 text-xs">
-                        Por favor, seleccione una forma de pago en el campo superior
-                      </span>
-                    )}
-                  </div>
+                {/* Tarjeta */}
+                <span className="text-right pr-4 self-center font-bold">Tarjeta:</span>
+                <div className="flex flex-col">
+                  <Select
+                    className="rounded-lg bg-black/90 text-lg w-full"
+                    name="FormaDePago"
+                    options={tarjetas.map((tarjeta) => ({
+                      value: tarjeta.id,
+                      name: tarjeta.Nombre,
+                      label: `${tarjeta.Nombre}`
+                    }))}
+                    onChange={(e) => handleSelectChange(e, setTarjeta, 'Tarjeta')}
+                    value={tarjeta}
+                    styles={customStyles}
+                    placeholder="Seleccione la tarjeta"
+                  />
+                  {formData.Tarjeta === 'Falta' && (
+                    <span className="text-red-500 text-xs mt-1">
+                      Por favor, seleccione una forma de pago en el campo superior
+                    </span>
+                  )}
                 </div>
-                <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
-                  <div className="flex justify-center items-center text-2xl">
-                    <span className="text-2xl font-bold">Cuotas: </span>
-                    <input
-                      type="number"
-                      name="Cuotas"
-                      className="input input-bordered appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                      placeholder="Cantidad de cuotas"
-                      value={formData.Cuotas}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="flex justify-center">
-                    {formData.Cuotas === 'Falta' && (
-                      <span className="text-red-500 text-xs">
-                        Por favor, ingrese las cuotas en el campo superior
-                      </span>
-                    )}
-                  </div>
+
+                {/* Cuotas */}
+                <span className="text-right pr-4 self-center font-bold">Cuotas:</span>
+                <div className="flex flex-col">
+                  <input
+                    type="number"
+                    name="Cuotas"
+                    className="input input-bordered appearance-none w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    placeholder="Cantidad de cuotas"
+                    value={formData.Cuotas}
+                    onChange={handleChange}
+                  />
+                  {formData.Cuotas === 'Falta' && (
+                    <span className="text-red-500 text-xs mt-1">
+                      Por favor, ingrese las cuotas en el campo superior
+                    </span>
+                  )}
                 </div>
-                <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
-                  <div className="flex justify-center items-center text-2xl">
-                    <span className="text-2xl font-bold">N° de cupon: </span>
-                    <input
-                      type="text"
-                      name="N_Cupon"
-                      className="input input-bordered appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                      placeholder="Cupon"
-                      value={formData.N_Cupon}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="flex justify-center">
-                    {formData.N_Cupon === 'Falta' && (
-                      <span className="text-red-500 text-xs">
-                        Por favor, ingrese el cupón de pago en el campo superior
-                      </span>
-                    )}
-                  </div>
+
+                {/* N° de cupón */}
+                <span className="text-right pr-4 self-center font-bold">N° de cupón:</span>
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    name="N_Cupon"
+                    className="input input-bordered appearance-none w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    placeholder="Cupón"
+                    value={formData.N_Cupon}
+                    onChange={handleChange}
+                  />
+                  {formData.N_Cupon === 'Falta' && (
+                    <span className="text-red-500 text-xs mt-1">
+                      Por favor, ingrese el cupón de pago en el campo superior
+                    </span>
+                  )}
                 </div>
-                <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
-                  <div className="flex justify-center items-center text-2xl">
-                    <span className="text-2xl font-bold">N° de lote: </span>
-                    <input
-                      type="text"
-                      name="N_Lote"
-                      className="input input-bordered appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                      placeholder="Lote"
-                      value={formData.N_Lote}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="flex justify-center">
-                    {formData.N_Lote === 'Falta' && (
-                      <span className="text-red-500 text-xs">
-                        Por favor, ingrese el numero de lote en el campo superior
-                      </span>
-                    )}
-                  </div>
+
+                {/* N° de lote */}
+                <span className="text-right pr-4 self-center font-bold">N° de lote:</span>
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    name="N_Lote"
+                    className="input input-bordered appearance-none w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    placeholder="Lote"
+                    value={formData.N_Lote}
+                    onChange={handleChange}
+                  />
+                  {formData.N_Lote === 'Falta' && (
+                    <span className="text-red-500 text-xs mt-1">
+                      Por favor, ingrese el numero de lote en el campo superior
+                    </span>
+                  )}
                 </div>
-                <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
-                  <div className="flex justify-center items-center text-2xl">
-                    <span className="text-2xl font-bold">Autorización: </span>
-                    <input
-                      type="text"
-                      name="N_Autorizacion"
-                      className="input input-bordered appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                      placeholder="Autorizacion"
-                      value={formData.N_Autorizacion}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="flex justify-center">
-                    {formData.N_Autorizacion === 'Falta' && (
-                      <span className="text-red-500 text-xs">
-                        Por favor, ingrese el numero de autorización en el campo superior
-                      </span>
-                    )}
-                  </div>
+
+                {/* Autorización */}
+                <span className="text-right pr-4 self-center font-bold">Autorización:</span>
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    name="N_Autorizacion"
+                    className="input input-bordered appearance-none w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    placeholder="Autorización"
+                    value={formData.N_Autorizacion}
+                    onChange={handleChange}
+                  />
+                  {formData.N_Autorizacion === 'Falta' && (
+                    <span className="text-red-500 text-xs mt-1">
+                      Por favor, ingrese el numero de autorización en el campo superior
+                    </span>
+                  )}
                 </div>
               </>
             )}
-            <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
-              <div className="flex justify-center items-center text-2xl">
-                <span className="flex justify-star items-center font-bold">Marketing: </span>
-                <Select
-                  className="rounded-lg m-2 bg-black/90 text-lg"
-                  name="Marketing"
-                  // options={[
-                  //   { value: 'Calle', name: 'Calle', label: 'Pase por la calle y los vi' },
-                  //   { value: 'Retorno', name: 'Retorno', label: 'Cliente usual' },
-                  //   {
-                  //     value: 'Recomendacion',
-                  //     name: 'Recomendacion',
-                  //     label: 'Recomendado por un conocido'
-                  //   },
-                  //   {
-                  //     value: 'Otros',
-                  //     name: 'Otros',
-                  //     label: 'Otros'
-                  //   }
-                  // ]}
-                  options={marketingOptions.map((marketing) => ({
-                    value: marketing.id,
-                    name: marketing.Nombre,
-                    label: `${marketing.Nombre}`
-                  }))}
-                  onChange={(e) => handleSelectChange(e, setMarketing, 'Marketing')}
-                  value={marketing}
-                  styles={customStyles}
-                  placeholder="Seleccione medio de reconocimiento del cliente"
-                ></Select>
-              </div>
-              <div className="flex justify-center">
-                {formData.Marketing === 'Falta' && (
-                  <span className="text-red-500 text-xs">
-                    Por favor, ingrese el medio de marketing en el campo superior
-                  </span>
-                )}
-              </div>
+
+            {/* Marketing */}
+            <span className="text-right pr-4 self-center font-bold">Marketing:</span>
+            <div className="flex flex-col">
+              <Select
+                className="rounded-lg bg-black/90 text-lg w-full"
+                name="Marketing"
+                options={marketingOptions.map((marketing) => ({
+                  value: marketing.id,
+                  name: marketing.Nombre,
+                  label: `${marketing.Nombre}`
+                }))}
+                onChange={(e) => handleSelectChange(e, setMarketing, 'Marketing')}
+                value={marketing}
+                styles={customStyles}
+                placeholder="Seleccione medio de reconocimiento del cliente"
+              />
+              {formData.Marketing === 'Falta' && (
+                <span className="text-red-500 text-xs mt-1">
+                  Por favor, ingrese el medio de marketing en el campo superior
+                </span>
+              )}
             </div>
-            <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
-              <div className="flex justify-center items-center text-2xl">
-                <span className="text-2xl font-bold">Operador 1: </span>
-                <input
-                  type="text"
-                  name="Operador1"
-                  className="input input-bordered appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  placeholder="Operador 1"
-                  value={formData.Operador1}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="flex justify-center">
-                {formData.Operador1 === 'Falta' && (
-                  <span className="text-red-500 text-xs">
-                    Por favor, ingrese el nombre del vendedor en el campo superior
-                  </span>
-                )}
-              </div>
+
+            {/* Operador 1 */}
+            <span className="text-right pr-4 self-center font-bold">Operador 1:</span>
+            <div className="flex flex-col">
+              <input
+                type="text"
+                name="Operador1"
+                className="input input-bordered appearance-none w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                placeholder="Operador 1"
+                value={formData.Operador1}
+                onChange={handleChange}
+              />
+              {formData.Operador1 === 'Falta' && (
+                <span className="text-red-500 text-xs mt-1">
+                  Por favor, ingrese el nombre del vendedor en el campo superior
+                </span>
+              )}
             </div>
-            <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
-              <div className="flex justify-center items-center text-2xl">
-                <span className="text-2xl font-bold">Operador 2: </span>
-                <input
-                  type="text"
-                  name="Operador2"
-                  className="input input-bordered appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  placeholder="Operador 2"
-                  value={formData.Operador2}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="flex justify-center">
-                {formData.Operador2 === 'Falta' && (
-                  <span className="text-red-500 text-xs">
-                    Por favor, ingrese el nombre de el co-vendedor <br />
-                    en el campo superior, o ingrese ninguno en caso <br />
-                    de que no haya
-                  </span>
-                )}
-              </div>
+
+            {/* Operador 2 */}
+            <span className="text-right pr-4 self-center font-bold">Operador 2:</span>
+            <div className="flex flex-col">
+              <input
+                type="text"
+                name="Operador2"
+                className="input input-bordered appearance-none w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                placeholder="Operador 2"
+                value={formData.Operador2}
+                onChange={handleChange}
+              />
+              {formData.Operador2 === 'Falta' && (
+                <span className="text-red-500 text-xs mt-1">
+                  Por favor, ingrese el nombre de el co-vendedor o ingrese ninguno en caso de que no
+                  haya
+                </span>
+              )}
             </div>
-            <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
-              <div className="flex justify-center items-center text-2xl">
-                <span className="text-2xl font-bold">Supervisor: </span>
-                <input
-                  type="text"
-                  name="Supervisor"
-                  className="input input-bordered appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  placeholder="Supervisor"
-                  value={formData.Supervisor}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="flex justify-center">
-                {formData.Supervisor === 'Falta' && (
-                  <p className="text-red-500 text-xs">
-                    Por favor, ingrese el nombre del supervisor a cargo en el campo superior
-                  </p>
-                )}
-              </div>
+
+            {/* Supervisor */}
+            <span className="text-right pr-4 self-center font-bold">Supervisor:</span>
+            <div className="flex flex-col">
+              <input
+                type="text"
+                name="Supervisor"
+                className="input input-bordered appearance-none w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                placeholder="Supervisor"
+                value={formData.Supervisor}
+                onChange={handleChange}
+              />
+              {formData.Supervisor === 'Falta' && (
+                <p className="text-red-500 text-xs mt-1">
+                  Por favor, ingrese el nombre del supervisor a cargo en el campo superior
+                </p>
+              )}
             </div>
-            <div className="flex-col items-center bg-[#2b2322] m-4 p-1">
-              <div className="flex justify-center items-center text-2xl">
-                <span className="text-2xl font-bold">Comentarios: </span>
-                <input
-                  type="text"
-                  name="Descripcion"
-                  className="input input-bordered appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  placeholder="Descripcion"
-                  value={formData.Descripcion}
-                  onChange={handleChange}
-                />
-              </div>
+
+            {/* Comentarios */}
+            <span className="text-right pr-4 self-center font-bold">Comentarios:</span>
+            <input
+              type="text"
+              name="Descripcion"
+              className="input input-bordered appearance-none w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              placeholder="Descripción"
+              value={formData.Descripcion}
+              onChange={handleChange}
+            />
+
+            {/* Botón de envío (opcional) */}
+            <div className="col-span-2 flex justify-end mt-4">
+              <button type="submit" className="btn btn-primary">
+                Guardar
+              </button>
             </div>
           </form>
         </div>
