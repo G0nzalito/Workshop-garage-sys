@@ -47,7 +47,7 @@ productosRouter.get("/filter", async (req, res) => {
       proveedor
     )
 
-    console.log('Productos', productos)
+    console.log("Productos", productos)
 
     res.status(200).json(productos)
   } catch (error) {
@@ -77,10 +77,15 @@ productosRouter.get("/specific", async (req: Request, res) => {
 productosRouter.post("/create", async (req, res) => {
   const producto: ProductoAInsertar = req.body
 
+  console.log("Producto", producto)
+
   if (!producto) {
     res.status(400).json({ error: "Todos los datos son requeridos" })
   } else {
     try {
+      producto.SubCategoria === 0
+        ? (producto.SubCategoria = null)
+        : null
       const productoCreado = await uploadProductos(producto)
       res.status(201).json(productoCreado)
     } catch (error: unknown) {

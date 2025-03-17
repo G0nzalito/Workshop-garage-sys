@@ -108,10 +108,17 @@ export default function BusquedaProductos(): JSX.Element {
   })
 
   useEffect(() => {
+    setFormData((prev) => {
+      return {
+        ...prev,
+        subcategoria: 0
+      }
+    })
     if (formdata.categoria === 0) return
     setSubCategoriasLocal(
       subCategorias.filter((subCategorias) => subCategorias.Categoria === formdata.categoria)
     )
+    setSubcategoriaSelec({ value: 0, label: 'Selecciona una subcategoría...' })
   }, [categoria])
 
   const limiparFiltros = () => {
@@ -294,11 +301,13 @@ export default function BusquedaProductos(): JSX.Element {
                       </td>
                       <td>
                         {producto.SubCategoria
-                          ? (subCategoriasLocal.length > 0 ? subCategoriasLocal.find(
-                            (subCategoria) => subCategoria.id === producto.SubCategoria
-                          )?.Descripción : subCategorias.find(
-                            (subCategoria) => subCategoria.id === producto.SubCategoria
-                          )?.Descripción)
+                          ? subCategoriasLocal.length > 0
+                            ? subCategoriasLocal.find(
+                                (subCategoria) => subCategoria.id === producto.SubCategoria
+                              )?.Descripción
+                            : subCategorias.find(
+                                (subCategoria) => subCategoria.id === producto.SubCategoria
+                              )?.Descripción
                           : 'No posee Sub categoria'}
                       </td>
                       <td>
@@ -330,4 +339,3 @@ export default function BusquedaProductos(): JSX.Element {
     </>
   )
 }
-

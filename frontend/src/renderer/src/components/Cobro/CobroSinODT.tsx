@@ -487,13 +487,6 @@ export default function CobroSinODT({
               value={formData.Descripcion}
               onChange={handleChange}
             />
-
-            {/* Botón de envío (opcional) */}
-            <div className="col-span-2 flex justify-end mt-4">
-              <button type="submit" className="btn btn-primary">
-                Guardar
-              </button>
-            </div>
           </form>
         </div>
         <div className="flex justify-end items-end  justify-items-end gap-4 m-5">

@@ -1,4 +1,3 @@
-import { data } from 'autoprefixer'
 import axios from 'axios'
 
 const API_URL = 'http://localhost:4001/api/productos'
@@ -45,7 +44,7 @@ export const modificarStockProducto = async (productos) => {
   const response = await axios.put(`${API_URL}/updateStock`, {
     data: {
       Productos: Productos
-    } 
+    }
   })
   if (response.status === 200) {
     return response.data
@@ -58,8 +57,21 @@ export const obtenerFiltrados = async (filtros) => {
   console.log('Filtros:', filtros)
   const response = await axios.get(`${API_URL}/filter`, { params: filtros })
   if (response.status === 200) {
+    console.log('Response:', response)
     return response.data
   } else {
     return response.statusText
+  }
+}
+
+export const crearProducto = async (producto) => {
+  try {
+    const response = await axios.post(`${API_URL}/create`, producto)
+    return response.data
+  } catch (error) {
+    if(error.status === 500){
+      console.log(error)
+    }
+    return(error.status)
   }
 }
