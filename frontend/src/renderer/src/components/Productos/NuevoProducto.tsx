@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { crearProducto } from '../../../../servicies/productosService'
 import { toast } from 'sonner'
-import { PlusCircle } from 'lucide-react'
+import { BadgeCheck, PlusCircle, X } from 'lucide-react'
 import PopUp from '@renderer/specificComponents/PopUp'
 import NavBar from '@renderer/specificComponents/Navbar'
 import NuevoProveedor from '@renderer/components/Proveedores/NuevoProveedor'
@@ -146,16 +146,22 @@ export default function NuevoProducto(): JSX.Element {
 
     if (!falta) {
       console.log('Enviando datos')
+      const toastEspera = toast.loading('Agregando producto', {
+        description: 'Agregando producto a la base de datos',
+      })
       const respuesta = await crearProducto(formData)
+      toast.dismiss(toastEspera)
       if (respuesta === 400) {
         toast.error('Codigo Duplicado', {
           description: 'El código del producto ya existe',
-          duration: 5000
+          duration: 5000,
+          icon: <X />
         })
       } else {
         toast.success('Producto agregado', {
           description: `Producto de codigo ${formData.Codigo} agregado`,
-          duration: 6000
+          duration: 6000,
+          icon: <BadgeCheck />
         })
         limpiarCampos()
       }
@@ -197,6 +203,7 @@ export default function NuevoProducto(): JSX.Element {
   return (
     <div className="flex flex-col p-4">
       <h1 className="text-lg badge badge-info badge-soft">Agregar nuevo producto: </h1>
+      {/* <span className='loading loading-bars loading-md'></span> */}
       <form
         onSubmit={(e) => {
           e.preventDefault()

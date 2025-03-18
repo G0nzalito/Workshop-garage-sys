@@ -19,11 +19,17 @@ function App(): JSX.Element {
             <Route path="/" component={WelcomeComponent} />
             <Route path="/OrdenesDeTrabajo" component={ODTMain} />
             {/* Productos */}
-            <Route path="/Productos" component={ProductosMain}/>
+            <Route path="/Productos" component={ProductosMain} />
           </Switch>
         </main>
         <Toaster
           closeButton
+          richColors
+          toastOptions={{
+            classNames: {
+              icon: 'hidden'
+            }
+          }}
         />
       </>
     </ConstsProvider>

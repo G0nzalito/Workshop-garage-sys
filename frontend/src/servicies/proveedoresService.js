@@ -12,10 +12,15 @@ export const getProveedoresActivos = async () => {
 }
 
 export const uploadProveedor = async (proveedor) => {
-  const response = await axios.post(URL, proveedor)
-  if (response.status === 201) {
+  try {
+    const response = await axios.post(`${URL}/create`, proveedor)
     return response.data
-  } else {
-    throw new Error(`Error al subir proveedor: ${response.statusText}`)
+  } catch (e) {
+    if (e.status === 400) {
+      return e.status
+    } else {
+      console.log(e)
+      throw new Error(`Error al subir proveedor: ${e}`)
+    }
   }
 }

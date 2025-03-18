@@ -57,6 +57,7 @@ proveedoresRouter.post("/create", async (req, res) => {
 
   } catch (e: unknown) {
     if (e instanceof ReferenceError) {
+      console.log(e)
       res.status(400).json({ message: e.message })
     } else {
       res.status(500).json({ message: "Error interno del sistema", error: e })

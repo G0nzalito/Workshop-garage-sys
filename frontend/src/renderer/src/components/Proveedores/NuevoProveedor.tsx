@@ -1,8 +1,11 @@
 import { useState } from 'react'
+import { uploadProveedor } from '../../../../servicies/proveedoresService.js'
+import { toast } from 'sonner'
+import { Badge, BadgeCheck, X } from 'lucide-react'
 
 export default function NuevoProveedor(): JSX.Element {
   const [formData, setFormData] = useState({
-    nombre: ''
+    Nombre: ''
   })
 
   const handleChange = (e): undefined => {
@@ -14,13 +17,34 @@ export default function NuevoProveedor(): JSX.Element {
     })
   }
 
+  const handleSubmit = async () => {
+    const toastEspera = toast.loading('Guardando proveedor...')
+    const response = await uploadProveedor(formData)
+    console.log(response)
+    toast.dismiss(toastEspera)
+    if (response === 400) {
+      toast.error('Error al guardar el proveedor', {
+        description: 'Este proveedor ya existe en la base de datos',
+        duration: 5000,
+        icon: <X />
+      })
+    } else {
+      toast.success('Proveedor guardado correctamente', {
+        description: `El proveedor ${formData.Nombre} ha sido guardado correctamente`,
+        duration: 5000,
+        icon: <BadgeCheck />
+      })
+    }
+  }
+
   return (
     <div className="h-46 w-96">
       <form
         id="formNuevoProveedor"
         className="grid grid-cols-[180px_1fr] gap-y-4 p-4 max-w-2xl mx-auto"
-        onSubmit={(e) => {e.preventDefault()
-          console.log(formData)
+        onSubmit={(e) => {
+          e.preventDefault()
+          handleSubmit()
         }}
       >
         <span className="text-right pr-4 self-center font-bold">Nombre Proveedor: </span>
@@ -29,7 +53,7 @@ export default function NuevoProveedor(): JSX.Element {
           className="input input-bordered appearance-none w-full"
           placeholder="Nombre del proveedor..."
           onChange={handleChange}
-          name="nombre"
+          name="Nombre"
         />
 
         <div className="col-span-2 flex justify-end mt-4">

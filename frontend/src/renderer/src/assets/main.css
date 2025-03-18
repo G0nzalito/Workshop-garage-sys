@@ -1474,9 +1474,6 @@
   .col-span-2 {
     grid-column: span 2 / span 2;
   }
-  .col-span-3 {
-    grid-column: span 3 / span 3;
-  }
   .modal-box {
     grid-column-start: 1;
     grid-row-start: 1;
@@ -1817,21 +1814,6 @@
   .table {
     display: table;
   }
-  .btn-circle {
-    border-radius: calc(infinity * 1px);
-    padding-inline: calc(0.25rem * 0);
-    width: var(--size);
-    height: var(--size);
-  }
-  .h-16 {
-    height: calc(var(--spacing) * 16);
-  }
-  .h-26 {
-    height: calc(var(--spacing) * 26);
-  }
-  .h-36 {
-    height: calc(var(--spacing) * 36);
-  }
   .h-46 {
     height: calc(var(--spacing) * 46);
   }
@@ -1841,8 +1823,11 @@
   .max-h-96 {
     max-height: calc(var(--spacing) * 96);
   }
-  .w-16 {
-    width: calc(var(--spacing) * 16);
+  .loading-md {
+    width: calc(var(--size-selector, 0.25rem) * 6);
+  }
+  .loading-xs {
+    width: calc(var(--size-selector, 0.25rem) * 4);
   }
   .w-60 {
     width: calc(var(--spacing) * 60);
@@ -2074,11 +2059,6 @@
     --btn-p: 0.75rem;
     --size: calc(var(--size-field, 0.25rem) * 8);
   }
-  .btn-xs {
-    font-size: 0.6875rem;
-    --btn-p: 0.5rem;
-    --size: calc(var(--size-field, 0.25rem) * 6);
-  }
   .font-bold {
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
@@ -2239,6 +2219,9 @@
   }
   .ease-out {
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+  .loading-bars {
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='1' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3C/rect%3E%3Crect x='9' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3C/rect%3E%3Crect x='17' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3C/rect%3E%3C/svg%3E");
   }
   .group-\[\.toast\]\:bg-muted {
     &:is(:where(.group):is(.toast) *) {
