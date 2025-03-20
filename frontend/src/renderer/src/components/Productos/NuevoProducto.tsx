@@ -8,6 +8,7 @@ import { BadgeCheck, PlusCircle, X } from 'lucide-react'
 import PopUp from '@renderer/specificComponents/PopUp'
 import NavBar from '@renderer/specificComponents/Navbar'
 import NuevoProveedor from '@renderer/components/Proveedores/NuevoProveedor'
+import NuevaMarca from '@renderer/components/Marcas/Marcas Productos/NuevaMarca'
 
 type formDataNuevoProducto = {
   Codigo: string
@@ -91,7 +92,11 @@ export default function NuevoProducto(): JSX.Element {
   const [subCategoriasLocal, setSubCategoriasLocal] = useState<SubCategoria[]>()
   const [Proveedor, setProveedor] = useState()
   const [Marca, setMarca] = useState()
+
+  // Estados para abrir los popups
+
   const [nuevoProveedor, setNuevoProveedor] = useState(false)
+  const [nuevaMarca, setNuevaMarca] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -147,7 +152,7 @@ export default function NuevoProducto(): JSX.Element {
     if (!falta) {
       console.log('Enviando datos')
       const toastEspera = toast.loading('Agregando producto', {
-        description: 'Agregando producto a la base de datos',
+        description: 'Agregando producto a la base de datos'
       })
       const respuesta = await crearProducto(formData)
       toast.dismiss(toastEspera)
@@ -360,7 +365,11 @@ export default function NuevoProducto(): JSX.Element {
           )}
         </div>
         <div className="pl-2 self-center">
-          <button className="btn btn-sm btn-success btn-soft">
+          <button
+            className="btn btn-sm btn-success btn-soft"
+            type="button"
+            onClick={() => setNuevaMarca(true)}
+          >
             <PlusCircle />
           </button>
         </div>
@@ -412,6 +421,14 @@ export default function NuevoProducto(): JSX.Element {
         }}
         Component={NuevoProveedor}
         mainTitle="Nuevo Proveedor"
+      />
+      <PopUp
+        open={nuevaMarca}
+        onClose={() => {
+          setNuevaMarca(false)
+        }}
+        Component={NuevaMarca}
+        mainTitle="Nueva Marca"
       />
     </div>
   )

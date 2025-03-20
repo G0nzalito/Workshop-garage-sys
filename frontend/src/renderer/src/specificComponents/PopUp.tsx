@@ -31,7 +31,7 @@ export default function PopUp({
             <X />
           </button>
         </div>
-        <Component />
+        <Component onClose={onClose}/>
       </div>
     </div>
   )

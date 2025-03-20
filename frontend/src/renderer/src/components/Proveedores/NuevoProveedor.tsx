@@ -3,7 +3,7 @@ import { uploadProveedor } from '../../../../servicies/proveedoresService.js'
 import { toast } from 'sonner'
 import { Badge, BadgeCheck, X } from 'lucide-react'
 
-export default function NuevoProveedor(): JSX.Element {
+export default function NuevoProveedor({ onClose }: { onClose: () => void }): JSX.Element {
   const [formData, setFormData] = useState({
     Nombre: ''
   })
@@ -34,6 +34,7 @@ export default function NuevoProveedor(): JSX.Element {
         duration: 5000,
         icon: <BadgeCheck />
       })
+      onClose()
     }
   }
 
@@ -47,7 +48,7 @@ export default function NuevoProveedor(): JSX.Element {
           handleSubmit()
         }}
       >
-        <span className="text-right pr-4 self-center font-bold">Nombre Proveedor: </span>
+        <span className="text-left pr-4 self-center font-bold">Nombre Proveedor: </span>
         <input
           type="text"
           className="input input-bordered appearance-none w-full"
