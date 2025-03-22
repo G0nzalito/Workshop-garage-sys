@@ -5,11 +5,13 @@ export default function PopUp({
   onClose,
   Component,
   mainTitle,
+  selectedCategoria
 }: {
   open: boolean
   onClose: () => void
   Component: () => JSX.Element
   mainTitle: string
+  selectedCategoria: number | null
 }): JSX.Element {
   return (
     <div
@@ -31,7 +33,7 @@ export default function PopUp({
             <X />
           </button>
         </div>
-        <Component onClose={onClose}/>
+        <Component onClose={onClose} selectedCategoria={selectedCategoria}/>
       </div>
     </div>
   )

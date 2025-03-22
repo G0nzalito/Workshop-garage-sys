@@ -1,7 +1,6 @@
 import supabase from "../supabase/client"
 import { Database } from "../supabase/database.types"
 
-
 type CategoriaAInsertar = Database["public"]["Tables"]["Categorias"]["Insert"]
 type Categoria = Database["public"]["Tables"]["Categorias"]["Row"]
 
@@ -16,7 +15,6 @@ async function getCategoriaActiva() {
     .select("*")
     .eq("Dada_de_baja", false)
   return data as Categoria[]
-
 }
 
 async function getCategoriaById(id: number) {
@@ -24,6 +22,22 @@ async function getCategoriaById(id: number) {
     .from("Categorias")
     .select("*")
     .eq("id", id)
+    .single()
+  if (error) {
+    if (error.code === "PGRST116") {
+      return null
+    }
+    throw new Error(error.message)
+  } else {
+    return data as Categoria
+  }
+}
+
+async function getCategoriaByDescripcion(descripcion: string) {
+  const { data, error } = await supabase
+    .from("Categorias")
+    .select("*")
+    .eq("Descripcion", descripcion)
     .single()
   if (error) {
     if (error.code === "PGRST116") {
@@ -50,4 +64,4 @@ async function uploadCategoria(nuevaCategoria: CategoriaAInsertar) {
   return data as Categoria
 }
 
-export { getCategorias, getCategoriaById, uploadCategoria, getCategoriaActiva }
+export { getCategorias, getCategoriaById, uploadCategoria, getCategoriaActiva, getCategoriaByDescripcion }

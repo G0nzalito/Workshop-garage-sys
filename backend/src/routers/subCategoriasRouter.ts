@@ -64,14 +64,20 @@ subCategoriasRouter.post("/create", async (req, res) => {
       throw new ReferenceError("Categoria es requerido")
     }
 
-    const nuevaSubCategoria: SubCategoriaAInsertar = {
-      Descripción: Descripcion,
-      Categoria: Categoria,
+    const subCategorias = await getSubCategoriaByCategoria(Categoria)
+
+    if (subCategorias.includes(Descripcion)) {
+      res.status(400).json({ message: "SubCategoria ya existe" })
+    } else {
+      const nuevaSubCategoria: SubCategoriaAInsertar = {
+        Descripción: Descripcion,
+        Categoria: Categoria,
+      }
+
+      const subCategoria = await uploadSubCategoria(nuevaSubCategoria)
+
+      res.status(201).json(subCategoria)
     }
-
-    const subCategoria = await uploadSubCategoria(nuevaSubCategoria)
-
-    res.status(201).json(subCategoria)
   } catch (e: unknown) {
     if (e instanceof ReferenceError) {
       res.status(400).json({ message: e.message })

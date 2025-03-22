@@ -38,6 +38,22 @@ export const uploadCategoria = async (categoria) => {
     return response.data
   } catch (e) {
     if (e.status === 400) {
+      console.log(e)
+      return e.status
+    } else {
+      console.log(e)
+      throw new Error(`Error al subir proveedor: ${e}`)
+    }
+  }
+}
+
+export const uploadSubCategoria = async (subcategoria) => {
+  try {
+    const response = await axios.post(`${URLSubCategorias}/create`, subcategoria)
+    return response.data
+  } catch (e) {
+    if (e.status === 400) {
+      console.log(e)
       return e.status
     } else {
       console.log(e)

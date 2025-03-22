@@ -11,7 +11,7 @@ export default function NuevaCategoria({ onClose }: { onClose: () => void }): JS
   const { setCategorias } = useConsts()
 
   const [formData, setFormData] = useState({
-    Nombre: ''
+    Descripcion: ''
   })
 
   const handleChange = (e): undefined => {
@@ -36,7 +36,7 @@ export default function NuevaCategoria({ onClose }: { onClose: () => void }): JS
       })
     } else {
       toast.success('Categoría guardada correctamente', {
-        description: `La categoría ${formData.Nombre} ha sido guardada correctamente`,
+        description: `La categoría ${formData.Descripcion} ha sido guardada correctamente`,
         duration: 5000,
         icon: <BadgeCheck />
       })
@@ -63,7 +63,7 @@ export default function NuevaCategoria({ onClose }: { onClose: () => void }): JS
           className="input input-bordered appearance-none w-full"
           placeholder="Nombre de la categoría..."
           onChange={handleChange}
-          name="Nombre"
+          name="Descripcion"
         />
 
         <div className="col-span-2 flex justify-end mt-4">

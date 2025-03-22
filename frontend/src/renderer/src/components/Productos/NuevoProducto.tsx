@@ -10,6 +10,8 @@ import NavBar from '@renderer/specificComponents/Navbar'
 import NuevoProveedor from '@renderer/components/Proveedores/NuevoProveedor'
 import NuevaMarca from '@renderer/components/Marcas/Marcas Productos/NuevaMarca'
 import NuevaCategoria from '@renderer/components/Categorias/NuevaCategoria'
+import NuevaSubCategoria from '@renderer/components/SubCategorias/NuevaSubCategoria'
+import CategoriaYSubCategoriaTabs from '@renderer/specificComponents/CategoriaYSubCategoriaTabs'
 
 type formDataNuevoProducto = {
   Codigo: string
@@ -98,7 +100,7 @@ export default function NuevoProducto(): JSX.Element {
 
   const [nuevoProveedor, setNuevoProveedor] = useState(false)
   const [nuevaMarca, setNuevaMarca] = useState(false)
-  const [nuevaCategoria, setNuevaCategoria] = useState(false)
+  const [nuevaCategoriaSubCategoria, setNuevaCategoriaSubCategoria] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -205,7 +207,7 @@ export default function NuevoProducto(): JSX.Element {
     setSubCategoriasLocal(
       subCategorias.filter((SubCategoria) => SubCategoria.Categoria === formData.Categoria)
     )
-  }, [Categoria])
+  }, [Categoria, nuevaCategoriaSubCategoria])
 
   return (
     <div className="flex flex-col p-4">
@@ -281,7 +283,7 @@ export default function NuevoProducto(): JSX.Element {
             className="btn btn-sm btn-success btn-soft"
             onClick={() => setNuevoProveedor(true)}
           >
-            <PlusCircle />
+            <PlusCircle size={20} />
           </button>
         </div>
 
@@ -310,9 +312,9 @@ export default function NuevoProducto(): JSX.Element {
           <button
             type="button"
             className="btn btn-sm btn-success btn-soft"
-            onClick={() => setNuevaCategoria(true)}
+            onClick={() => setNuevaCategoriaSubCategoria(true)}
           >
-            <PlusCircle />
+            <PlusCircle size={20} />
           </button>
         </div>
 
@@ -342,8 +344,12 @@ export default function NuevoProducto(): JSX.Element {
               )}
             </div>
             <div className="pl-2 self-center">
-              <button className="btn btn-sm btn-success btn-soft">
-                <PlusCircle />
+              <button
+                className="btn btn-sm btn-success btn-soft"
+                type="button"
+                onClick={() => setNuevaCategoriaSubCategoria(true)}
+              >
+                <PlusCircle size={20} />
               </button>
             </div>
           </>
@@ -376,7 +382,7 @@ export default function NuevoProducto(): JSX.Element {
             type="button"
             onClick={() => setNuevaMarca(true)}
           >
-            <PlusCircle />
+            <PlusCircle size={20} />
           </button>
         </div>
 
@@ -437,12 +443,13 @@ export default function NuevoProducto(): JSX.Element {
         mainTitle="Nueva Marca"
       />
       <PopUp
-        open={nuevaCategoria}
+        open={nuevaCategoriaSubCategoria}
         onClose={() => {
-          setNuevaCategoria(false)
+          setNuevaCategoriaSubCategoria(false)
         }}
-        Component={NuevaCategoria}
-        mainTitle="Nueva Marca"
+        Component={CategoriaYSubCategoriaTabs}
+        mainTitle="Nueva Categoria/SubCategoria"
+        selectedCategoria={subCategoriasLocal?.length > 0 ? formData.Categoria : null}
       />
     </div>
   )

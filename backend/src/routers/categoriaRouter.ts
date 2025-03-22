@@ -1,5 +1,11 @@
 import appExpress from "express"
-import {getCategoriaActiva, getCategoriaById, getCategorias, uploadCategoria} from "../service/categoriasService"
+import {
+  getCategoriaActiva,
+  getCategoriaByDescripcion,
+  getCategoriaById,
+  getCategorias,
+  uploadCategoria,
+} from "../service/categoriasService"
 import { Database } from "../supabase/database.types"
 
 type Categoria = Database["public"]["Tables"]["Categorias"]["Row"]
@@ -7,7 +13,6 @@ type Categoria = Database["public"]["Tables"]["Categorias"]["Row"]
 export const categoriaRouter = appExpress.Router()
 
 categoriaRouter.get("/all", async (req, res) => {
-
   const categorias: Categoria[] = await getCategorias()
 
   res.status(200).json(categorias)
@@ -39,9 +44,12 @@ categoriaRouter.post("/create", async (req, res) => {
       throw new ReferenceError("Descripcion es requerido")
     }
 
-    const categoria = await uploadCategoria({ Descripcion })
-
-    res.status(201).json(categoria)
+    if (await getCategoriaByDescripcion(Descripcion)) {
+      res.status(400).json({ message: "Proveedor ya existe" })
+    } else {
+      const categoria = await uploadCategoria({ Descripcion })
+      res.status(201).json(categoria)
+    }
   } catch (e: unknown) {
     if (e instanceof ReferenceError) {
       res.status(400).json({ message: e.message })
