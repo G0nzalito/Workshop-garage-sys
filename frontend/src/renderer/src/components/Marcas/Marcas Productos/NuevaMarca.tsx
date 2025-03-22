@@ -1,9 +1,14 @@
-import { useState } from "react"
-import {createMarcaProducto} from '../../../../../servicies/marcaProductoService.js'
-import { toast } from "sonner"
-import { BadgeCheck, X } from "lucide-react"
+import { useState } from 'react'
+import { createMarcaProducto } from '../../../../../servicies/marcaProductoService.js'
+import { toast } from 'sonner'
+import { BadgeCheck, X } from 'lucide-react'
+import { Database } from '@/src/types/database.types.js'
+import { useConsts } from '@renderer/Contexts/constsContext.js'
 
-export default function NuevaMarca({onClose}: {onClose: () => void}): JSX.Element {
+type Marca = Database['public']['Tables']['Marca_de_Productos']['Row']
+
+export default function NuevaMarca({ onClose }: { onClose: () => void }): JSX.Element {
+  const { setMarcasProductos } = useConsts()
 
   const [formData, setFormData] = useState({
     Nombre: ''
@@ -20,25 +25,28 @@ export default function NuevaMarca({onClose}: {onClose: () => void}): JSX.Elemen
 
   const handleSubmit = async () => {
     const toastEspera = toast.loading('Guardando marca...')
-    const response = await createMarcaProducto(formData)
+    const response: Marca | number = await createMarcaProducto(formData)
     toast.dismiss(toastEspera)
-    if(response === 400){
+    if (response === 400) {
       toast.error('Error al guardar la marca', {
         description: 'Esta marca ya existe en la base de datos',
         duration: 5000,
-        icon: <X/>
+        icon: <X />
       })
-    }else{
+    } else {
       toast.success('Marca guardada correctamente', {
         description: `La marca ${formData.Nombre} ha sido guardada correctamente`,
         duration: 5000,
-        icon: <BadgeCheck/>
+        icon: <BadgeCheck />
       })
+      if (typeof response !== 'number') {
+        setMarcasProductos((prev) => [...prev, response])
+      }
       onClose()
     }
   }
 
-  return(
+  return (
     <div className="h-46 w-96">
       <form
         id="formNuevoProveedor"
@@ -55,7 +63,7 @@ export default function NuevaMarca({onClose}: {onClose: () => void}): JSX.Elemen
           placeholder="Nombre de la marca..."
           onChange={handleChange}
           name="Nombre"
-          />
+        />
         <div className="col-span-2 flex justify-end mt-4">
           <button className="btn btn-success btn-soft">Guardar Marca</button>
         </div>
@@ -63,3 +71,4 @@ export default function NuevaMarca({onClose}: {onClose: () => void}): JSX.Elemen
     </div>
   )
 }
+

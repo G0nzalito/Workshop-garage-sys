@@ -1,19 +1,21 @@
-import axios from "axios";
+import axios from 'axios'
 
-const URLCategorias = "http://localhost:4001/api/categorias";
-const URLSubCategorias = "http://localhost:4001/api/subcategorias";
+const URLCategorias = 'http://localhost:4001/api/categorias'
+const URLSubCategorias = 'http://localhost:4001/api/subcategorias'
 
 export const getCategoriasProductos = async () => {
-  const response = await axios.get(`${URLCategorias}/active`);
+  const response = await axios.get(`${URLCategorias}/active`)
   if (response.status === 200) {
-    return response.data;
+    return response.data
   } else {
-    throw new Error(`Error al obtener categorias: ${response.statusText}`);
+    throw new Error(`Error al obtener categorias: ${response.statusText}`)
   }
 }
 
 export const getSubCategoriasProductosByCategoria = async (categoria) => {
-  const response = await axios.get(`${URLSubCategorias}/specific`, { params: { Categoria: categoria } })
+  const response = await axios.get(`${URLSubCategorias}/specific`, {
+    params: { Categoria: categoria }
+  })
   if (response.status === 200) {
     return response.data
   } else {
@@ -27,5 +29,19 @@ export const getSubCategoriasProductos = async () => {
     return response.data
   } else {
     throw new Error(`Error al obtener subcategorias: ${response.statusText}`)
+  }
+}
+
+export const uploadCategoria = async (categoria) => {
+  try {
+    const response = await axios.post(`${URLCategorias}/create`, categoria)
+    return response.data
+  } catch (e) {
+    if (e.status === 400) {
+      return e.status
+    } else {
+      console.log(e)
+      throw new Error(`Error al subir proveedor: ${e}`)
+    }
   }
 }

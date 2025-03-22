@@ -9,6 +9,7 @@ import PopUp from '@renderer/specificComponents/PopUp'
 import NavBar from '@renderer/specificComponents/Navbar'
 import NuevoProveedor from '@renderer/components/Proveedores/NuevoProveedor'
 import NuevaMarca from '@renderer/components/Marcas/Marcas Productos/NuevaMarca'
+import NuevaCategoria from '@renderer/components/Categorias/NuevaCategoria'
 
 type formDataNuevoProducto = {
   Codigo: string
@@ -93,10 +94,11 @@ export default function NuevoProducto(): JSX.Element {
   const [Proveedor, setProveedor] = useState()
   const [Marca, setMarca] = useState()
 
-  // Estados para abrir los popups
+  // Estados para abrir los modals
 
   const [nuevoProveedor, setNuevoProveedor] = useState(false)
   const [nuevaMarca, setNuevaMarca] = useState(false)
+  const [nuevaCategoria, setNuevaCategoria] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -305,7 +307,11 @@ export default function NuevoProducto(): JSX.Element {
           )}
         </div>
         <div className="pl-2 self-center">
-          <button className="btn btn-sm btn-success btn-soft">
+          <button
+            type="button"
+            className="btn btn-sm btn-success btn-soft"
+            onClick={() => setNuevaCategoria(true)}
+          >
             <PlusCircle />
           </button>
         </div>
@@ -428,6 +434,14 @@ export default function NuevoProducto(): JSX.Element {
           setNuevaMarca(false)
         }}
         Component={NuevaMarca}
+        mainTitle="Nueva Marca"
+      />
+      <PopUp
+        open={nuevaCategoria}
+        onClose={() => {
+          setNuevaCategoria(false)
+        }}
+        Component={NuevaCategoria}
         mainTitle="Nueva Marca"
       />
     </div>
