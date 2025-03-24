@@ -34,13 +34,14 @@ cajaRouter.get("/specific", async (req, res) => {
 cajaRouter.post("/create", async (req, res) => {
   try {
     const cobro: CobranzaAInsertar = req.body
+    const {Sucursal_id} = req.body
 
     if (
       cobro.Forma_de_Pago === undefined ||
       cobro.Numero_Documento_Cliente === undefined ||
       cobro.Tipo_Documento_Cliente === undefined ||
       cobro.Monto === undefined ||
-      cobro.Turno === undefined
+      cobro.Turno === undefined 
     ) {
       throw new ReferenceError("Faltan datos de la venta")
     }
@@ -57,7 +58,7 @@ cajaRouter.post("/create", async (req, res) => {
 
     cobro.Fecha = convertirFechaLocal(new Date())
 
-    const caja = await registrarCobros(cobro)
+    const caja = await registrarCobros(cobro, Sucursal_id)
 
     res.status(201).json(caja)
   } catch (e: unknown) {

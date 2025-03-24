@@ -23,6 +23,7 @@ export type Database = {
           Operador_1: string | null
           Operador_2: string | null
           Sub_Total: number
+          Sucursal_id: number
           Supervisor: string | null
           Tarjeta: number | null
           Tipo_de_comprobante: number | null
@@ -43,6 +44,7 @@ export type Database = {
           Operador_1?: string | null
           Operador_2?: string | null
           Sub_Total: number
+          Sucursal_id: number
           Supervisor?: string | null
           Tarjeta?: number | null
           Tipo_de_comprobante?: number | null
@@ -63,6 +65,7 @@ export type Database = {
           Operador_1?: string | null
           Operador_2?: string | null
           Sub_Total?: number
+          Sucursal_id?: number
           Supervisor?: string | null
           Tarjeta?: number | null
           Tipo_de_comprobante?: number | null
@@ -83,6 +86,13 @@ export type Database = {
             columns: ["Fuente_MKT"]
             isOneToOne: false
             referencedRelation: "Fuente MKT"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Caja_Sucursal_id_fkey"
+            columns: ["Sucursal_id"]
+            isOneToOne: false
+            referencedRelation: "Sucursales"
             referencedColumns: ["id"]
           },
           {
@@ -114,6 +124,7 @@ export type Database = {
           Fecha: string
           Monto: number
           Movimiento: number
+          Sucursal_id: number
           Turno: number
         }
         Insert: {
@@ -121,6 +132,7 @@ export type Database = {
           Fecha?: string
           Monto: number
           Movimiento: number
+          Sucursal_id: number
           Turno: number
         }
         Update: {
@@ -128,6 +140,7 @@ export type Database = {
           Fecha?: string
           Monto?: number
           Movimiento?: number
+          Sucursal_id?: number
           Turno?: number
         }
         Relationships: [
@@ -136,6 +149,13 @@ export type Database = {
             columns: ["Movimiento"]
             isOneToOne: false
             referencedRelation: "Conceptos Caja Contable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Caja Contable_Sucursal_id_fkey"
+            columns: ["Sucursal_id"]
+            isOneToOne: false
+            referencedRelation: "Sucursales"
             referencedColumns: ["id"]
           }
         ]
@@ -377,6 +397,7 @@ export type Database = {
           Monto: number
           Observaciones: string | null
           Turno: number
+          Sucursal_id: number
         }
         Insert: {
           Comprobante?: boolean
@@ -385,6 +406,7 @@ export type Database = {
           Monto: number
           Observaciones?: string | null
           Turno: number
+          Sucursal_id: number
         }
         Update: {
           Comprobante?: boolean
@@ -393,6 +415,7 @@ export type Database = {
           Monto?: number
           Observaciones?: string | null
           Turno?: number
+          Sucursal_id?: number
         }
         Relationships: [
           {
@@ -637,6 +660,42 @@ export type Database = {
           Nombre?: string
         }
         Relationships: []
+      }
+      Stock: {
+        Row: {
+          Cantidad: number
+          Codigo: string
+          id: number
+          Sucursal_id: number
+        }
+        Insert: {
+          Cantidad?: number
+          Codigo: string
+          id?: number
+          Sucursal_id: number
+        }
+        Update: {
+          Cantidad?: number
+          Codigo?: string
+          id?: number
+          Sucursal_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Stock_Codigo_fkey"
+            columns: ["Codigo"]
+            isOneToOne: false
+            referencedRelation: "Productos"
+            referencedColumns: ["Codigo"]
+          },
+          {
+            foreignKeyName: "Stock_Sucursal_id_fkey"
+            columns: ["Sucursal_id"]
+            isOneToOne: false
+            referencedRelation: "Sucursales"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       SubCategorias: {
         Row: {

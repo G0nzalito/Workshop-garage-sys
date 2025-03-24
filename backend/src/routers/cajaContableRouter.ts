@@ -40,9 +40,9 @@ cajaContableRouter.get("/specific", async (req, res) => {
 })
 
 cajaContableRouter.post("/create", async (req, res) => {
-  const { Monto, Movimiento, Turno, Detalle } = req.body
+  const { Monto, Movimiento, Turno, Detalle, Sucursal_id } = req.body
 
-  if (!Monto || Monto < 0 || !Movimiento || !Turno) {
+  if (!Monto || Monto < 0 || !Movimiento || !Turno || !Sucursal_id) {
     res.status(400).json({ message: "Faltan datos" })
   } else {
     try {
@@ -67,6 +67,7 @@ cajaContableRouter.post("/create", async (req, res) => {
         Turno,
         Detalle: Detalle ? Detalle : "Sin comentarios extra",
         Fecha: convertirFechaLocal(new Date()),
+        Sucursal_id
       }
       await createAsientoContable(asiento)
       res.status(201).json({ message: "Asiento creado" })

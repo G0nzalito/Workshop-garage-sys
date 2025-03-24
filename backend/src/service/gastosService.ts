@@ -59,6 +59,7 @@ async function insertGasto(gasto: GastoAInsertar) {
         Movimiento: 5,
         Turno: gasto.Turno,
         Detalle: `Gasto en ${cuenta.Nombre}`,
+        Sucursal_id: gasto.Sucursal_id,
       })
     }
   } else {

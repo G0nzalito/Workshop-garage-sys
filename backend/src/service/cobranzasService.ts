@@ -40,7 +40,7 @@ async function getCobrosDesdeFecha(fechaMinima: string, fechaMaxima?: string) {
   }
 }
 
-async function registrarCobros(cobranza: CobranzaAInsertar) {
+async function registrarCobros(cobranza: CobranzaAInsertar, sucursal_id: number) {
   const { data, error } = await supabase
   .from("Cobranzas")
   .insert(cobranza)
@@ -58,7 +58,8 @@ async function registrarCobros(cobranza: CobranzaAInsertar) {
       Movimiento: 3,
       Turno: cobranza.Turno,
       Detalle: "Cobro de CC en efectivo",
-      Fecha: cobranza.Fecha
+      Fecha: cobranza.Fecha,
+      Sucursal_id: sucursal_id
     }
     try {
       await createAsientoContable(asiento)

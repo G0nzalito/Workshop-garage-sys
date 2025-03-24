@@ -47,11 +47,12 @@ gastosRouter.get("/specific", async (req, res) => {
 })
 
 gastosRouter.post("/create", async (req, res) => {
-  const { Turno, Cuenta, Monto, Observaciones, Comprobante } = req.body
+  const { Turno, Cuenta, Monto, Observaciones, Comprobante, Sucursal_id } =
+    req.body
 
-  console.log('Hola')
+  console.log("Hola")
 
-  if (!Turno || !Cuenta || !Monto) {
+  if (!Turno || !Cuenta || !Monto || !Sucursal_id) {
     res.status(400).json({ message: "Faltan datos" })
   } else {
     try {
@@ -69,9 +70,12 @@ gastosRouter.post("/create", async (req, res) => {
           Turno,
           Cuenta,
           Monto,
-          Observaciones: Observaciones ? Observaciones : "Sin Observaciones extra",
+          Observaciones: Observaciones
+            ? Observaciones
+            : "Sin Observaciones extra",
           Comprobante,
           Fecha: convertirFechaLocal(new Date()),
+          Sucursal_id,
         }
 
         await insertGasto(gasto)

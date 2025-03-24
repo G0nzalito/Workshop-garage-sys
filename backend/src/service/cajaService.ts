@@ -58,7 +58,8 @@ async function registrarVenta(caja: CajaAInsertar) {
       Movimiento: 3,
       Turno: caja.Turno,
       Detalle: "Venta de productos en efectivo",
-      Fecha: caja.Fecha
+      Fecha: caja.Fecha,
+      Sucursal_id: caja.Sucursal_id
     }
     try {
       await createAsientoContable(asiento)

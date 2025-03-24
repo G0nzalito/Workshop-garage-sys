@@ -44,7 +44,8 @@ cajaRouter.post("/create", async (req, res) => {
       venta.Numero_Documento_Cliente === undefined ||
       venta.Tipo_Documento_Cliente === undefined ||
       venta.Sub_Total === undefined ||
-      venta.Turno === undefined
+      venta.Turno === undefined || 
+      venta.Sucursal_id === undefined
     ) {
       throw new ReferenceError("Faltan datos de la venta")
     }
