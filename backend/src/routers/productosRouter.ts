@@ -8,7 +8,9 @@ import {
   uploadProductos,
   modificarStockProducto,
   getProductosFiltrados,
+  obtenerStockProducto,
 } from "../service/productosService"
+import { getSucursalById } from "../service/sucursalService"
 
 type ProductoAInsertar = Database["public"]["Tables"]["Productos"]["Insert"]
 type Producto = Database["public"]["Tables"]["Productos"]["Row"]
@@ -81,9 +83,7 @@ productosRouter.post("/create", async (req, res) => {
     res.status(400).json({ error: "Todos los datos son requeridos" })
   } else {
     try {
-      producto.SubCategoria === 0
-        ? (producto.SubCategoria = null)
-        : null
+      producto.SubCategoria === 0 ? (producto.SubCategoria = null) : null
       const productoCreado = await uploadProductos(producto)
       res.status(201).json(productoCreado)
     } catch (error: unknown) {
@@ -119,17 +119,24 @@ productosRouter.put("/update", async (req, res) => {
 })
 
 productosRouter.put("/updateStock", async (req, res) => {
-  const { Productos }: { Productos: ProductoStock[] } = req.body.data
+  const {
+    Productos,
+    Sucursal_id,
+  }: { Productos: ProductoStock[]; Sucursal_id: number } = req.body
 
-  console.log("Body", req.body)
+  // console.log("Body", req.body)
 
   if (Productos.length === 0) {
     res.status(400).json({ error: "No fueron enviados productos" })
   } else {
     try {
       Productos.forEach(async (producto) => {
-        console.log("producto", producto)
-        await modificarStockProducto(producto.Codigo, producto.Cantidad)
+        // console.log("producto", producto)
+        await modificarStockProducto(
+          producto.Codigo,
+          producto.Cantidad,
+          Sucursal_id
+        )
       })
       res.status(200).json("Los productos fueron actualizados con exito")
     } catch (error) {
@@ -154,16 +161,55 @@ productosRouter.delete("/delete", async (req, res) => {
 })
 
 productosRouter.get("/hayStock", async (req, res) => {
-  const { Codigo, Cantidad } = req.query
+  const { Codigo, Cantidad, Sucursal_id } = req.query
 
   const producto = await getProductosByCodigo(Codigo as string)
   if (!producto) {
     res.status(404).json({ error: "Producto no encontrado" })
   } else {
-    if (producto.Stock >= parseFloat(Cantidad as string)) {
+    const stock = (
+      await obtenerStockProducto(
+        Codigo as string,
+        parseInt(Sucursal_id as string)
+      )
+    )[0]
+    if (stock.Cantidad >= parseFloat(Cantidad as string)) {
       res.status(200).json({ message: "Hay stock suficiente" })
     } else {
       res.status(400).json({ error: "No hay stock suficiente" })
+    }
+  }
+})
+
+productosRouter.get("/stock", async (req, res) => {
+  const { Codigo, Sucursal_id } = req.query
+
+  console.log('Query', req.query)
+
+  try {
+    const producto = await getProductosByCodigo(Codigo as string)
+    if (!producto) {
+      throw new ReferenceError("Producto no encontrado")
+    }
+
+    console.log("sucursal id", Sucursal_id as string)
+
+    const sucursal_id = getSucursalById(parseInt(Sucursal_id as string))
+    if (!sucursal_id) {
+      throw new ReferenceError("Sucursal no encontrada")
+    }
+
+    const stock = await obtenerStockProducto(
+      Codigo as string,
+      parseInt(Sucursal_id as string)
+    )
+
+    res.status(200).json(stock)
+  } catch (error) {
+    if (error instanceof ReferenceError) {
+      res.status(404).json({ error: error.message })
+    } else {
+      res.status(500).json({ error })
     }
   }
 })

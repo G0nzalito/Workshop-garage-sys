@@ -22,7 +22,10 @@ cajaRouter.get("/all", async (req, res) => {
 cajaRouter.get("/specific", async (req, res) => {
   const { fechaMinima, fechaMaxima } = req.query
 
-  const caja = await getCajaDesdeFecha(fechaMinima as string, fechaMaxima as string)
+  const caja = await getCajaDesdeFecha(
+    fechaMinima as string,
+    fechaMaxima as string
+  )
 
   if (caja) {
     res.status(200).json(caja)
@@ -33,10 +36,10 @@ cajaRouter.get("/specific", async (req, res) => {
 
 cajaRouter.post("/create", async (req, res) => {
   try {
-    const venta: CajaAInsertar = req.body.data
+    const venta: CajaAInsertar = req.body
 
     console.log(venta)
-
+    console.log(venta.Sucursal_id)
 
     if (
       venta.Forma_de_Pago === undefined ||
@@ -44,14 +47,19 @@ cajaRouter.post("/create", async (req, res) => {
       venta.Numero_Documento_Cliente === undefined ||
       venta.Tipo_Documento_Cliente === undefined ||
       venta.Sub_Total === undefined ||
-      venta.Turno === undefined || 
+      venta.Turno === undefined ||
       venta.Sucursal_id === undefined
     ) {
+      console.log(venta.Sucursal_id)
       throw new ReferenceError("Faltan datos de la venta")
     }
 
-    if (venta.Forma_de_Pago === 2 || venta.Forma_de_Pago === 3) { 
-      if(venta.N_Autorizacion === undefined || venta.N_Cupon === undefined || venta.N_Lote === undefined) {
+    if (venta.Forma_de_Pago === 2 || venta.Forma_de_Pago === 3) {
+      if (
+        venta.N_Autorizacion === undefined ||
+        venta.N_Cupon === undefined ||
+        venta.N_Lote === undefined
+      ) {
         throw new ReferenceError("Faltan datos para la venta con tarjeta")
       }
     }
@@ -65,6 +73,7 @@ cajaRouter.post("/create", async (req, res) => {
     if (e instanceof ReferenceError) {
       res.status(400).json({ message: e.message })
     } else {
+      console.log(e)
       res.status(500).json({ message: "Error interno del sistema", error: e })
     }
   }

@@ -18,7 +18,8 @@ async function generarCobroSinODT({
   Operador_1,
   Operador_2,
   Supervisor,
-  Descripcion
+  Descripcion,
+  sucursal_id
 }) {
   if (
     !Forma_de_Pago ||
@@ -44,9 +45,7 @@ async function generarCobroSinODT({
 
   console.log('data', data)
 
-  const response = await axios.post(`${URLCaja}/create`, {
-    data: data
-  })
+  const response = await axios.post(`${URLCaja}/create`, data)
 
   console.log('response', response)
 

@@ -5,6 +5,7 @@ import { getVehiculoByPatente } from "./vehiculoService"
 import {
   getProductosByCodigo,
   modificarStockProducto,
+  obtenerStockProducto,
 } from "./productosService"
 
 type OrdenDeTrabajoAInsertar =
@@ -82,7 +83,7 @@ async function createOrdenTrabajo(orden: OrdenDeTrabajoAInsertar) {
 async function agregarDetallesOrdenDeTrabajo(
   detallesOrden: DetalleOrdenDeTrabajoAInsertar[]
 ) {
-  //@ts-ignore sdasdsadasdasd
+  //@ts-ignore Lidire contigo más tarde
   const orden = await getOrdenDeTrabajoById(detallesOrden[0].Orden_Trabajo)
   if (!orden) {
     throw new ReferenceError("Orden de trabajo no encontrada")
@@ -108,7 +109,9 @@ async function agregarDetallesOrdenDeTrabajo(
     if (!producto) {
       throw new ReferenceError("Producto no encontrado")
     } else {
-      if (producto.Stock < diccionario[codigo]) {
+      const stock = await obtenerStockProducto(codigo)
+      const hayStock = stock.some((s) => s.Cantidad > diccionario[codigo])
+      if (!hayStock) {
         throw new SyntaxError("Stock insuficiente")
       } else {
         const detalle: DetalleOrdenDeTrabajoAInsertar = {
@@ -136,9 +139,9 @@ async function agregarDetallesOrdenDeTrabajo(
     throw error
   }
 
-  for (const codigo in diccionario) {
-    modificarStockProducto(codigo, -diccionario[codigo])
-  }
+  // for (const codigo in diccionario) {
+  //   modificarStockProducto(codigo, -diccionario[codigo])
+  // }
 
   return data as DetalleOrdenDeTrabajoAInsertar[]
 }

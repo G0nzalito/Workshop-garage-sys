@@ -4,6 +4,7 @@ import { obtenerFiltrados, getProductoByCodigo } from '../../../../servicies/pro
 import Select from 'react-select'
 import { useConsts } from '@renderer/Contexts/constsContext.js'
 import { Pencil, PlusCircle, Trash } from 'lucide-react'
+import { toast } from 'sonner'
 
 type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
 type Productos = Database['public']['Tables']['Productos']['Row']
@@ -74,8 +75,9 @@ export default function BusquedaProductos(): JSX.Element {
   const [categoria, setCategoria] = useState()
   const [subcategoriaSelec, setSubcategoriaSelec] = useState()
   const [subCategoriasLocal, setSubCategoriasLocal] = useState<SubCategoria[]>([])
-  const [productos, setProductos] = useState<Productos[]>()
-  const { marcasProductos, categorias, subCategorias, proveedores } = useConsts()
+  const [productos, setProductos] = useState<{ Producto: Productos; Stock: number }[]>()
+  const { marcasProductos, categorias, subCategorias, proveedores, sucursalSeleccionada } =
+    useConsts()
 
   const handleChange = (e): undefined => {
     const { name, value } = e.target
@@ -153,17 +155,23 @@ export default function BusquedaProductos(): JSX.Element {
       SubCategoria: formdata.subcategoria,
       Proveedor: formdata.proveedor
     }
-
+    const toastLoading = toast.loading('Buscando productos...')
     if (formdata.codigo !== '') {
-      getProductoByCodigo(formdata.codigo).then((data) => {
+      getProductoByCodigo(formdata.codigo, sucursalSeleccionada).then((data) => {
+        console.log(data)
         setProductos([data])
+        toast.dismiss(toastLoading)
       })
+
       return
     }
-    obtenerFiltrados(filtros).then((data) => {
+    obtenerFiltrados(filtros, sucursalSeleccionada).then((data) => {
       setProductos(data)
+      toast.dismiss(toastLoading)
     })
   }
+
+  // console.log(productos ? productos[0] : 'No hay productos')
 
   return (
     <>
@@ -291,43 +299,55 @@ export default function BusquedaProductos(): JSX.Element {
               {productos.length > 0 ? (
                 productos.map((producto) => {
                   return (
-                    <tr key={producto.Codigo}>
-                      <td>{producto.Codigo}</td>
-                      <td>{producto.Descripcion}</td>
-                      <td>{producto.Precio}</td>
+                    <tr key={producto.Producto.Codigo}>
+                      <td>{producto.Producto.Codigo}</td>
+                      <td>{producto.Producto.Descripcion}</td>
+                      <td>{producto.Producto.Precio}</td>
                       <td>
                         {
-                          categorias.find((categoria) => categoria.id === producto.Categoria)
-                            ?.Descripcion
+                          categorias.find(
+                            (categoria) => categoria.id === producto.Producto.Categoria
+                          )?.Descripcion
                         }
                       </td>
                       <td>
-                        {producto.SubCategoria
+                        {producto.Producto.SubCategoria
                           ? subCategoriasLocal.length > 0
                             ? subCategoriasLocal.find(
-                                (subCategoria) => subCategoria.id === producto.SubCategoria
+                                (subCategoria) => subCategoria.id === producto.Producto.SubCategoria
                               )?.Descripción
                             : subCategorias.find(
-                                (subCategoria) => subCategoria.id === producto.SubCategoria
+                                (subCategoria) => subCategoria.id === producto.Producto.SubCategoria
                               )?.Descripción
                           : 'No posee Sub categoria'}
                       </td>
                       <td>
-                        {marcasProductos.find((marca) => marca.id === producto.Marca)?.Nombre}
+                        {
+                          marcasProductos.find((marca) => marca.id === producto.Producto.Marca)
+                            ?.Nombre
+                        }
                       </td>
                       <td>
                         {
-                          proveedores.find((proveedor) => proveedor.id === producto.Proveedor)
-                            ?.Nombre
+                          proveedores.find(
+                            (proveedor) => proveedor.id === producto.Producto.Proveedor
+                          )?.Nombre
                         }
                       </td>
                       <td>{producto.Stock}</td>
                       <td>
-                        <div className='flex gap-2'>
-                          <button type="button" className="btn btn-warning btn-soft"><Pencil size={16} /></button>
-                          <button type="button" className="btn btn-error btn-soft"><Trash size={16} /></button>
-                          <button type="button" className="btn btn-info btn-soft"><PlusCircle size={16}/></button>
-                        </div></td>
+                        <div className="flex gap-2">
+                          <button type="button" className="btn btn-warning btn-soft">
+                            <Pencil size={16} />
+                          </button>
+                          <button type="button" className="btn btn-error btn-soft">
+                            <Trash size={16} />
+                          </button>
+                          <button type="button" className="btn btn-info btn-soft">
+                            <PlusCircle size={16} />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   )
                 })

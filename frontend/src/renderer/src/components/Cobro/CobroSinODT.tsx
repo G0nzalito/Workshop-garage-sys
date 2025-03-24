@@ -1,5 +1,5 @@
 import { useConsts } from '@renderer/Contexts/constsContext'
-import { X } from 'lucide-react'
+import { BadgeCheck, X } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { generarCobroSinODT } from '../../../../servicies/cobroService.js'
 import { modificarStockProducto } from '../../../../servicies/productosService.js'
@@ -73,7 +73,7 @@ export default function CobroSinODT({
   total: number
   productos: { Producto: Producto; Cantidad: number }[]
   setProductos: React.Dispatch<React.SetStateAction<{ Producto: Producto; Cantidad: number }[]>>
-}): JSX.Element {
+}): JSX.Element | null {
   const [formData, setFormData] = useState({
     Cliente: '',
 
@@ -106,7 +106,14 @@ export default function CobroSinODT({
   const [formaPago, setFormaPaga] = useState()
   const [marketing, setMarketing] = useState()
   const [tarjeta, setTarjeta] = useState()
-  const { clientes, formasPago, tarjetas, marketing: marketingOptions, comprobantes } = useConsts()
+  const {
+    clientes,
+    formasPago,
+    tarjetas,
+    marketing: marketingOptions,
+    comprobantes,
+    sucursalSeleccionada
+  } = useConsts()
 
   const handleChange = (e): undefined => {
     const { name, value } = e.target
@@ -172,7 +179,9 @@ export default function CobroSinODT({
     }
 
     if (!falta) {
-      // Llamar a la API para cobrar
+      const toastCargando = toast.loading('Generando Cobro', {
+        description: 'Espere un momento por favor'
+      })
       const response = await generarCobroSinODT({
         Forma_de_Pago: formData.FormaDePago,
         Tarjeta: formData.Tarjeta,
@@ -188,30 +197,35 @@ export default function CobroSinODT({
         Operador_1: formData.Operador1,
         Operador_2: formData.Operador2,
         Supervisor: formData.Supervisor,
-        Descripcion: formData.Descripcion
+        Descripcion: formData.Descripcion,
+        Sucursal_id: sucursalSeleccionada
       })
 
+      toast.dismiss(toastCargando)
       if (response === 201) {
-        console.log('Cobro exitoso')
+        toast.success('Venta Realizada', {
+          description: `Venta por el valor de $${total} realizada con exito`,
+          duration: 6000,
+          icon: <BadgeCheck />
+        })
         productos.forEach((producto) => {
           console.log(producto)
         })
-        await modificarStockProducto(productos)
+        await modificarStockProducto(productos, sucursalSeleccionada)
         console.log('Stock modificado')
         setProductos([])
         onClose()
       }
-      toast.success('Venta realizada con exito', {
-        description: 'Se ha cobrado la venta',
-        duration: 3000
-      })
     } else {
       toast.error('Error al realizar la venta', {
         description: 'Por favor complete todos los campos',
-        duration: 3000
+        duration: 3000,
+        icon: <X />
       })
     }
   }
+
+  if (!open) return null
 
   return (
     // Este div es mi fondo

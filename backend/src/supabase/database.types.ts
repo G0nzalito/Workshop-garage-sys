@@ -587,7 +587,6 @@ export type Database = {
           Marca: number
           Precio: number
           Proveedor: number
-          Stock: number
           SubCategoria: number | null
         }
         Insert: {
@@ -598,7 +597,6 @@ export type Database = {
           Marca: number
           Precio?: number
           Proveedor: number
-          Stock?: number
           SubCategoria?: number | null
         }
         Update: {
@@ -609,7 +607,6 @@ export type Database = {
           Marca?: number
           Precio?: number
           Proveedor?: number
-          Stock?: number
           SubCategoria?: number | null
         }
         Relationships: [

@@ -1,23 +1,16 @@
-import { X } from 'lucide-react'
-
 export default function PopUp({
   open,
   onClose,
   Component,
-  mainTitle,
-  selectedCategoria
+  mainTitle
 }: {
   open: boolean
   onClose: () => void
   Component: () => JSX.Element
   mainTitle: string
-  selectedCategoria?: number | null
-}): JSX.Element | null {
-  if (!open) return null
-
+}): JSX.Element {
   return (
     <div
-      onClick={onClose}
       className={`fixed inset-0 flex justify-center items-center transition-colors ${open ? 'visible bg-black/20' : 'invisible'}`}
     >
       {/* Este div es mi ventana emergente */}
@@ -31,12 +24,10 @@ export default function PopUp({
           <h2 className="text-white text-3xl flex justify-start justify-items-start p-4">
             {mainTitle}
           </h2>
-          <button className="btn btn-error" onClick={onClose}>
-            <X />
-          </button>
         </div>
-        <Component onClose={onClose} selectedCategoria={selectedCategoria} />
+        <Component onClose={onClose} open={open}/>
       </div>
     </div>
   )
 }
+

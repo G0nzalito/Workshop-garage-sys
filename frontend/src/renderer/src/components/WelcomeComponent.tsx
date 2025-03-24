@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { X, CirclePlus } from 'lucide-react'
-import { getProductoByCodigo, hayStockParaVenta } from '../../../servicies/productosService'
+import {
+  getProductoByCodigo,
+  hayStockParaVenta,
+  obtenerStockProductos
+} from '../../../servicies/productosService'
 import { Database } from '../../../types/database.types'
 import CobroSinODT from '@renderer/components/Cobro/CobroSinODT'
 import { toast } from 'sonner'
@@ -16,12 +20,15 @@ import {
 import SeleccionSucursal from '@renderer/components/Administrativo/SeleccionSucursal'
 import { getSucursales } from '../../../servicies/sucursalesService'
 import PopUp from '@renderer/specificComponents/PopUp'
+import PopUpNoX from '@renderer/specificComponents/PopUpNoX'
 
 type Producto = Database['public']['Tables']['Productos']['Row']
 
 export default function WelcomeComponent(): JSX.Element {
   const [, setLocation] = useLocation()
-  const [cesta, setCesta] = useState<{ Producto: Producto; cantidad: number }[]>([])
+  const [cesta, setCesta] = useState<
+    { Producto: Producto; cantidad: number; stockMaximo: number }[]
+  >([])
   const [formData, setFormData] = useState({
     Codigo: '',
     Cantidad: ''
@@ -54,12 +61,11 @@ export default function WelcomeComponent(): JSX.Element {
       const itemExistente = cesta.find((item) => item.Producto.Codigo === data.Codigo)
 
       if (itemExistente) {
-        console.log(parseFloat(itemExistente.cantidad) + parseFloat(data.Cantidad))
-        console.log(itemExistente.Producto.Stock)
+        console.log(itemExistente)
 
         if (
           parseFloat(itemExistente.cantidad) + parseFloat(data.Cantidad) >
-          itemExistente.Producto.Stock
+          itemExistente.stockMaximo
         ) {
           toast.error('No hay stock suficiente', {
             description: 'No se puede agregar el producto',
@@ -72,6 +78,7 @@ export default function WelcomeComponent(): JSX.Element {
           cesta.map((item) => {
             if (item.Producto.Codigo === data.Codigo) {
               return {
+                ...item,
                 Producto: item.Producto,
                 cantidad: parseFloat(item.cantidad) + parseFloat(data.Cantidad)
               }
@@ -79,6 +86,10 @@ export default function WelcomeComponent(): JSX.Element {
             return item
           })
         )
+        toast.success('Producto agregado con exito', {
+          description: 'Figura en la tabla',
+          duration: 3000
+        })
         return
       }
 
@@ -86,12 +97,18 @@ export default function WelcomeComponent(): JSX.Element {
 
       if (producto) {
         try {
-          const hayStock = await hayStockParaVenta(producto.Codigo, data.Cantidad)
+          const hayStock = await hayStockParaVenta(producto.Codigo, data.Cantidad, sucursal)
           if (hayStock) {
+            const stock = (await obtenerStockProductos(data.Codigo, sucursal))[0]
             if (cesta.length > 0) {
-              setCesta([...cesta, { Producto: producto, cantidad: data.Cantidad }])
+              setCesta([
+                ...cesta,
+                { Producto: producto, cantidad: data.Cantidad, stockMaximo: stock.Cantidad }
+              ])
             } else {
-              setCesta([{ Producto: producto, cantidad: data.Cantidad }])
+              setCesta([
+                { Producto: producto, cantidad: data.Cantidad, stockMaximo: stock.Cantidad }
+              ])
             }
             toast.success('Producto agregado con exito', {
               description: 'Figura en la tabla',
@@ -233,7 +250,7 @@ export default function WelcomeComponent(): JSX.Element {
                     <input
                       type="number"
                       name="Cantidad"
-                      className="input input-bordered [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      className="input input-bordered w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                       placeholder="Cantidad"
                       value={formData.Cantidad}
                       onChange={handleChange}
@@ -271,7 +288,12 @@ export default function WelcomeComponent(): JSX.Element {
           >
             Cancelar venta
           </button>
-        </div>
+        <PopUpNoX
+          Component={SeleccionSucursal}
+          open={seleccionSucursal}
+          onClose={() => setSeleccionSucursal(false)}
+          mainTitle="Seleccion de sucursal"
+        ></PopUpNoX>
         <CobroSinODT
           open={cobrando}
           onClose={() => setCobrando(false)}
@@ -279,13 +301,8 @@ export default function WelcomeComponent(): JSX.Element {
           productos={cesta}
           setProductos={setCesta}
         ></CobroSinODT>
+        </div>
       </div>
-      <PopUp
-        Component={SeleccionSucursal}
-        open={seleccionSucursal}
-        onClose={() => setSeleccionSucursal(false)}
-        mainTitle="Seleccion de sucursal"
-      ></PopUp>
     </>
   )
 }

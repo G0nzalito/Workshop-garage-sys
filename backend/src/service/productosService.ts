@@ -16,6 +16,8 @@ type Producto = Database["public"]["Tables"]["Productos"]["Row"]
 type PrecioHistorialAInsertar =
   Database["public"]["Tables"]["Historial_Precios"]["Insert"]
 
+type StockProducto = Database["public"]["Tables"]["Stock"]["Row"]
+
 async function getProductos() {
   const { data, error } = await supabase
     .from("Productos")
@@ -206,23 +208,40 @@ async function deleteProductos(codigo: string) {
   }
 }
 
-async function modificarStockProducto(codigo: string, cantidad: number) {
+async function obtenerStockProducto(codigo: string, sucursal_id?: number){
+  const request = supabase.from("Stock")
+    .select("*")
+    .eq("Codigo", codigo)
+  if (sucursal_id) {
+    request.eq("Sucursal_id", sucursal_id)
+  }
+  const {data, error} = await request
+  if (error) {
+    throw error
+  }
+  console.log("Stock", data)
+  return data as StockProducto[]
+}
+
+async function modificarStockProducto(codigo: string, cantidad: number, sucursal_id: number) {
   const producto = await getProductosByCodigo(codigo)
   if (producto === null) {
     throw new ReferenceError("Producto no encontrado")
   }
-  producto.Stock += cantidad
+  const stock = (await obtenerStockProducto(codigo, sucursal_id))[0]
+
+  stock.Cantidad += cantidad
 
   const { data, error } = await supabase
-    .from("Productos")
-    .update(producto)
-    .eq("Codigo", codigo)
+    .from("Stock")
+    .update(stock)
+    .eq("id", stock.id)
     .select()
     .single()
   if (error) {
     throw error
   } else {
-    return data as Producto
+    return data as StockProducto
   }
 }
 
@@ -250,4 +269,5 @@ export {
   deleteProductos,
   modificarStockProducto,
   getProductosFiltrados,
+  obtenerStockProducto
 }
