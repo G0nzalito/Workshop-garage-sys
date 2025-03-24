@@ -82,6 +82,7 @@ async function createOrdenTrabajo(orden: OrdenDeTrabajoAInsertar) {
 async function agregarDetallesOrdenDeTrabajo(
   detallesOrden: DetalleOrdenDeTrabajoAInsertar[]
 ) {
+  //@ts-ignore sdasdsadasdasd
   const orden = await getOrdenDeTrabajoById(detallesOrden[0].Orden_Trabajo)
   if (!orden) {
     throw new ReferenceError("Orden de trabajo no encontrada")

@@ -20,7 +20,7 @@ import { cajaRouter } from "./routers/cajaRouter"
 import { cajaContableRouter } from "./routers/cajaContableRouter"
 import { gastosRouter } from "./routers/gastosRouter"
 import { formaPagoRouter } from "./routers/formaPagoRouter"
-
+import { sucursalesRouter } from "./routers/sucursalesRouter"
 
 const app = express()
 
@@ -38,19 +38,20 @@ app.use("/api/categorias", categoriaRouter)
 app.use("/api/subcategorias", subCategoriasRouter)
 app.use("/api/proveedores", proveedoresRouter)
 app.use("/api/marcasProductos", marcaProductosRouter)
-app.use("/api/productos", productosRouter)  
+app.use("/api/productos", productosRouter)
 app.use("/api/ordenesDeTrabajo", ordenDeTrabajoRouter)
 app.use("/api/ventas", cajaRouter)
 app.use("/api/cajaContable", cajaContableRouter)
 app.use("/api/gastos", gastosRouter)
 app.use("/api/formaPago", formaPagoRouter)
+app.use("/api/sucursales", sucursalesRouter)
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*'); // Permite todos los orígenes
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
+  res.header("Access-Control-Allow-Origin", "*") // Permite todos los orígenes
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+  next()
+})
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({

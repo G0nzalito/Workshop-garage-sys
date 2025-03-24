@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { obtenerFiltrados, getProductoByCodigo } from '../../../../servicies/productosService.js'
 import Select from 'react-select'
 import { useConsts } from '@renderer/Contexts/constsContext.js'
+import { Pencil, PlusCircle, Trash } from 'lucide-react'
 
 type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
 type Productos = Database['public']['Tables']['Productos']['Row']
@@ -285,6 +286,7 @@ export default function BusquedaProductos(): JSX.Element {
             <th>Marca</th>
             <th>Proveedor</th>
             <th>Stock</th>
+            <th>Acciones</th>
             <tbody>
               {productos.length > 0 ? (
                 productos.map((producto) => {
@@ -320,6 +322,12 @@ export default function BusquedaProductos(): JSX.Element {
                         }
                       </td>
                       <td>{producto.Stock}</td>
+                      <td>
+                        <div className='flex gap-2'>
+                          <button type="button" className="btn btn-warning btn-soft"><Pencil size={16} /></button>
+                          <button type="button" className="btn btn-error btn-soft"><Trash size={16} /></button>
+                          <button type="button" className="btn btn-info btn-soft"><PlusCircle size={16}/></button>
+                        </div></td>
                     </tr>
                   )
                 })

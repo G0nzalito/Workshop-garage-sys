@@ -3,7 +3,7 @@ import { useLocation } from 'wouter'
 import { X, CirclePlus } from 'lucide-react'
 import { getProductoByCodigo, hayStockParaVenta } from '../../../servicies/productosService'
 import { Database } from '../../../types/database.types'
-import CobroSinODT from '@renderer/components/Cobro/CobroSinODT.js'
+import CobroSinODT from '@renderer/components/Cobro/CobroSinODT'
 import { toast } from 'sonner'
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { getClientes } from '../../../servicies/clientesService'
@@ -13,6 +13,9 @@ import {
   getMarketing,
   getComprobantes
 } from '../../../servicies/formaPagoService'
+import SeleccionSucursal from '@renderer/components/Administrativo/SeleccionSucursal'
+import { getSucursales } from '../../../servicies/sucursalesService'
+import PopUp from '@renderer/specificComponents/PopUp'
 
 type Producto = Database['public']['Tables']['Productos']['Row']
 
@@ -26,7 +29,17 @@ export default function WelcomeComponent(): JSX.Element {
   const [total, setTotal] = useState(0)
   const [cobrando, setCobrando] = useState(false)
 
-  const { setClientes, setFormasPago, setTarjetas, setMarketing, setComprobantes } = useConsts()
+  const {
+    setClientes,
+    setFormasPago,
+    setTarjetas,
+    setMarketing,
+    setComprobantes,
+    sucursalSeleccionada: sucursal,
+    setSucursales
+  } = useConsts()
+
+  const [seleccionSucursal, setSeleccionSucursal] = useState(false)
 
   const handleChange = (e): void => {
     const { name, value } = e.target
@@ -145,6 +158,13 @@ export default function WelcomeComponent(): JSX.Element {
     getComprobantes().then((comprobantes) => {
       setComprobantes(comprobantes)
     })
+
+    getSucursales().then((sucursales) => {
+      setSucursales(sucursales)
+      if (!sucursal) {
+        setSeleccionSucursal(true)
+      }
+    })
   }, [])
 
   return (
@@ -260,6 +280,12 @@ export default function WelcomeComponent(): JSX.Element {
           setProductos={setCesta}
         ></CobroSinODT>
       </div>
+      <PopUp
+        Component={SeleccionSucursal}
+        open={seleccionSucursal}
+        onClose={() => setSeleccionSucursal(false)}
+        mainTitle="Seleccion de sucursal"
+      ></PopUp>
     </>
   )
 }

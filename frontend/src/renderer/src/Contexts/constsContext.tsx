@@ -10,8 +10,11 @@ type MarcasProductos = Database['public']['Tables']['Marca_de_Productos']['Row']
 type Proveedores = Database['public']['Tables']['Proveedores']['Row']
 type Categoria = Database['public']['Tables']['Categorias']['Row']
 type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
+type Sucursal = Database['public']['Tables']['Sucursales']['Row']
 
 type ClientesContextData = {
+  sucursalSeleccionada: number
+  setSucursalSeleccionada: React.Dispatch<React.SetStateAction<number>>
   clientes: Cliente[]
   setClientes: React.Dispatch<React.SetStateAction<Cliente[]>>
   formasPago: FormaDePago[]
@@ -30,6 +33,8 @@ type ClientesContextData = {
   setCategorias: React.Dispatch<React.SetStateAction<Categoria[]>>
   subCategorias: SubCategoria[]
   setSubCategorias: React.Dispatch<React.SetStateAction<SubCategoria[]>>
+  sucursales: Sucursal[]
+  setSucursales: React.Dispatch<React.SetStateAction<Sucursal[]>>
 }
 
 export const ConstContext = createContext<ClientesContextData | undefined>(undefined)
@@ -44,10 +49,14 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [proveedores, setProveedores] = useState<Proveedores[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [subCategorias, setSubCategorias] = useState<SubCategoria[]>([])
+  const [sucursal, setSucursal] = useState<number>(0)
+  const [sucursales, setSucursales] = useState<Sucursal[]>([])
 
   return (
     <ConstContext.Provider
       value={{
+        sucursalSeleccionada: sucursal,
+        setSucursalSeleccionada: setSucursal,
         clientes,
         setClientes,
         formasPago,
@@ -65,7 +74,9 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         categorias,
         setCategorias,
         subCategorias,
-        setSubCategorias
+        setSubCategorias,
+        sucursales,
+        setSucursales
       }}
     >
       {children}
@@ -80,4 +91,3 @@ export const useConsts = () => {
   }
   return context
 }
-

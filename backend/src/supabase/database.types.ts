@@ -20,10 +20,10 @@ export type Database = {
           N_Cupon: number | null
           N_Lote: number | null
           Numero_Documento_Cliente: number
-          Operador_1: number | null
-          Operador_2: number | null
+          Operador_1: string | null
+          Operador_2: string | null
           Sub_Total: number
-          Supervisor: number | null
+          Supervisor: string | null
           Tarjeta: number | null
           Tipo_de_comprobante: number | null
           Tipo_Documento_Cliente: number
@@ -40,10 +40,10 @@ export type Database = {
           N_Cupon?: number | null
           N_Lote?: number | null
           Numero_Documento_Cliente: number
-          Operador_1?: number | null
-          Operador_2?: number | null
+          Operador_1?: string | null
+          Operador_2?: string | null
           Sub_Total: number
-          Supervisor?: number | null
+          Supervisor?: string | null
           Tarjeta?: number | null
           Tipo_de_comprobante?: number | null
           Tipo_Documento_Cliente: number
@@ -60,10 +60,10 @@ export type Database = {
           N_Cupon?: number | null
           N_Lote?: number | null
           Numero_Documento_Cliente?: number
-          Operador_1?: number | null
-          Operador_2?: number | null
+          Operador_1?: string | null
+          Operador_2?: string | null
           Sub_Total?: number
-          Supervisor?: number | null
+          Supervisor?: string | null
           Tarjeta?: number | null
           Tipo_de_comprobante?: number | null
           Tipo_Documento_Cliente?: number
@@ -105,7 +105,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Vehiculo"
             referencedColumns: ["Patente"]
-          },
+          }
         ]
       }
       "Caja Contable": {
@@ -137,7 +137,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Conceptos Caja Contable"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       Categorias: {
@@ -199,7 +199,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Tipo_documento"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       Cobranzas: {
@@ -209,6 +209,7 @@ export type Database = {
           Facturas_Canceladas: string | null
           Fecha: string
           Forma_de_Pago: number
+          id: number
           Lote: number | null
           Monto: number
           Numero_Documento_Cliente: number
@@ -223,6 +224,7 @@ export type Database = {
           Facturas_Canceladas?: string | null
           Fecha?: string
           Forma_de_Pago: number
+          id?: number
           Lote?: number | null
           Monto: number
           Numero_Documento_Cliente: number
@@ -237,6 +239,7 @@ export type Database = {
           Facturas_Canceladas?: string | null
           Fecha?: string
           Forma_de_Pago?: number
+          id?: number
           Lote?: number | null
           Monto?: number
           Numero_Documento_Cliente?: number
@@ -252,7 +255,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Cliente"
             referencedColumns: ["Tipo_Documento", "Numero_Documento"]
-          },
+          }
         ]
       }
       "Conceptos Caja Contable": {
@@ -292,7 +295,7 @@ export type Database = {
           Fecha: string
           id: number
           KilometroXDia: number
-          Orden_Trabajo: number
+          Orden_Trabajo: number | null
           Producto: string
           Proximo_Service: string
           SubTotal: number
@@ -303,7 +306,7 @@ export type Database = {
           Fecha?: string
           id?: number
           KilometroXDia: number
-          Orden_Trabajo: number
+          Orden_Trabajo?: number | null
           Producto: string
           Proximo_Service: string
           SubTotal: number
@@ -314,7 +317,7 @@ export type Database = {
           Fecha?: string
           id?: number
           KilometroXDia?: number
-          Orden_Trabajo?: number
+          Orden_Trabajo?: number | null
           Producto?: string
           Proximo_Service?: string
           SubTotal?: number
@@ -333,7 +336,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Productos"
             referencedColumns: ["Codigo"]
-          },
+          }
         ]
       }
       "Cuentas Gastos": {
@@ -398,7 +401,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Cuentas Gastos"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       Historial_Precios: {
@@ -427,7 +430,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Productos"
             referencedColumns: ["Codigo"]
-          },
+          }
         ]
       }
       Marca_de_Productos: {
@@ -469,14 +472,17 @@ export type Database = {
       "Medios Pago": {
         Row: {
           id: number
+          Interes: number
           Nombre: string
         }
         Insert: {
           id?: number
+          Interes?: number
           Nombre: string
         }
         Update: {
           id?: number
+          Interes?: number
           Nombre?: string
         }
         Relationships: []
@@ -504,7 +510,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Marca_de_Vehiculos"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       "Ordenes de trabajo": {
@@ -546,7 +552,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Cliente"
             referencedColumns: ["Tipo_Documento", "Numero_Documento"]
-          },
+          }
         ]
       }
       Productos: {
@@ -611,7 +617,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "SubCategorias"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       Proveedores: {
@@ -658,8 +664,29 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Categorias"
             referencedColumns: ["id"]
-          },
+          }
         ]
+      }
+      Sucursales: {
+        Row: {
+          Dirección: string
+          id: number
+          Nombre: string
+          Telefóno: number
+        }
+        Insert: {
+          Dirección: string
+          id?: number
+          Nombre?: string
+          Telefóno: number
+        }
+        Update: {
+          Dirección?: string
+          id?: number
+          Nombre?: string
+          Telefóno?: number
+        }
+        Relationships: []
       }
       Tarjetas: {
         Row: {
@@ -726,7 +753,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Marca_de_Vehiculos"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       Vehiculos_de_clientes: {
@@ -765,7 +792,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Cliente"
             referencedColumns: ["Tipo_Documento", "Numero_Documento"]
-          },
+          }
         ]
       }
     }
@@ -793,7 +820,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -802,14 +829,14 @@ export type Tables<
     ? R
     : never
   : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
+      PublicSchema["Views"])
+  ? (PublicSchema["Tables"] &
+      PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+      Row: infer R
+    }
+    ? R
     : never
+  : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -817,7 +844,7 @@ export type TablesInsert<
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
@@ -825,12 +852,12 @@ export type TablesInsert<
     ? I
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+      Insert: infer I
+    }
+    ? I
     : never
+  : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -838,7 +865,7 @@ export type TablesUpdate<
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
@@ -846,12 +873,12 @@ export type TablesUpdate<
     ? U
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+      Update: infer U
+    }
+    ? U
     : never
+  : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -859,12 +886,12 @@ export type Enums<
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never = never
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
+  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
@@ -874,9 +901,9 @@ export type CompositeTypes<
     schema: keyof Database
   }
     ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never = never
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never

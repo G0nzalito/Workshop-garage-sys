@@ -1,4 +1,4 @@
-import { X } from "lucide-react"
+import { X } from 'lucide-react'
 
 export default function PopUp({
   open,
@@ -11,7 +11,7 @@ export default function PopUp({
   onClose: () => void
   Component: () => JSX.Element
   mainTitle: string
-  selectedCategoria: number | null
+  selectedCategoria?: number | null
 }): JSX.Element {
   return (
     <div
@@ -26,16 +26,13 @@ export default function PopUp({
       >
         {/* Este div es el contenido de mi ventana emergente */}
         <div className="flex justify-between items-center">
-          <h2 className=" text-3xl flex justify-start justify-items-start p-4">
-            {mainTitle}
-          </h2>
+          <h2 className="text-white text-3xl flex justify-start justify-items-start p-4">{mainTitle}</h2>
           <button className="btn btn-error" onClick={onClose}>
             <X />
           </button>
         </div>
-        <Component onClose={onClose} selectedCategoria={selectedCategoria}/>
+        <Component onClose={onClose} selectedCategoria={selectedCategoria} />
       </div>
     </div>
   )
 }
-
