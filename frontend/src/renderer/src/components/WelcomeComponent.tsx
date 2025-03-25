@@ -184,6 +184,8 @@ export default function WelcomeComponent(): JSX.Element {
     })
   }, [])
 
+  console.log(sucursal)
+
   return (
     <>
       <div className="p-24 bg-base-100 text-white">

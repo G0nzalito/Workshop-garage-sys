@@ -1,5 +1,5 @@
 import { Database } from '@types'
-import React, { createContext, ReactNode, useContext, useState } from 'react'
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 
 type Cliente = Database['public']['Tables']['Cliente']['Row']
 type FormaDePago = Database['public']['Tables']['Medios Pago']['Row']
@@ -49,8 +49,26 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [proveedores, setProveedores] = useState<Proveedores[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [subCategorias, setSubCategorias] = useState<SubCategoria[]>([])
-  const [sucursal, setSucursal] = useState<number>(0)
+  const [sucursal, setSucursal] = useState<number>(() => {
+    const storedSucursal = sessionStorage.getItem('sucursalSeleccionada')
+    if (storedSucursal) {
+      return parseInt(storedSucursal)
+    }
+    return 0
+  })
   const [sucursales, setSucursales] = useState<Sucursal[]>([])
+
+  // useEffect(() => {
+  //   const storedSucursal = sessionStorage.getItem('sucursalSeleccionada')
+  //   if (storedSucursal) {
+  //     setSucursal(parseInt(storedSucursal))
+  //   }
+  // }, [])
+
+  useEffect(() => {
+    // console.log('holaaaa')
+    sessionStorage.setItem('sucursalSeleccionada', sucursal.toString())
+  }, [sucursal])
 
   return (
     <ConstContext.Provider
