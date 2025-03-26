@@ -211,7 +211,7 @@ export default function CobroSinODT({
         productos.forEach((producto) => {
           console.log(producto)
         })
-        await modificarStockProducto(productos, sucursalSeleccionada)
+        await modificarStockProducto(productos, sucursalSeleccionada, false)
         console.log('Stock modificado')
         setProductos([])
         onClose()

@@ -24,6 +24,9 @@ type formDataNuevoProducto = {
   Stock: number
 }
 
+type ProductoAInsertar = Database['public']['Tables']['Productos']['Insert']
+type StockAActualizar = Database['public']['Tables']['Stock']['Update']
+
 const customStyles = {
   container: (provided: any) => ({
     ...provided,
@@ -89,7 +92,7 @@ export default function NuevoProducto(): JSX.Element {
     Stock: 0
   })
 
-  const { proveedores, categorias, subCategorias, marcasProductos } = useConsts()
+  const { proveedores, categorias, subCategorias, marcasProductos, sucursalSeleccionada, sucursales } = useConsts()
   const [Categoria, setCategoria] = useState()
   const [SubCategoria, setSubCategoria] = useState()
   const [subCategoriasLocal, setSubCategoriasLocal] = useState<SubCategoria[]>()
@@ -153,12 +156,30 @@ export default function NuevoProducto(): JSX.Element {
       }
     }
 
+    const nuevoProducto: ProductoAInsertar ={
+      Categoria: formData.Categoria,
+      Codigo: formData.Codigo,
+      Descripcion: formData.Descripcion,
+      Marca: formData.Marca,
+      Precio: formData.Precio,
+      Proveedor: formData.Proveedor,
+      Stock: formData.Stock,
+      SubCategoria: formData.SubCategoria
+    } 
+
+    const nuevoStock: StockAActualizar = {
+      Cantidad: formData.Stock,
+      Codigo: formData.Codigo,
+      Sucursal_id: sucursalSeleccionada
+      
+    }
+
     if (!falta) {
       console.log('Enviando datos')
       const toastEspera = toast.loading('Agregando producto', {
         description: 'Agregando producto a la base de datos'
       })
-      const respuesta = await crearProducto(formData)
+      const respuesta = await crearProducto(nuevoProducto, nuevoStock, sucursales)
       toast.dismiss(toastEspera)
       if (respuesta === 400) {
         toast.error('Codigo Duplicado', {

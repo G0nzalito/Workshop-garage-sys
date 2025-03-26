@@ -17,6 +17,7 @@ type PrecioHistorialAInsertar =
   Database["public"]["Tables"]["Historial_Precios"]["Insert"]
 
 type StockProducto = Database["public"]["Tables"]["Stock"]["Row"]
+type StockAInsertar = Database["public"]["Tables"]["Stock"]["Insert"]
 
 async function getProductos() {
   const { data, error } = await supabase
@@ -261,6 +262,19 @@ async function guardarPrecioAntiguo(precio: number, productId: string) {
   }
 }
 
+async function guardarStockSucursal(stock: StockAInsertar) {
+  const { data, error } = await supabase
+    .from("Stock")
+    .insert(stock)
+    .select()
+    .single()
+  if (error) {
+    throw error
+  } else {
+    return data as StockProducto
+  }
+}
+
 export {
   getProductos,
   getProductosByCodigo,
@@ -269,5 +283,6 @@ export {
   deleteProductos,
   modificarStockProducto,
   getProductosFiltrados,
-  obtenerStockProducto
+  obtenerStockProducto,
+  guardarStockSucursal
 }

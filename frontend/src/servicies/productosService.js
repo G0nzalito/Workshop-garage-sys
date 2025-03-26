@@ -38,14 +38,21 @@ export const hayStockParaVenta = async (codigo, cantidad, sucursal_id) => {
   }
 }
 
-export const modificarStockProducto = async (productos, Sucursal_id) => {
+export const modificarStockProducto = async (productos, Sucursal_id, suma) => {
   const Productos = []
 
   for (const producto of productos) {
-    Productos.push({
-      Codigo: producto.Producto.Codigo,
-      Cantidad: -producto.cantidad
-    })
+    if (suma) {
+      Productos.push({
+        Codigo: producto.Producto.Codigo,
+        Cantidad: producto.cantidad
+      })
+    } else {
+      Productos.push({
+        Codigo: producto.Producto.Codigo,
+        Cantidad: -producto.cantidad
+      })
+    }
   }
 
   const response = await axios.put(`${API_URL}/updateStock`, {
@@ -81,9 +88,34 @@ export const obtenerFiltrados = async (filtros, sucursal) => {
   }
 }
 
-export const crearProducto = async (producto) => {
+export const crearProducto = async (nuevoProducto, nuevoStock, sucursales) => {
   try {
-    const response = await axios.post(`${API_URL}/create`, producto)
+    const response = await axios.post(`${API_URL}/create`, nuevoProducto)
+    if (response.status === 201) {
+      for (let sucursal of sucursales) {
+        if (nuevoStock.Sucursal_id === sucursal.id) {
+          await crearStockProducto(nuevoStock)
+        } else {
+          await crearStockProducto({
+            Sucursal_id: sucursal.id,
+            Codigo: nuevoProducto.Codigo,
+            Cantidad: 0
+          })
+        }
+      }
+    }
+    return response.data
+  } catch (error) {
+    if (error.status === 500) {
+      console.log(error)
+    }
+    return error.status
+  }
+}
+
+export const crearStockProducto = async (nuevoStock) => {
+  try {
+    const response = await axios.post(`${API_URL}/uploadStock`, nuevoStock)
     return response.data
   } catch (error) {
     if (error.status === 500) {

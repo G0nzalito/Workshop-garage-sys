@@ -9,11 +9,13 @@ import {
   modificarStockProducto,
   getProductosFiltrados,
   obtenerStockProducto,
+  guardarStockSucursal,
 } from "../service/productosService"
 import { getSucursalById } from "../service/sucursalService"
 
 type ProductoAInsertar = Database["public"]["Tables"]["Productos"]["Insert"]
 type Producto = Database["public"]["Tables"]["Productos"]["Row"]
+type StockAInsertar = Database["public"]["Tables"]["Stock"]["Insert"]
 
 export const productosRouter = appExpress.Router()
 
@@ -184,7 +186,7 @@ productosRouter.get("/hayStock", async (req, res) => {
 productosRouter.get("/stock", async (req, res) => {
   const { Codigo, Sucursal_id } = req.query
 
-  console.log('Query', req.query)
+  console.log("Query", req.query)
 
   try {
     const producto = await getProductosByCodigo(Codigo as string)
@@ -211,5 +213,25 @@ productosRouter.get("/stock", async (req, res) => {
     } else {
       res.status(500).json({ error })
     }
+  }
+})
+
+productosRouter.post("/uploadStock", async (req, res) => {
+  const nuevoStock: StockAInsertar = req.body
+
+  if (!nuevoStock.Codigo || !nuevoStock.Sucursal_id) {
+    res.status(400).json({ error: "Codigo y Sucursal son requeridos" })
+  }
+
+  if (!nuevoStock.Cantidad) {
+    nuevoStock.Cantidad = 0
+  }
+
+  try {
+    const stock = await guardarStockSucursal(nuevoStock)
+
+    res.status(201).json(stock)
+  } catch (error) {
+    res.status(500).json(error)
   }
 })
