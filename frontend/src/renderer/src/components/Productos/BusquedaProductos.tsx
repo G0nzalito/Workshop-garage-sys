@@ -12,6 +12,7 @@ import {
 import PopUp from '@renderer/specificComponents/PopUp.js'
 import AumentarStock from '@renderer/components/Productos/AccionesProductos/AumentarStock.js'
 import EliminarProducto from '@renderer/components/Productos/AccionesProductos/EliminarProducto.js'
+import EditarProducto from '@renderer/components/Productos/AccionesProductos/EditarProducto.js'
 
 type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
 type Productos = Database['public']['Tables']['Productos']['Row']
@@ -98,6 +99,7 @@ export default function BusquedaProductos(): JSX.Element {
   // use states para abrir modals
   const [aumentarStock, setAumentarStock] = useState(false)
   const [eliminarProducto, setEliminarProducto] = useState(false)
+  const [editarProducto, setEditarProducto] = useState(false)
 
   const openModals = (producto: Productos, setModal: (boolean) => void) => {
     setProductoSeleccionado(producto)
@@ -193,8 +195,9 @@ export default function BusquedaProductos(): JSX.Element {
     }
     const toastLoading = toast.loading('Buscando productos...')
     if (formdata.codigo !== '') {
-      setCargando(true)
+      setCargando(true) 
       handleFilterCodigo(formdata.codigo, sucursalSeleccionada).then((data) => {
+        limiparFiltros()
         setProductos(data)
         setCargando(false)
         toast.dismiss(toastLoading)
@@ -202,6 +205,7 @@ export default function BusquedaProductos(): JSX.Element {
       return
     }
     obtenerFiltrados(filtros, sucursalSeleccionada).then((data) => {
+      limiparFiltros()
       setProductos(data)
       toast.dismiss(toastLoading)
     })
@@ -385,6 +389,9 @@ export default function BusquedaProductos(): JSX.Element {
                             type="button"
                             className="btn btn-warning btn-soft tooltip"
                             data-tip="Editar Producto"
+                            onClick={() => {
+                              openModals(producto.Producto, setEditarProducto)
+                            }}
                           >
                             <Pencil size={16} />
                           </button>
@@ -441,6 +448,14 @@ export default function BusquedaProductos(): JSX.Element {
           setEliminarProducto(false)
         }}
         open={eliminarProducto}
+      />
+      <PopUp
+        Component={EditarProducto}
+        mainTitle="Editar Producto"
+        onClose={() => {
+          setEditarProducto(false)
+        }}
+        open={editarProducto}
       />
     </>
   )
