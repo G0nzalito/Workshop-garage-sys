@@ -163,7 +163,6 @@ export default function NuevoProducto(): JSX.Element {
       Marca: formData.Marca,
       Precio: formData.Precio,
       Proveedor: formData.Proveedor,
-      Stock: formData.Stock,
       SubCategoria: formData.SubCategoria
     } 
 

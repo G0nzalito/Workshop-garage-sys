@@ -1,10 +1,17 @@
 import { Database } from '@/src/types/database.types'
-import { useEffect, useState } from 'react'
-import { obtenerFiltrados, getProductoByCodigo } from '../../../../servicies/productosService.js'
-import Select from 'react-select'
 import { useConsts } from '@renderer/Contexts/constsContext.js'
 import { Pencil, PlusCircle, Trash } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import Select from 'react-select'
 import { toast } from 'sonner'
+import {
+  getProductoByCodigo,
+  obtenerFiltrados,
+  obtenerStockProductos
+} from '../../../../servicies/productosService.js'
+import PopUp from '@renderer/specificComponents/PopUp.js'
+import AumentarStock from '@renderer/components/Productos/AccionesProductos/AumentarStock.js'
+import EliminarProducto from '@renderer/components/Productos/AccionesProductos/EliminarProducto.js'
 
 type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
 type Productos = Database['public']['Tables']['Productos']['Row']
@@ -75,9 +82,27 @@ export default function BusquedaProductos(): JSX.Element {
   const [categoria, setCategoria] = useState()
   const [subcategoriaSelec, setSubcategoriaSelec] = useState()
   const [subCategoriasLocal, setSubCategoriasLocal] = useState<SubCategoria[]>([])
+  const [cargando, setCargando] = useState(false)
   const [productos, setProductos] = useState<{ Producto: Productos; Stock: number }[]>()
-  const { marcasProductos, categorias, subCategorias, proveedores, sucursalSeleccionada } =
-    useConsts()
+
+  const codigoProducto = useRef(0)
+  const {
+    marcasProductos,
+    categorias,
+    subCategorias,
+    proveedores,
+    sucursalSeleccionada,
+    setProductoSeleccionado
+  } = useConsts()
+
+  // use states para abrir modals
+  const [aumentarStock, setAumentarStock] = useState(false)
+  const [eliminarProducto, setEliminarProducto] = useState(false)
+
+  const openModals = (producto: Productos, setModal: (boolean) => void) => {
+    setProductoSeleccionado(producto)
+    setModal(true)
+  }
 
   const handleChange = (e): undefined => {
     const { name, value } = e.target
@@ -145,6 +170,17 @@ export default function BusquedaProductos(): JSX.Element {
     setProductos()
   }
 
+  const handleFilterCodigo = async (codigo, sucursal) => {
+    const productoConStock = []
+    const producto = await getProductoByCodigo(codigo)
+    if (producto) {
+      const stock = await obtenerStockProductos(codigo, sucursal)
+      productoConStock.push({ Producto: producto, Stock: stock[0].Cantidad })
+    }
+
+    return productoConStock
+  }
+
   const handleFilter = (e) => {
     e.preventDefault()
 
@@ -157,12 +193,12 @@ export default function BusquedaProductos(): JSX.Element {
     }
     const toastLoading = toast.loading('Buscando productos...')
     if (formdata.codigo !== '') {
-      getProductoByCodigo(formdata.codigo, sucursalSeleccionada).then((data) => {
-        console.log(data)
-        setProductos([data])
+      setCargando(true)
+      handleFilterCodigo(formdata.codigo, sucursalSeleccionada).then((data) => {
+        setProductos(data)
+        setCargando(false)
         toast.dismiss(toastLoading)
       })
-
       return
     }
     obtenerFiltrados(filtros, sucursalSeleccionada).then((data) => {
@@ -284,7 +320,7 @@ export default function BusquedaProductos(): JSX.Element {
       <div className="divider"></div>
       <div>LISTA DE PRODUCTOS</div>
       <div>
-        {productos ? (
+        {productos && !cargando ? (
           <table className="table outline-1">
             <th>Código</th>
             <th>Descripción</th>
@@ -294,6 +330,7 @@ export default function BusquedaProductos(): JSX.Element {
             <th>Marca</th>
             <th>Proveedor</th>
             <th>Stock</th>
+            <th>Listado</th>
             <th>Acciones</th>
             <tbody>
               {productos.length > 0 ? (
@@ -336,14 +373,39 @@ export default function BusquedaProductos(): JSX.Element {
                       </td>
                       <td>{producto.Stock}</td>
                       <td>
+                        {producto.Producto.Dado_de_baja ? (
+                          <span className="text-red-400"> No listado </span>
+                        ) : (
+                          <span className="text-green-400"> Listado </span>
+                        )}
+                      </td>
+                      <td>
                         <div className="flex gap-2">
-                          <button type="button" className="btn btn-warning btn-soft">
+                          <button
+                            type="button"
+                            className="btn btn-warning btn-soft tooltip"
+                            data-tip="Editar Producto"
+                          >
                             <Pencil size={16} />
                           </button>
-                          <button type="button" className="btn btn-error btn-soft">
+                          <button
+                            type="button"
+                            className="btn btn-error btn-soft tooltip"
+                            data-tip="Eliminar Producto"
+                            onClick={() => {
+                              openModals(producto.Producto, setEliminarProducto)
+                            }}
+                          >
                             <Trash size={16} />
                           </button>
-                          <button type="button" className="btn btn-info btn-soft">
+                          <button
+                            type="button"
+                            className="btn btn-info btn-soft tooltip"
+                            data-tip="Agregar Stock"
+                            onClick={() => {
+                              openModals(producto.Producto, setAumentarStock)
+                            }}
+                          >
                             <PlusCircle size={16} />
                           </button>
                         </div>
@@ -364,6 +426,22 @@ export default function BusquedaProductos(): JSX.Element {
           </div>
         )}
       </div>
+      <PopUp
+        Component={AumentarStock}
+        mainTitle="Aumentar Stock Producto"
+        onClose={() => {
+          setAumentarStock(false)
+        }}
+        open={aumentarStock}
+      />
+      <PopUp
+        Component={EliminarProducto}
+        mainTitle="Eliminar Producto"
+        onClose={() => {
+          setEliminarProducto(false)
+        }}
+        open={eliminarProducto}
+      />
     </>
   )
 }

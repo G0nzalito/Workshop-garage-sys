@@ -54,7 +54,15 @@ const customStyles = {
   })
 }
 
-export default function SeleccionSucursal({ onClose, ...props }: { props: any, onClose: () => void }): JSX.Element {
+export default function SeleccionSucursal({
+  onClose,
+  open,
+  ...props
+}: {
+  props: any
+  open: boolean
+  onClose: () => void
+}): JSX.Element | null {
   const { setSucursalSeleccionada: setSucursal, sucursales } = useConsts()
   const [sucursalSelect, setSucursalSelect] = useState()
   const [formData, setFormData] = useState({
@@ -78,6 +86,10 @@ export default function SeleccionSucursal({ onClose, ...props }: { props: any, o
   const handleSubmit = () => {
     setSucursal(formData.sucursal)
     onClose()
+  }
+
+  if (!open) {
+    return null
   }
 
   return (

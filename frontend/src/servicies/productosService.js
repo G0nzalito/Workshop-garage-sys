@@ -7,17 +7,17 @@ export const getProductos = async () => {
   return responseData
 }
 
-export const getProductoByCodigo = async (codigo, sucursal) => {
+export const getProductoByCodigo = async (codigo) => {
   const response = await axios.get(`${API_URL}/specific`, { params: { Codigo: codigo } })
   if (response.status === 200) {
-    const producto = response.data
-    const stock = await obtenerStockProductos(codigo, sucursal)
-    if (stock) {
-      // console.log('Stock:', stock[0].Cantidad)
-      return { Producto: producto, Stock: stock[0].Cantidad }
-    } else {
-      throw new Error(`Error al obtener stock del producto`)
-    }
+    return response.data
+    // const stock = await obtenerStockProductos(codigo, sucursal)
+    // if (stock) {
+    //   // console.log('Stock:', stock[0].Cantidad)
+    //   return { Producto: producto, Stock: stock[0].Cantidad }
+    // } else {
+    //   throw new Error(`Error al obtener stock del producto`)
+    // }
   } else {
     if (response.status === 404) {
       return null
@@ -74,6 +74,7 @@ export const obtenerFiltrados = async (filtros, sucursal) => {
     const productosTemp = []
 
     for (const producto of productos) {
+      console.log('sucursal en obtener filtrados: ', sucursal)
       const stock = await obtenerStockProductos(producto.Codigo, sucursal)
       // console.log('Stock:', stock)
       productosTemp.push({ Producto: producto, Stock: stock[0].Cantidad })
@@ -127,6 +128,7 @@ export const crearStockProducto = async (nuevoStock) => {
 
 export const obtenerStockProductos = async (codigo, sucursal) => {
   try {
+    console.log('Sucursal:', sucursal)
     const response = await axios.get(`${API_URL}/stock`, {
       params: { Codigo: codigo, Sucursal_id: sucursal }
     })
@@ -141,8 +143,16 @@ export const obtenerStockProductos = async (codigo, sucursal) => {
   }
 }
 
-// export const getProductoWithStock = async (codigo, sucursal) => {
-//   try{
-//     const
-//   }
-// }
+export const eliminarProducto = async (codigo) => {
+  try {
+    const response = await axios.delete(`${API_URL}/delete`, { params: { Codigo: codigo } })
+    return response.data
+  } catch (error) {
+    if (error.status === 400) {
+      return error.status
+    } else {
+      console.log(error)
+      return error
+    }
+  }
+}

@@ -10,29 +10,29 @@ function App(): JSX.Element {
   // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
   return (
-    <ConstsProvider>
-      <>
-        <NavBar />
+      <ConstsProvider>
+        <>
+          <NavBar />
 
-        <main>
-          <Switch>
-            <Route path="/" component={WelcomeComponent} />
-            <Route path="/OrdenesDeTrabajo" component={ODTMain} />
-            {/* Productos */}
-            <Route path="/Productos" component={ProductosMain} />
-          </Switch>
-        </main>
-        <Toaster
-          closeButton
-          richColors
-          toastOptions={{
-            classNames: {
-              icon: 'hidden'
-            }
-          }}
-        />
-      </>
-    </ConstsProvider>
+          <main>
+            <Switch>
+              <Route path="/" component={WelcomeComponent} />
+              <Route path="/OrdenesDeTrabajo" component={ODTMain} />
+              {/* Productos */}
+              <Route path="/Productos" component={ProductosMain} />
+            </Switch>
+          </main>
+          <Toaster
+            closeButton
+            richColors
+            toastOptions={{
+              classNames: {
+                icon: 'hidden'
+              }
+            }}
+          />
+        </>
+      </ConstsProvider>
   )
 }
 

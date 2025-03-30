@@ -42,7 +42,7 @@ export default function WelcomeComponent(): JSX.Element {
     setTarjetas,
     setMarketing,
     setComprobantes,
-    sucursalSeleccionada: sucursal,
+    sucursalSeleccionada,
     setSucursales
   } = useConsts()
 
@@ -57,6 +57,7 @@ export default function WelcomeComponent(): JSX.Element {
   }
 
   const getProductos = async (data): Promise<void> => {
+    const toastLoading = toast.loading('Cargando producto')
     try {
       const itemExistente = cesta.find((item) => item.Producto.Codigo === data.Codigo)
 
@@ -93,13 +94,14 @@ export default function WelcomeComponent(): JSX.Element {
         return
       }
 
-      const producto: Producto = await getProductoByCodigo(data.Codigo)
+      const producto: Producto = await getProductoByCodigo(data.Codigo, sucursalSeleccionada)
 
       if (producto) {
         try {
-          const hayStock = await hayStockParaVenta(producto.Codigo, data.Cantidad, sucursal)
+          const hayStock = await hayStockParaVenta(producto.Codigo, data.Cantidad, sucursalSeleccionada)
           if (hayStock) {
-            const stock = (await obtenerStockProductos(data.Codigo, sucursal))[0]
+            console.log('Sucursal en componente: ', sucursalSeleccionada)
+            const stock = (await obtenerStockProductos(data.Codigo, sucursalSeleccionada))[0]
             if (cesta.length > 0) {
               setCesta([
                 ...cesta,
@@ -110,12 +112,14 @@ export default function WelcomeComponent(): JSX.Element {
                 { Producto: producto, cantidad: data.Cantidad, stockMaximo: stock.Cantidad }
               ])
             }
+            toast.dismiss(toastLoading)
             toast.success('Producto agregado con exito', {
               description: 'Figura en la tabla',
               duration: 3000
             })
           }
         } catch (noProductos) {
+          toast.dismiss(toastLoading)
           console.error(noProductos)
           toast.error('No hay stock suficiente', {
             description: 'No se puede agregar el producto',
@@ -124,6 +128,7 @@ export default function WelcomeComponent(): JSX.Element {
         }
       }
     } catch (err) {
+      toast.dismiss(toastLoading)
       console.error(err)
       toast.error('Producto no encontrado', {
         description: 'No se puede agregar el producto',
@@ -178,13 +183,13 @@ export default function WelcomeComponent(): JSX.Element {
 
     getSucursales().then((sucursales) => {
       setSucursales(sucursales)
-      if (!sucursal) {
+      if (!sucursalSeleccionada) {
         setSeleccionSucursal(true)
       }
     })
   }, [])
 
-  console.log(sucursal)
+  // console.log(sucursalSeleccionada)
 
   return (
     <>
@@ -208,7 +213,7 @@ export default function WelcomeComponent(): JSX.Element {
                     <td>{producto.Producto.Codigo}</td>
                     <td>{producto.Producto.Descripcion}</td>
                     <td>{producto.cantidad}</td>
-                    <td>{producto.Producto.Precio * producto.cantidad}</td>
+                    <td>${producto.Producto.Precio * producto.cantidad}</td>
                     <td>
                       <button
                         className="btn btn-error"
