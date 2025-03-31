@@ -156,3 +156,43 @@ export const eliminarProducto = async (codigo) => {
     }
   }
 }
+
+export const modificarProducto = async (codigo, cambios) => {
+  try {
+    const response = await axios.put(`${API_URL}/update`, {
+      Codigo: codigo,
+      Descripcion: cambios.Descripcion,
+      Precio: cambios.Precio,
+      PorcentajeAumento: cambios.PorcentajeAumento,
+      Baja: cambios.Baja,
+      Proveedor: cambios.Proveedor
+    })
+    return response.data
+  } catch (error) {
+    if (error.status === 400) {
+      return error.status
+    } else {
+      console.log(error)
+      return error
+    }
+  }
+}
+
+export const aumentarPrecioSegunCatYSCat = async (categoria, subcategoria, porcentaje) => {
+  try {
+    const response = await axios.put(`${API_URL}/updatePrecioCategoria`, {
+      Categoria: categoria,
+      SubCategoria: subcategoria,
+      Porcentaje: porcentaje
+    })
+    return response.data
+  } catch (error) {
+    if (error.status === 400) {
+      console.log(error)
+      return error.status
+    } else {
+      console.log(error)
+      return error
+    }
+  }
+}

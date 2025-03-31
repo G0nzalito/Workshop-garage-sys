@@ -9,7 +9,7 @@ import {
   obtenerFiltrados,
   obtenerStockProductos
 } from '../../../../servicies/productosService.js'
-import PopUp from '@renderer/specificComponents/PopUp.js'
+import Modal from '@renderer/specificComponents/Modal.js'
 import AumentarStock from '@renderer/components/Productos/AccionesProductos/AumentarStock.js'
 import EliminarProducto from '@renderer/components/Productos/AccionesProductos/EliminarProducto.js'
 import EditarProducto from '@renderer/components/Productos/AccionesProductos/EditarProducto.js'
@@ -86,7 +86,6 @@ export default function BusquedaProductos(): JSX.Element {
   const [cargando, setCargando] = useState(false)
   const [productos, setProductos] = useState<{ Producto: Productos; Stock: number }[]>()
 
-  const codigoProducto = useRef(0)
   const {
     marcasProductos,
     categorias,
@@ -151,6 +150,12 @@ export default function BusquedaProductos(): JSX.Element {
     setSubcategoriaSelec({ value: 0, label: 'Selecciona una subcategoría...' })
   }, [categoria])
 
+  useEffect(() => {
+    if (editarProducto === false && eliminarProducto === false && aumentarStock === false) {
+      limiparFiltros()
+    }
+  }, [editarProducto, eliminarProducto, aumentarStock])
+
   const limiparFiltros = () => {
     setFormData({
       descripcion: '',
@@ -195,7 +200,7 @@ export default function BusquedaProductos(): JSX.Element {
     }
     const toastLoading = toast.loading('Buscando productos...')
     if (formdata.codigo !== '') {
-      setCargando(true) 
+      setCargando(true)
       handleFilterCodigo(formdata.codigo, sucursalSeleccionada).then((data) => {
         limiparFiltros()
         setProductos(data)
@@ -433,7 +438,7 @@ export default function BusquedaProductos(): JSX.Element {
           </div>
         )}
       </div>
-      <PopUp
+      <Modal
         Component={AumentarStock}
         mainTitle="Aumentar Stock Producto"
         onClose={() => {
@@ -441,7 +446,7 @@ export default function BusquedaProductos(): JSX.Element {
         }}
         open={aumentarStock}
       />
-      <PopUp
+      <Modal
         Component={EliminarProducto}
         mainTitle="Eliminar Producto"
         onClose={() => {
@@ -449,7 +454,7 @@ export default function BusquedaProductos(): JSX.Element {
         }}
         open={eliminarProducto}
       />
-      <PopUp
+      <Modal
         Component={EditarProducto}
         mainTitle="Editar Producto"
         onClose={() => {

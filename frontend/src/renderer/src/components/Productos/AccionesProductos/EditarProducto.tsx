@@ -1,6 +1,8 @@
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { useState } from 'react'
 import Select from 'react-select'
+import { modificarProducto } from '../../../../../servicies/productosService.js'
+import { toast } from 'sonner'
 
 const customStyles = {
   container: (provided: any) => ({
@@ -25,8 +27,12 @@ const customStyles = {
 
   menu: (provided: any) => ({
     ...provided,
-
     backgroundColor: 'black'
+  }),
+
+  menuList: (provided: any) => ({
+    ...provided,
+    maxHeight: '150px'
   }),
 
   option: (provided: any, state: any) => ({
@@ -53,30 +59,38 @@ const customStyles = {
   })
 }
 
-export default function EditarProducto({ props }: { props: any }): JSX.Element {
+export default function EditarProducto({
+  props,
+  onClose
+}: {
+  props: any
+  onClose: () => void
+}): JSX.Element {
   const { productoSeleccionado, proveedores } = useConsts()
   const [Proveedor, setProveedor] = useState()
-  const [formData, setFormData] = useState({
-    Descripcion: '',
-    Precio: -1,
-    PorcentajeAumento: -1,
-    Baja: false,
-    Proveedor: -1
+  const [activeTab, setActiveTab] = useState<'precioDirecto' | 'porcentajeAumento'>('precioDirecto')
+  interface FormData {
+    Descripcion: string
+    Precio: number
+    PorcentajeAumento: number
+    Baja: boolean | string
+    Proveedor: number
+  }
+
+  const [formData, setFormData] = useState<FormData>({
+    Descripcion: productoSeleccionado.Descripcion,
+    Precio: productoSeleccionado.Precio,
+    PorcentajeAumento: 0,
+    Baja: productoSeleccionado.Dado_de_baja,
+    Proveedor: productoSeleccionado.Proveedor
   })
 
-  const handleChange = (e) => {
+  const handleChange = (e): void => {
     const { name, value } = e.target
-    if (name === 'Codigo') {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value.toUpperCase()
-      }))
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value
-      }))
-    }
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value
+    }))
   }
 
   const handleSelectChange = (selectedOption, setFunction, formDataName) => {
@@ -84,22 +98,39 @@ export default function EditarProducto({ props }: { props: any }): JSX.Element {
     handleChange({ target: { name: formDataName, value: selectedOption.value } })
   }
 
+  const handleSubmit = (e): void => {
+    e.preventDefault()
+
+    formData.Baja === '1' ? (formData.Baja = false) : (formData.Baja = true)
+    formData.Precio === productoSeleccionado.Precio ? (formData.Precio = 0) : formData.Precio
+    const toastLoading = toast.loading('Guardando cambios...')
+    modificarProducto(productoSeleccionado.Codigo, formData)
+      .then(() => {
+        toast.success('Producto editado correctamente', { id: toastLoading })
+        onClose()
+      })
+      .catch((error) => {
+        toast.error(`Error al editar el producto: ${error}`, { id: toastLoading })
+      })
+  }
+
   return (
-    <div className="h-180 w-150">
-      <div className="flex-col p-2">
-        <p className="text-xl">
+    <div className="h-130 w-150">
+      <div className="mb-8">
+        <p className="text-xl mb-2">
           Usted esta editando el producto:{' '}
           <span className="font-bold">&quot;{productoSeleccionado.Descripcion}&quot;</span>{' '}
         </p>
         <p className="text-lg"> Ingrese sus cambios en los siguientes campos:</p>
-        <form className="flex flex-col gap-2">
+        <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">Nueva descripción: </legend>
             <input
               name="Descripcion"
               type="text"
               className="input input-bordered w-full max-w-xs mb-2"
-              value={productoSeleccionado.Descripcion}
+              value={formData.Descripcion}
+              onChange={handleChange}
             />
           </fieldset>
           <div className="tabs tabs-border">
@@ -108,6 +139,11 @@ export default function EditarProducto({ props }: { props: any }): JSX.Element {
               name="cambioPrecio"
               className="tab"
               aria-label="Cambio precio directo $$"
+              onChange={() => {
+                setActiveTab('precioDirecto')
+                formData.PorcentajeAumento = 0
+              }}
+              checked={activeTab === 'precioDirecto'}
             />
             <div className="tab-content bg-base-100 border-base-300 p-6">
               <fieldset className="fieldset">
@@ -116,7 +152,8 @@ export default function EditarProducto({ props }: { props: any }): JSX.Element {
                   name="Precio"
                   type="number"
                   className="input input-bordered w-full max-w-xs mb-2 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  value={productoSeleccionado.Precio}
+                  value={formData.Precio}
+                  onChange={handleChange}
                 />
               </fieldset>
             </div>
@@ -125,6 +162,11 @@ export default function EditarProducto({ props }: { props: any }): JSX.Element {
               name="cambioPrecio"
               className="tab"
               aria-label="Aumento Porcentual %"
+              onChange={() => {
+                setActiveTab('porcentajeAumento')
+                formData.Precio = productoSeleccionado.Precio
+              }}
+              checked={activeTab === 'porcentajeAumento'}
             />
             <div className="tab-content bg-base-100 border-base-300 p-6">
               <fieldset className="fieldset">
@@ -137,6 +179,8 @@ export default function EditarProducto({ props }: { props: any }): JSX.Element {
                   type="number"
                   className="input input-bordered w-full max-w-xs mb-2 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   placeholder="Ingrese el porcentaje como numero entero"
+                  onChange={handleChange}
+                  value={formData.PorcentajeAumento === 0 ? '' : formData.PorcentajeAumento}
                 />
               </fieldset>
             </div>
@@ -144,9 +188,10 @@ export default function EditarProducto({ props }: { props: any }): JSX.Element {
           <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">Estado de listado de producto: </legend>
             <select
-              name="Dado_de_baja"
-              defaultValue={productoSeleccionado.Dado_de_baja ? 2 : 1}
+              name="Baja"
+              defaultValue={formData.Baja ? 2 : 1}
               className="select select-bordered w-full max-w-xs mb-2"
+              onChange={handleChange}
             >
               <option value={1} label="Listado" />
               <option value={2} label="No listado" />
@@ -173,9 +218,13 @@ export default function EditarProducto({ props }: { props: any }): JSX.Element {
               className="w-full"
             />
           </fieldset>
+          <div className="flex justify-end mt-8">
+            <button className="btn btn-success btn-soft gap-2">
+              <span className="material-symbols-outlined">Guardar Cambios</span>
+            </button>
+          </div>
         </form>
       </div>
     </div>
   )
 }
-

@@ -19,8 +19,8 @@ import {
 } from '../../../servicies/formaPagoService'
 import SeleccionSucursal from '@renderer/components/Administrativo/SeleccionSucursal'
 import { getSucursales } from '../../../servicies/sucursalesService'
-import PopUp from '@renderer/specificComponents/PopUp'
-import PopUpNoX from '@renderer/specificComponents/PopUpNoX'
+import Modal from '@renderer/specificComponents/Modal'
+import ModalNoX from '@renderer/specificComponents/ModalNoX'
 
 type Producto = Database['public']['Tables']['Productos']['Row']
 
@@ -98,7 +98,11 @@ export default function WelcomeComponent(): JSX.Element {
 
       if (producto) {
         try {
-          const hayStock = await hayStockParaVenta(producto.Codigo, data.Cantidad, sucursalSeleccionada)
+          const hayStock = await hayStockParaVenta(
+            producto.Codigo,
+            data.Cantidad,
+            sucursalSeleccionada
+          )
           if (hayStock) {
             console.log('Sucursal en componente: ', sucursalSeleccionada)
             const stock = (await obtenerStockProductos(data.Codigo, sucursalSeleccionada))[0]
@@ -295,19 +299,19 @@ export default function WelcomeComponent(): JSX.Element {
           >
             Cancelar venta
           </button>
-        <PopUpNoX
-          Component={SeleccionSucursal}
-          open={seleccionSucursal}
-          onClose={() => setSeleccionSucursal(false)}
-          mainTitle="Seleccion de sucursal"
-        ></PopUpNoX>
-        <CobroSinODT
-          open={cobrando}
-          onClose={() => setCobrando(false)}
-          total={total}
-          productos={cesta}
-          setProductos={setCesta}
-        ></CobroSinODT>
+          <ModalNoX
+            Component={SeleccionSucursal}
+            open={seleccionSucursal}
+            onClose={() => setSeleccionSucursal(false)}
+            mainTitle="Seleccion de sucursal"
+          ></ModalNoX>
+          <CobroSinODT
+            open={cobrando}
+            onClose={() => setCobrando(false)}
+            total={total}
+            productos={cesta}
+            setProductos={setCesta}
+          ></CobroSinODT>
         </div>
       </div>
     </>

@@ -5,7 +5,7 @@ import Select from 'react-select'
 import { crearProducto } from '../../../../servicies/productosService'
 import { toast } from 'sonner'
 import { BadgeCheck, PlusCircle, X } from 'lucide-react'
-import PopUp from '@renderer/specificComponents/PopUp'
+import Modal from '@renderer/specificComponents/Modal'
 import NavBar from '@renderer/specificComponents/Navbar'
 import NuevoProveedor from '@renderer/components/Proveedores/NuevoProveedor'
 import NuevaMarca from '@renderer/components/Marcas/Marcas Productos/NuevaMarca'
@@ -92,7 +92,14 @@ export default function NuevoProducto(): JSX.Element {
     Stock: 0
   })
 
-  const { proveedores, categorias, subCategorias, marcasProductos, sucursalSeleccionada, sucursales } = useConsts()
+  const {
+    proveedores,
+    categorias,
+    subCategorias,
+    marcasProductos,
+    sucursalSeleccionada,
+    sucursales
+  } = useConsts()
   const [Categoria, setCategoria] = useState()
   const [SubCategoria, setSubCategoria] = useState()
   const [subCategoriasLocal, setSubCategoriasLocal] = useState<SubCategoria[]>()
@@ -156,7 +163,7 @@ export default function NuevoProducto(): JSX.Element {
       }
     }
 
-    const nuevoProducto: ProductoAInsertar ={
+    const nuevoProducto: ProductoAInsertar = {
       Categoria: formData.Categoria,
       Codigo: formData.Codigo,
       Descripcion: formData.Descripcion,
@@ -164,13 +171,12 @@ export default function NuevoProducto(): JSX.Element {
       Precio: formData.Precio,
       Proveedor: formData.Proveedor,
       SubCategoria: formData.SubCategoria
-    } 
+    }
 
     const nuevoStock: StockAActualizar = {
       Cantidad: formData.Stock,
       Codigo: formData.Codigo,
       Sucursal_id: sucursalSeleccionada
-      
     }
 
     if (!falta) {
@@ -446,7 +452,7 @@ export default function NuevoProducto(): JSX.Element {
           </button>
         </div>
       </form>
-      <PopUp
+      <Modal
         open={nuevoProveedor}
         onClose={() => {
           setNuevoProveedor(false)
@@ -454,7 +460,7 @@ export default function NuevoProducto(): JSX.Element {
         Component={NuevoProveedor}
         mainTitle="Nuevo Proveedor"
       />
-      <PopUp
+      <Modal
         open={nuevaMarca}
         onClose={() => {
           setNuevaMarca(false)
@@ -462,7 +468,7 @@ export default function NuevoProducto(): JSX.Element {
         Component={NuevaMarca}
         mainTitle="Nueva Marca"
       />
-      <PopUp
+      <Modal
         open={nuevaCategoriaSubCategoria}
         onClose={() => {
           setNuevaCategoriaSubCategoria(false)

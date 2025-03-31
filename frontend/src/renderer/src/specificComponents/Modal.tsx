@@ -1,6 +1,6 @@
 import { X } from 'lucide-react'
 
-export default function PopUp({
+export default function Modal({
   open,
   onClose,
   Component,
@@ -23,7 +23,7 @@ export default function PopUp({
       {/* Este div es mi ventana emergente */}
 
       <div
-        className={`bg-accent-foreground outline-1 rounded-xl shadow p-6 transition-all ${open ? 'scale-100 opacity-100' : 'scale-125 opacity-0'}`}
+        className={`bg-accent-foreground outline-1 rounded-xl shadow p-6 transition-all ${open ? 'scale-100 opacity-100' : 'scale-125 opacity-0'}  max-h-[90vh] overflow-y-auto`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Este div es el contenido de mi ventana emergente */}

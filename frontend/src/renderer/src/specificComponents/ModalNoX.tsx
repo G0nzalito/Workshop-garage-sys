@@ -1,4 +1,4 @@
-export default function PopUp({
+export default function ModalNoX({
   open,
   onClose,
   Component,
@@ -25,7 +25,7 @@ export default function PopUp({
             {mainTitle}
           </h2>
         </div>
-        <Component onClose={onClose} open={open}/>
+        <Component onClose={onClose} open={open} />
       </div>
     </div>
   )
