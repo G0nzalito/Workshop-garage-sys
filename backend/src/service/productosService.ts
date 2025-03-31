@@ -51,7 +51,7 @@ async function getProductosFiltrados(
   marca: number,
   proveedor: number
 ) {
-  let query = supabase.from("Productos").select("*")
+  let query = supabase.from("Productos").select("*").eq("Dado_de_baja", false)
 
   if (descripcion !== "") {
     query = query.like("Descripcion", `%${descripcion}%`)
@@ -140,11 +140,11 @@ async function uploadProductos(producto: ProductoAInsertar) {
 async function updateProductos(
   codigoProducto: string,
   cambios: {
-    Descripcion: string
-    Precio: number
-    PorcentajeAumento: number
-    Baja: boolean
-    Proveedor: number
+    Descripcion?: string
+    Precio?: number
+    PorcentajeAumento?: number
+    Baja?: boolean
+    Proveedor?: number
   }
 ) {
   const productoACambiar = await getProductosByCodigo(codigoProducto)
@@ -163,7 +163,7 @@ async function updateProductos(
   if (cambios.Descripcion) {
     productoACambiar.Descripcion = cambios.Descripcion
   }
-  if (cambios.Baja) {
+  if (cambios.Baja !== undefined) {
     productoACambiar.Dado_de_baja = cambios.Baja
   }
   if (cambios.Precio) {
@@ -176,7 +176,9 @@ async function updateProductos(
     if (cambios.PorcentajeAumento && productoACambiar.Precio !== null) {
       const precioViejo = productoACambiar.Precio
 
-      productoACambiar.Precio *= 1 + cambios.PorcentajeAumento / 100
+      productoACambiar.Precio = parseFloat(
+        (precioViejo * 1 + cambios.PorcentajeAumento / 100).toFixed(2)
+      )
 
       await guardarPrecioAntiguo(precioViejo, productoACambiar.Codigo)
     }
@@ -209,22 +211,24 @@ async function deleteProductos(codigo: string) {
   }
 }
 
-async function obtenerStockProducto(codigo: string, sucursal_id?: number){
-  const request = supabase.from("Stock")
-    .select("*")
-    .eq("Codigo", codigo)
+async function obtenerStockProducto(codigo: string, sucursal_id?: number) {
+  const request = supabase.from("Stock").select("*").eq("Codigo", codigo)
   if (sucursal_id) {
     request.eq("Sucursal_id", sucursal_id)
   }
-  const {data, error} = await request
+  const { data, error } = await request
   if (error) {
     throw error
   }
-  console.log("Stock", data)
+  // console.log("Stock", data)
   return data as StockProducto[]
 }
 
-async function modificarStockProducto(codigo: string, cantidad: number, sucursal_id: number) {
+async function modificarStockProducto(
+  codigo: string,
+  cantidad: number,
+  sucursal_id: number
+) {
   const producto = await getProductosByCodigo(codigo)
   if (producto === null) {
     throw new ReferenceError("Producto no encontrado")
@@ -232,6 +236,8 @@ async function modificarStockProducto(codigo: string, cantidad: number, sucursal
   const stock = (await obtenerStockProducto(codigo, sucursal_id))[0]
 
   stock.Cantidad += cantidad
+
+  // console.log(stock)
 
   const { data, error } = await supabase
     .from("Stock")
@@ -275,6 +281,30 @@ async function guardarStockSucursal(stock: StockAInsertar) {
   }
 }
 
+async function aumentarPrecioPorCatYSCat(
+  categoria: number,
+  PorcentajeAumento: number,
+  subCategoria?: number
+) {
+  let productos: Producto[] = []
+
+  console.log("subCategoria", subCategoria)
+
+  if (subCategoria) {
+    productos = await getProductosFiltrados("", categoria, subCategoria, 0, 0)
+    console.log("con subcategorias", productos)
+  } else {
+    console.log("sin subcategorias", productos)
+    productos = await getProductosFiltrados("", categoria, 0, 0, 0)
+  }
+
+  for (const producto of productos) {
+    await updateProductos(producto.Codigo, {
+      PorcentajeAumento: PorcentajeAumento,
+    })
+  }
+}
+
 export {
   getProductos,
   getProductosByCodigo,
@@ -284,5 +314,6 @@ export {
   modificarStockProducto,
   getProductosFiltrados,
   obtenerStockProducto,
-  guardarStockSucursal
+  guardarStockSucursal,
+  aumentarPrecioPorCatYSCat,
 }

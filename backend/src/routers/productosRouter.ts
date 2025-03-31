@@ -10,6 +10,7 @@ import {
   getProductosFiltrados,
   obtenerStockProducto,
   guardarStockSucursal,
+  aumentarPrecioPorCatYSCat,
 } from "../service/productosService"
 import { getSucursalById } from "../service/sucursalService"
 
@@ -78,95 +79,12 @@ productosRouter.get("/specific", async (req: Request, res) => {
   }
 })
 
-productosRouter.post("/create", async (req, res) => {
-  const producto: ProductoAInsertar = req.body
-
-  if (!producto) {
-    res.status(400).json({ error: "Todos los datos son requeridos" })
-  } else {
-    try {
-      producto.SubCategoria === 0 ? (producto.SubCategoria = null) : null
-      const productoCreado = await uploadProductos(producto)
-      res.status(201).json(productoCreado)
-    } catch (error: unknown) {
-      if (error instanceof ReferenceError) {
-        res.status(400).json({ message: error.message })
-      } else {
-        res.status(500).json(error)
-      }
-    }
-  }
-})
-
-productosRouter.put("/update", async (req, res) => {
-  const { Codigo, Descripcion, Precio, PorcentajeAumento, Baja, Proveedor } =
-    req.body
-
-  if (!Codigo) {
-    res.status(400).json({ error: "Codigo is required" })
-  } else {
-    try {
-      const productoActualizado = await updateProductos(Codigo, {
-        Descripcion,
-        Precio,
-        PorcentajeAumento,
-        Baja,
-        Proveedor,
-      })
-      res.status(200).json(productoActualizado)
-    } catch (error) {
-      res.status(500).json({ error })
-    }
-  }
-})
-
-productosRouter.put("/updateStock", async (req, res) => {
-  const {
-    Productos,
-    Sucursal_id,
-  }: { Productos: ProductoStock[]; Sucursal_id: number } = req.body
-
-  // console.log("Body", req.body)
-
-  if (Productos.length === 0) {
-    res.status(400).json({ error: "No fueron enviados productos" })
-  } else {
-    try {
-      Productos.forEach(async (producto) => {
-        // console.log("producto", producto)
-        await modificarStockProducto(
-          producto.Codigo,
-          producto.Cantidad,
-          Sucursal_id
-        )
-      })
-      res.status(200).json("Los productos fueron actualizados con exito")
-    } catch (error) {
-      res.status(500).json({ error })
-    }
-  }
-})
-
-productosRouter.delete("/delete", async (req, res) => {
-  const { Codigo } = req.body
-
-  if (!Codigo) {
-    res.status(400).json({ error: "Codigo is required" })
-  } else {
-    try {
-      await deleteProductos(Codigo)
-      res.status(204).end()
-    } catch (error) {
-      res.status(500).json({ error })
-    }
-  }
-})
-
 productosRouter.get("/hayStock", async (req, res) => {
   const { Codigo, Cantidad, Sucursal_id } = req.query
 
   const producto = await getProductosByCodigo(Codigo as string)
   if (!producto) {
+    console.log("encontre este error")
     res.status(404).json({ error: "Producto no encontrado" })
   } else {
     const stock = (
@@ -196,10 +114,10 @@ productosRouter.get("/stock", async (req, res) => {
 
     console.log("sucursal id", Sucursal_id as string)
 
-    const sucursal_id = getSucursalById(parseInt(Sucursal_id as string))
-    if (!sucursal_id) {
+    if (!Sucursal_id) {
       throw new ReferenceError("Sucursal no encontrada")
     }
+    const sucursal_id = getSucursalById(parseInt(Sucursal_id as string))
 
     const stock = await obtenerStockProducto(
       Codigo as string,
@@ -212,6 +130,26 @@ productosRouter.get("/stock", async (req, res) => {
       res.status(404).json({ error: error.message })
     } else {
       res.status(500).json({ error })
+    }
+  }
+})
+
+productosRouter.post("/create", async (req, res) => {
+  const producto: ProductoAInsertar = req.body
+
+  if (!producto) {
+    res.status(400).json({ error: "Todos los datos son requeridos" })
+  } else {
+    try {
+      producto.SubCategoria === 0 ? (producto.SubCategoria = null) : null
+      const productoCreado = await uploadProductos(producto)
+      res.status(201).json(productoCreado)
+    } catch (error: unknown) {
+      if (error instanceof ReferenceError) {
+        res.status(400).json({ message: error.message })
+      } else {
+        res.status(500).json(error)
+      }
     }
   }
 })
@@ -233,5 +171,92 @@ productosRouter.post("/uploadStock", async (req, res) => {
     res.status(201).json(stock)
   } catch (error) {
     res.status(500).json(error)
+  }
+})
+
+productosRouter.put("/update", async (req, res) => {
+  const { Codigo, Descripcion, Precio, PorcentajeAumento, Baja, Proveedor } =
+    req.body
+
+  if (!Codigo) {
+    res.status(400).json({ error: "Codigo is required" })
+  } else {
+    try {
+      const productoActualizado = await updateProductos(Codigo, {
+        Descripcion,
+        Precio,
+        PorcentajeAumento,
+        Baja,
+        Proveedor,
+      })
+      res.status(200).json(productoActualizado)
+    } catch (error) {
+      res.status(500).json({ error })
+    }
+  }
+})
+
+productosRouter.put("/updatePrecioCategoria", async (req, res) => {
+  const { Categoria, SubCategoria, Porcentaje } = req.body
+
+  console.log(req.body.SubCategoria)
+
+  if (!Categoria || !Porcentaje) {
+    res.status(400).json({ error: "Categoria y Porcentaje son requeridos" })
+  } else {
+    try {
+      await aumentarPrecioPorCatYSCat(
+        Categoria,
+        Porcentaje,
+        parseInt(SubCategoria)
+      )
+      res.status(200).json("Productos Actualizados con éxito")
+    } catch (error) {
+      if (error instanceof ReferenceError) {
+        res.status(400).json(error)
+      } else {
+        res.status(500).json(error)
+      }
+    }
+  }
+})
+
+productosRouter.put("/updateStock", async (req, res) => {
+  const {
+    Productos,
+    Sucursal_id,
+  }: { Productos: ProductoStock[]; Sucursal_id: number } = req.body
+
+  if (Productos.length === 0) {
+    res.status(400).json({ error: "No fueron enviados productos" })
+  } else {
+    try {
+      Productos.forEach(async (producto) => {
+        // console.log("producto", producto)
+        await modificarStockProducto(
+          producto.Codigo,
+          producto.Cantidad,
+          Sucursal_id
+        )
+      })
+      res.status(200).json("Los productos fueron actualizados con exito")
+    } catch (error) {
+      res.status(500).json({ error })
+    }
+  }
+})
+
+productosRouter.delete("/delete", async (req, res) => {
+  const { Codigo } = req.query
+
+  if (!Codigo) {
+    res.status(400).json({ error: "Codigo is required" })
+  } else {
+    try {
+      await deleteProductos(Codigo as string)
+      res.status(204).end()
+    } catch (error) {
+      res.status(500).json({ error })
+    }
   }
 })
