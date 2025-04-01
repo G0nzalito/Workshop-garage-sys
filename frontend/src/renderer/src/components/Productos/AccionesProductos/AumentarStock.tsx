@@ -3,15 +3,13 @@ import { modificarStockProducto } from '../../../../../servicies/productosServic
 import { toast } from 'sonner'
 
 export default function AumentarStock({
-  onClose,
-  props
+  onClose
 }: {
   onClose: () => void
-  props: any
 }): JSX.Element {
   const { productoSeleccionado, sucursalSeleccionada } = useConsts()
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault()
     const toastLoading = toast.loading('Modificando Stock')
     const cantidad = parseInt(e.currentTarget.cantidad.value)

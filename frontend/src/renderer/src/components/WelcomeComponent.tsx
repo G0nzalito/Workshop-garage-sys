@@ -1,31 +1,28 @@
-import { useState, useEffect } from 'react'
-import { useLocation } from 'wouter'
-import { X, CirclePlus } from 'lucide-react'
+import SeleccionSucursal from '@renderer/components/Administrativo/SeleccionSucursal'
+import CobroSinODT from '@renderer/components/Cobro/CobroSinODT'
+import { useConsts } from '@renderer/Contexts/constsContext'
+import ModalNoX from '@renderer/specificComponents/ModalNoX'
+import { CirclePlus, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { getClientes } from '../../../servicies/clientesService'
+import {
+  getComprobantes,
+  getFormasPago,
+  getMarketing,
+  getTarjetas
+} from '../../../servicies/formaPagoService'
 import {
   getProductoByCodigo,
   hayStockParaVenta,
   obtenerStockProductos
 } from '../../../servicies/productosService'
-import { Database } from '../../../types/database.types'
-import CobroSinODT from '@renderer/components/Cobro/CobroSinODT'
-import { toast } from 'sonner'
-import { useConsts } from '@renderer/Contexts/constsContext'
-import { getClientes } from '../../../servicies/clientesService'
-import {
-  getFormasPago,
-  getTarjetas,
-  getMarketing,
-  getComprobantes
-} from '../../../servicies/formaPagoService'
-import SeleccionSucursal from '@renderer/components/Administrativo/SeleccionSucursal'
 import { getSucursales } from '../../../servicies/sucursalesService'
-import Modal from '@renderer/specificComponents/Modal'
-import ModalNoX from '@renderer/specificComponents/ModalNoX'
+import { Database } from '../../../types/database.types'
 
 type Producto = Database['public']['Tables']['Productos']['Row']
 
 export default function WelcomeComponent(): JSX.Element {
-  const [, setLocation] = useLocation()
   const [cesta, setCesta] = useState<
     { Producto: Producto; cantidad: number; stockMaximo: number }[]
   >([])
@@ -65,7 +62,7 @@ export default function WelcomeComponent(): JSX.Element {
         console.log(itemExistente)
 
         if (
-          parseFloat(itemExistente.cantidad) + parseFloat(data.Cantidad) >
+          parseFloat(itemExistente.cantidad.toString()) + parseFloat(data.Cantidad) >
           itemExistente.stockMaximo
         ) {
           toast.error('No hay stock suficiente', {
@@ -81,7 +78,7 @@ export default function WelcomeComponent(): JSX.Element {
               return {
                 ...item,
                 Producto: item.Producto,
-                cantidad: parseFloat(item.cantidad) + parseFloat(data.Cantidad)
+                cantidad: parseFloat(item.cantidad.toString()) + parseFloat(data.Cantidad)
               }
             }
             return item
@@ -222,7 +219,7 @@ export default function WelcomeComponent(): JSX.Element {
                       <button
                         className="btn btn-error"
                         onClick={() => {
-                          setCesta(cesta.filter((producto, index2) => index2 !== index))
+                          setCesta(cesta.filter((_, index2) => index2 !== index))
                         }}
                       >
                         <X />
@@ -300,7 +297,7 @@ export default function WelcomeComponent(): JSX.Element {
             Cancelar venta
           </button>
           <ModalNoX
-            Component={SeleccionSucursal}
+            Component={() => <SeleccionSucursal onClose={() => setSeleccionSucursal(false)} open={seleccionSucursal} />}
             open={seleccionSucursal}
             onClose={() => setSeleccionSucursal(false)}
             mainTitle="Seleccion de sucursal"

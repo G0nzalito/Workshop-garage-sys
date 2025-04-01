@@ -12,8 +12,9 @@ type Categoria = Database['public']['Tables']['Categorias']['Row']
 type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
 type Sucursal = Database['public']['Tables']['Sucursales']['Row']
 type Producto = Database['public']['Tables']['Productos']['Row']
+type Vehiculo = Database['public']['Tables']['Vehiculo']['Row']
 
-type ClientesContextData = {
+type ConstContextData = {
   sucursalSeleccionada: number
   setSucursalSeleccionada: React.Dispatch<React.SetStateAction<number>>
   clientes: Cliente[]
@@ -38,9 +39,11 @@ type ClientesContextData = {
   setSucursales: React.Dispatch<React.SetStateAction<Sucursal[]>>
   productoSeleccionado: Producto
   setProductoSeleccionado: React.Dispatch<React.SetStateAction<Producto>>
+  vehiculos: Vehiculo[]
+  setVehiculos: React.Dispatch<React.SetStateAction<Vehiculo[]>>
 }
 
-export const ConstContext = createContext<ClientesContextData | undefined>(undefined)
+export const ConstContext = createContext<ConstContextData | undefined>(undefined)
 
 export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [clientes, setClientes] = useState<Cliente[]>([])
@@ -60,7 +63,8 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return 0
   })
   const [sucursales, setSucursales] = useState<Sucursal[]>([])
-  const [productoSeleccionado, setProductoSeleccionado] = useState<Producto>({})
+  const [productoSeleccionado, setProductoSeleccionado] = useState<Producto>({} as Producto)
+  const [vehiculos, setVehiculos] = useState<Vehiculo[]>([])
 
   // useEffect(() => {
   //   const storedSucursal = sessionStorage.getItem('sucursalSeleccionada')
@@ -100,7 +104,9 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         sucursales,
         setSucursales,
         productoSeleccionado,
-        setProductoSeleccionado
+        setProductoSeleccionado,
+        vehiculos,
+        setVehiculos
       }}
     >
       {children}
@@ -108,7 +114,7 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   )
 }
 
-export const useConsts = () => {
+export const useConsts = (): ConstContextData => {
   const context = useContext(ConstContext)
   if (!context) {
     throw new Error('useClientes must be used within a ClientesProvider')

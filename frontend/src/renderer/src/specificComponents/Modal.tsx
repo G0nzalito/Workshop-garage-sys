@@ -9,7 +9,7 @@ export default function Modal({
 }: {
   open: boolean
   onClose: () => void
-  Component: () => JSX.Element
+  Component: (props: { onClose: () => void; selectedCategoria?: number | null }) => JSX.Element
   mainTitle: string
   selectedCategoria?: number | null
 }): JSX.Element | null {

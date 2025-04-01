@@ -9,9 +9,11 @@ import {
 import BusquedaProductos from '@renderer/components/Productos/BusquedaProductos.js'
 import NuevoProducto from '@renderer/components/Productos/NuevoProducto.js'
 import AumentarPrecioPorCategoria from '@renderer/components/Productos/AumentarPrecioPorCategoria.js'
+import { getSucursales } from '../../../../servicies/sucursalesService'
 
 export default function ProductosMain(): JSX.Element {
-  const { setMarcasProductos, setProveedores, setCategorias, setSubCategorias } = useConsts()
+  const { setMarcasProductos, setProveedores, setCategorias, setSubCategorias, setSucursales } =
+    useConsts()
 
   const [activo, setActivo] = useState('')
 
@@ -28,15 +30,33 @@ export default function ProductosMain(): JSX.Element {
     getSubCategoriasProductos().then((data) => {
       setSubCategorias(data)
     })
+    getSucursales().then((sucursales) => {
+      setSucursales(sucursales)
+    })
   }, [])
 
   return (
     <div className="flex w-full flex-col bg-base-100 text-white gap-2 p-4">
       <h1 className="text-2xl">Seleccione una opción: </h1>
       <div className="flex justify-start gap-2">
-        <button className={`btn btn-accent ${activo === 'busqueda' ? '': 'btn-soft'}`} onClick={() => setActivo('busqueda')}>Busqueda de productos</button>
-        <button className={`btn btn-accent ${activo === 'nuevo' ? '': 'btn-soft'}`} onClick={() => setActivo('nuevo')}>Agregar Producto</button>
-        <button className={`btn btn-accent ${activo === 'aumento' ? '': 'btn-soft'}`} onClick={() => setActivo('aumento')}>Aumentar precio</button>
+        <button
+          className={`btn btn-accent ${activo === 'busqueda' ? '' : 'btn-soft'}`}
+          onClick={() => setActivo('busqueda')}
+        >
+          Busqueda de productos
+        </button>
+        <button
+          className={`btn btn-accent ${activo === 'nuevo' ? '' : 'btn-soft'}`}
+          onClick={() => setActivo('nuevo')}
+        >
+          Agregar Producto
+        </button>
+        <button
+          className={`btn btn-accent ${activo === 'aumento' ? '' : 'btn-soft'}`}
+          onClick={() => setActivo('aumento')}
+        >
+          Aumentar precio
+        </button>
       </div>
       {activo === 'busqueda' && <BusquedaProductos />}
       {activo === 'nuevo' && <NuevoProducto />}
@@ -44,4 +64,3 @@ export default function ProductosMain(): JSX.Element {
     </div>
   )
 }
-

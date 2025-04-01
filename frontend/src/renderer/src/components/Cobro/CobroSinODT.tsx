@@ -1,12 +1,12 @@
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { BadgeCheck, X } from 'lucide-react'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { generarCobroSinODT } from '../../../../servicies/cobroService.js'
 import { modificarStockProducto } from '../../../../servicies/productosService.js'
 
+import { Database } from '@/src/types/database.types.js'
 import Select from 'react-select'
 import { toast } from 'sonner'
-import { Database } from '@/src/types/database.types.js'
 
 const customStyles = {
   container: (provided: any) => ({
@@ -71,8 +71,10 @@ export default function CobroSinODT({
   open: boolean
   onClose: () => void
   total: number
-  productos: { Producto: Producto; Cantidad: number }[]
-  setProductos: React.Dispatch<React.SetStateAction<{ Producto: Producto; Cantidad: number }[]>>
+  productos: { Producto: Producto; cantidad: number; stockMaximo: number }[]
+  setProductos: React.Dispatch<
+    React.SetStateAction<{ Producto: Producto; cantidad: number; stockMaximo: number }[]>
+  >
 }): JSX.Element | null {
   const [formData, setFormData] = useState({
     Cliente: '',
@@ -111,7 +113,7 @@ export default function CobroSinODT({
     formasPago,
     tarjetas,
     marketing: marketingOptions,
-    comprobantes,
+    // comprobantes, Despues lo agregamos
     sucursalSeleccionada
   } = useConsts()
 
@@ -160,20 +162,42 @@ export default function CobroSinODT({
         ) {
           if (formData[entry] === '' || formData[entry] === 0 || formData[entry] === 'Falta') {
             falta = true
-            setFormData((prevData) => ({
-              ...prevData,
-              [entry]: 'Falta'
-            }))
+            if (typeof formData[entry] === 'string') {
+              setFormData((prevData) => ({
+                ...prevData,
+                [entry]: 'Falta'
+              }))
+            } else {
+              setFormData((prevData) => ({
+                ...prevData,
+                [entry]: 0
+              }))
+            }
+            // setFormData((prevData) => ({
+            //   ...prevData,
+            //   [entry]: 'Falta'
+            // }))
           }
         }
       } else {
         // console.log('Entre por tarjeta')
         if (formData[entry] === '' || formData[entry] === 0 || formData[entry] === 'Falta') {
           falta = true
-          setFormData((prevData) => ({
-            ...prevData,
-            [entry]: 'Falta'
-          }))
+          if (typeof formData[entry] === 'string') {
+            setFormData((prevData) => ({
+              ...prevData,
+              [entry]: 'Falta'
+            }))
+          } else {
+            setFormData((prevData) => ({
+              ...prevData,
+              [entry]: 0
+            }))
+          }
+          // setFormData((prevData) => ({
+          //   ...prevData,
+          //   [entry]: 'Falta'
+          // }))
         }
       }
     }
@@ -297,7 +321,7 @@ export default function CobroSinODT({
                 styles={customStyles}
                 placeholder="Seleccione forma de pago"
               />
-              {(formData.FormaDePago === 0 || formData.FormaDePago === 'Falta') && (
+              {formData.FormaDePago === 0 && (
                 <p className="text-red-500 text-xs mt-1">
                   Por favor, seleccione una forma de pago en el campo superior
                 </p>
@@ -307,7 +331,7 @@ export default function CobroSinODT({
             {/* Total */}
             <span className="text-right pr-4 self-center font-bold">Total:</span>
             <p className="text-lg self-center">
-              {formData.FormaDePago !== 0 && formData.FormaDePago !== 'Falta'
+              {formData.FormaDePago !== 0
                 ? `${total} + ${formasPago.filter((formaPago) => formaPago.id === formData.FormaDePago)[0].Interes} = 
       ${(total * (1 + formasPago.filter((formaPago) => formaPago.id === formData.FormaDePago)[0].Interes / 100)).toFixed(2)}`
                 : 'Seleccione primero un metodo de pago'}
@@ -507,6 +531,7 @@ export default function CobroSinODT({
           <button
             className="btn btn-soft btn-success"
             onClick={() => {
+              //@ts-ignore no te va a ser nulo
               document.getElementById('formCobroSinODT').requestSubmit()
             }}
           >

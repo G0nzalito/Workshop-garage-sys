@@ -182,6 +182,7 @@ productosRouter.put("/update", async (req, res) => {
     res.status(400).json({ error: "Codigo is required" })
   } else {
     try {
+
       const productoActualizado = await updateProductos(Codigo, {
         Descripcion,
         Precio,

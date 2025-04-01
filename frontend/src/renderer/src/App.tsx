@@ -5,34 +5,34 @@ import { Toaster } from '../../../components/ui/sonner'
 import NavBar from '@renderer/specificComponents/Navbar'
 import { ConstsProvider } from '@renderer/Contexts/constsContext'
 import ProductosMain from '@renderer/components/Productos/ProductosMain'
+import VehiculosMain from '@renderer/components/Vehiculos/VehiculosMain'
 
 function App(): JSX.Element {
   // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
   return (
+    <main>
       <ConstsProvider>
-        <>
-          <NavBar />
+        <NavBar />
 
-          <main>
-            <Switch>
-              <Route path="/" component={WelcomeComponent} />
-              <Route path="/OrdenesDeTrabajo" component={ODTMain} />
-              {/* Productos */}
-              <Route path="/Productos" component={ProductosMain} />
-            </Switch>
-          </main>
-          <Toaster
-            closeButton
-            richColors
-            toastOptions={{
-              classNames: {
-                icon: 'hidden'
-              }
-            }}
-          />
-        </>
+        <Switch>
+          <Route path="/" component={WelcomeComponent} />
+          <Route path="/OrdenesDeTrabajo" component={ODTMain} />
+          {/* Productos */}
+          <Route path="/Productos" component={ProductosMain} />
+          <Route path="/Vehiculos" component={VehiculosMain} />
+        </Switch>
+        <Toaster
+          closeButton
+          richColors
+          toastOptions={{
+            classNames: {
+              icon: 'hidden'
+            }
+          }}
+        />
       </ConstsProvider>
+    </main>
   )
 }
 

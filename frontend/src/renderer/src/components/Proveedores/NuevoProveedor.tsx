@@ -23,7 +23,7 @@ export default function NuevoProveedor({ onClose }: { onClose: () => void }): JS
     })
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     const toastEspera = toast.loading('Guardando proveedor...')
     const response: Proveedor | number = await uploadProveedor(formData)
     console.log(response)
@@ -73,4 +73,3 @@ export default function NuevoProveedor({ onClose }: { onClose: () => void }): JS
     </div>
   )
 }
-

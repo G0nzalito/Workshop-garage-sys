@@ -6,7 +6,7 @@ export default function ModalNoX({
 }: {
   open: boolean
   onClose: () => void
-  Component: () => JSX.Element
+  Component: (props: { onClose: () => void; open: boolean }) => JSX.Element
   mainTitle: string
 }): JSX.Element {
   return (

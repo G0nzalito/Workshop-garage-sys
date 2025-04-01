@@ -1,7 +1,11 @@
 import { Database } from '@/src/types/database.types'
+import AumentarStock from '@renderer/components/Productos/AccionesProductos/AumentarStock.js'
+import EditarProducto from '@renderer/components/Productos/AccionesProductos/EditarProducto.js'
+import EliminarProducto from '@renderer/components/Productos/AccionesProductos/EliminarProducto.js'
 import { useConsts } from '@renderer/Contexts/constsContext.js'
+import Modal from '@renderer/specificComponents/Modal.js'
 import { Pencil, PlusCircle, Trash } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { toast } from 'sonner'
 import {
@@ -9,13 +13,14 @@ import {
   obtenerFiltrados,
   obtenerStockProductos
 } from '../../../../servicies/productosService.js'
-import Modal from '@renderer/specificComponents/Modal.js'
-import AumentarStock from '@renderer/components/Productos/AccionesProductos/AumentarStock.js'
-import EliminarProducto from '@renderer/components/Productos/AccionesProductos/EliminarProducto.js'
-import EditarProducto from '@renderer/components/Productos/AccionesProductos/EditarProducto.js'
 
 type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
 type Productos = Database['public']['Tables']['Productos']['Row']
+
+interface ProductosConStock {
+  Producto: Productos
+  Stock: number
+}
 
 const customStyles = {
   container: (provided: any) => ({
@@ -100,7 +105,7 @@ export default function BusquedaProductos(): JSX.Element {
   const [eliminarProducto, setEliminarProducto] = useState(false)
   const [editarProducto, setEditarProducto] = useState(false)
 
-  const openModals = (producto: Productos, setModal: (boolean) => void) => {
+  const openModals = (producto: Productos, setModal: (boolean) => void): void => {
     setProductoSeleccionado(producto)
     setModal(true)
   }
@@ -147,6 +152,7 @@ export default function BusquedaProductos(): JSX.Element {
     setSubCategoriasLocal(
       subCategorias.filter((subCategorias) => subCategorias.Categoria === formdata.categoria)
     )
+    //@ts-ignore Lo hago asi para que el componente select de react select funcione
     setSubcategoriaSelec({ value: 0, label: 'Selecciona una subcategoría...' })
   }, [categoria])
 
@@ -156,7 +162,7 @@ export default function BusquedaProductos(): JSX.Element {
     }
   }, [editarProducto, eliminarProducto, aumentarStock])
 
-  const limiparFiltros = () => {
+  const limiparFiltros = (): void => {
     setFormData({
       descripcion: '',
       marca: 0,
@@ -175,10 +181,11 @@ export default function BusquedaProductos(): JSX.Element {
     setSubcategoriaSelec({ value: 0, label: 'Selecciona una subcategoría...' })
     //@ts-ignore si funciona, dejemoslo como está
     setProductos()
+    setSubCategoriasLocal([])
   }
 
-  const handleFilterCodigo = async (codigo, sucursal) => {
-    const productoConStock = []
+  const handleFilterCodigo = async (codigo, sucursal): Promise<ProductosConStock[]> => {
+    const productoConStock: ProductosConStock[] = []
     const producto = await getProductoByCodigo(codigo)
     if (producto) {
       const stock = await obtenerStockProductos(codigo, sucursal)
@@ -188,7 +195,7 @@ export default function BusquedaProductos(): JSX.Element {
     return productoConStock
   }
 
-  const handleFilter = (e) => {
+  const handleFilter = (e): void => {
     e.preventDefault()
 
     const filtros = {
@@ -202,15 +209,15 @@ export default function BusquedaProductos(): JSX.Element {
     if (formdata.codigo !== '') {
       setCargando(true)
       handleFilterCodigo(formdata.codigo, sucursalSeleccionada).then((data) => {
-        limiparFiltros()
-        setProductos(data)
+        // limiparFiltros()
+        setProductos(data as ProductosConStock[])
         setCargando(false)
         toast.dismiss(toastLoading)
       })
       return
     }
     obtenerFiltrados(filtros, sucursalSeleccionada).then((data) => {
-      limiparFiltros()
+      // limiparFiltros()
       setProductos(data)
       toast.dismiss(toastLoading)
     })
@@ -317,6 +324,7 @@ export default function BusquedaProductos(): JSX.Element {
         <button
           className="btn btn-primary"
           onClick={() => {
+            //@ts-ignore No debería ser nulo
             document.getElementById('formBusquedaProductos').requestSubmit()
           }}
         >
@@ -439,7 +447,7 @@ export default function BusquedaProductos(): JSX.Element {
         )}
       </div>
       <Modal
-        Component={AumentarStock}
+        Component={() => <AumentarStock onClose={() => setAumentarStock(false)} />}
         mainTitle="Aumentar Stock Producto"
         onClose={() => {
           setAumentarStock(false)
@@ -447,7 +455,7 @@ export default function BusquedaProductos(): JSX.Element {
         open={aumentarStock}
       />
       <Modal
-        Component={EliminarProducto}
+        Component={() => <EliminarProducto onClose={() => setEliminarProducto(false)} />}
         mainTitle="Eliminar Producto"
         onClose={() => {
           setEliminarProducto(false)
@@ -455,7 +463,7 @@ export default function BusquedaProductos(): JSX.Element {
         open={eliminarProducto}
       />
       <Modal
-        Component={EditarProducto}
+        Component={() => <EditarProducto onClose={() => setEditarProducto(false)} />}
         mainTitle="Editar Producto"
         onClose={() => {
           setEditarProducto(false)

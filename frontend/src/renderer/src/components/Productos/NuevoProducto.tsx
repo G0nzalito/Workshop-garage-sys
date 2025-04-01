@@ -1,17 +1,14 @@
 import { Database } from '@/src/types/database.types'
+import NuevaMarca from '@renderer/components/Marcas/Marcas Productos/NuevaMarca'
+import NuevoProveedor from '@renderer/components/Proveedores/NuevoProveedor'
 import { useConsts } from '@renderer/Contexts/constsContext'
+import CategoriaYSubCategoriaTabs from '@renderer/specificComponents/CategoriaYSubCategoriaTabs'
+import Modal from '@renderer/specificComponents/Modal'
+import { BadgeCheck, PlusCircle, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Select from 'react-select'
-import { crearProducto } from '../../../../servicies/productosService'
 import { toast } from 'sonner'
-import { BadgeCheck, PlusCircle, X } from 'lucide-react'
-import Modal from '@renderer/specificComponents/Modal'
-import NavBar from '@renderer/specificComponents/Navbar'
-import NuevoProveedor from '@renderer/components/Proveedores/NuevoProveedor'
-import NuevaMarca from '@renderer/components/Marcas/Marcas Productos/NuevaMarca'
-import NuevaCategoria from '@renderer/components/Categorias/NuevaCategoria'
-import NuevaSubCategoria from '@renderer/components/SubCategorias/NuevaSubCategoria'
-import CategoriaYSubCategoriaTabs from '@renderer/specificComponents/CategoriaYSubCategoriaTabs'
+import { crearProducto } from '../../../../servicies/productosService'
 
 type formDataNuevoProducto = {
   Codigo: string
@@ -112,7 +109,7 @@ export default function NuevoProducto(): JSX.Element {
   const [nuevaMarca, setNuevaMarca] = useState(false)
   const [nuevaCategoriaSubCategoria, setNuevaCategoriaSubCategoria] = useState(false)
 
-  const handleChange = (e) => {
+  const handleChange = (e): void => {
     const { name, value } = e.target
     if (name === 'Codigo') {
       setFormData((prevData) => ({
@@ -127,12 +124,12 @@ export default function NuevoProducto(): JSX.Element {
     }
   }
 
-  const handleSelectChange = (selectedOption, setFunction, formDataName) => {
+  const handleSelectChange = (selectedOption, setFunction, formDataName): void => {
     setFunction(selectedOption)
     handleChange({ target: { name: formDataName, value: selectedOption.value } })
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     const camposOpcionales = ['Precio', 'Stock']
     let falta = false
 
@@ -203,7 +200,7 @@ export default function NuevoProducto(): JSX.Element {
     }
   }
 
-  const limpiarCampos = () => {
+  const limpiarCampos = (): void => {
     setFormData((prevData) => ({
       ...prevData,
       Codigo: '',
@@ -345,7 +342,7 @@ export default function NuevoProducto(): JSX.Element {
         </div>
 
         {/* SubCategoría (condicional) */}
-        {subCategoriasLocal?.length > 0 && (
+        {subCategoriasLocal !== undefined && subCategoriasLocal?.length > 0 && (
           <>
             <span className="fieldset-legend text-right pr-4 self-center font-medium">
               SubCategoría:
@@ -457,7 +454,7 @@ export default function NuevoProducto(): JSX.Element {
         onClose={() => {
           setNuevoProveedor(false)
         }}
-        Component={NuevoProveedor}
+        Component={() => <NuevoProveedor onClose={() => setNuevoProveedor(false)} />}
         mainTitle="Nuevo Proveedor"
       />
       <Modal
@@ -465,7 +462,7 @@ export default function NuevoProducto(): JSX.Element {
         onClose={() => {
           setNuevaMarca(false)
         }}
-        Component={NuevaMarca}
+        Component={() => <NuevaMarca onClose={() => setNuevaMarca(false)} />}
         mainTitle="Nueva Marca"
       />
       <Modal
@@ -473,9 +470,17 @@ export default function NuevoProducto(): JSX.Element {
         onClose={() => {
           setNuevaCategoriaSubCategoria(false)
         }}
-        Component={CategoriaYSubCategoriaTabs}
+        Component={() => (
+          <CategoriaYSubCategoriaTabs
+            onClose={() => setNuevaCategoriaSubCategoria(false)}
+            selectedCategoria={
+              subCategoriasLocal !== undefined && subCategoriasLocal?.length > 0
+                ? formData.Categoria
+                : null
+            }
+          />
+        )}
         mainTitle="Nueva Categoria/SubCategoria"
-        selectedCategoria={subCategoriasLocal?.length > 0 ? formData.Categoria : null}
       />
     </div>
   )

@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { uploadCategoria } from '../../../../servicies/categoriasYSubCategoriasService.js'
-import { toast } from 'sonner'
-import { BadgeCheck, X } from 'lucide-react'
-import { useConsts } from '@renderer/Contexts/constsContext.js'
 import { Database } from '@/src/types/database.types.js'
+import { useConsts } from '@renderer/Contexts/constsContext.js'
+import { BadgeCheck, X } from 'lucide-react'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { uploadCategoria } from '../../../../servicies/categoriasYSubCategoriasService.js'
 
 type Categoria = Database['public']['Tables']['Categorias']['Row']
 
@@ -23,7 +23,7 @@ export default function NuevaCategoria({ onClose }: { onClose: () => void }): JS
     })
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     const toastEspera = toast.loading('Guardando proveedor...')
     const response: Categoria | number = await uploadCategoria(formData)
     console.log(response)
@@ -73,4 +73,3 @@ export default function NuevaCategoria({ onClose }: { onClose: () => void }): JS
     </div>
   )
 }
-

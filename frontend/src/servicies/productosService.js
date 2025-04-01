@@ -91,9 +91,13 @@ export const obtenerFiltrados = async (filtros, sucursal) => {
 
 export const crearProducto = async (nuevoProducto, nuevoStock, sucursales) => {
   try {
+    console.log(nuevoProducto)
+    console.log(nuevoStock)
+    console.log(sucursales)
     const response = await axios.post(`${API_URL}/create`, nuevoProducto)
     if (response.status === 201) {
       for (let sucursal of sucursales) {
+
         if (nuevoStock.Sucursal_id === sucursal.id) {
           await crearStockProducto(nuevoStock)
         } else {
@@ -149,6 +153,7 @@ export const eliminarProducto = async (codigo) => {
     return response.data
   } catch (error) {
     if (error.status === 400) {
+      console.log(error)
       return error.status
     } else {
       console.log(error)
@@ -167,6 +172,7 @@ export const modificarProducto = async (codigo, cambios) => {
       Baja: cambios.Baja,
       Proveedor: cambios.Proveedor
     })
+
     return response.data
   } catch (error) {
     if (error.status === 400) {

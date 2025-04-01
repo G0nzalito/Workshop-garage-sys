@@ -5,7 +5,6 @@ import { Database } from '@/src/types/database.types'
 import { aumentarPrecioSegunCatYSCat } from '../../../../servicies/productosService.js'
 import { toast } from 'sonner'
 
-type Categoria = Database['public']['Tables']['Categorias']['Row']
 type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
 
 const customStyles = {
@@ -59,7 +58,7 @@ const customStyles = {
   })
 }
 
-export default function AumentarPrecioPorCategoria({ props }: { props: any }): JSX.Element {
+export default function AumentarPrecioPorCategoria(): JSX.Element {
   const [categoria, setCategoria] = useState()
   const [subCategoria, setSubCategoria] = useState()
   const [subCategoriasLocales, setSubCategoriasLocales] = useState<SubCategoria[]>([])
@@ -70,7 +69,7 @@ export default function AumentarPrecioPorCategoria({ props }: { props: any }): J
     PorcentajeAumento: 0
   })
 
-  const handleChange = (e) => {
+  const handleChange = (e): void => {
     const { name, value } = e.target
     if (name === 'Codigo') {
       setFormData((prevData) => ({
@@ -85,12 +84,12 @@ export default function AumentarPrecioPorCategoria({ props }: { props: any }): J
     }
   }
 
-  const handleSelectChange = (selectedOption, setFunction, formDataName) => {
+  const handleSelectChange = (selectedOption, setFunction, formDataName): void => {
     setFunction(selectedOption)
     handleChange({ target: { name: formDataName, value: selectedOption.value } })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e): void => {
     e.preventDefault()
     const toastLoading = toast.loading('Modificando precios')
     console.log('formData', formData)
@@ -107,7 +106,9 @@ export default function AumentarPrecioPorCategoria({ props }: { props: any }): J
           SubCategoria: 0,
           PorcentajeAumento: 0
         })
+        //@ts-ignore Lo hago asi para que el componente select de react select funcione
         setCategoria({ value: 0, label: 'Selecciona una categoria' })
+        //@ts-ignore Lo hago asi para que el componente select de react select funcione
         setSubCategoria({ value: 0, label: 'Selecciona una subcategoria' })
       })
       .catch((error) => {

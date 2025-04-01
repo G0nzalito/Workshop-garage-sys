@@ -59,13 +59,7 @@ const customStyles = {
   })
 }
 
-export default function EditarProducto({
-  props,
-  onClose
-}: {
-  props: any
-  onClose: () => void
-}): JSX.Element {
+export default function EditarProducto({ onClose }: { onClose: () => void }): JSX.Element {
   const { productoSeleccionado, proveedores } = useConsts()
   const [Proveedor, setProveedor] = useState()
   const [activeTab, setActiveTab] = useState<'precioDirecto' | 'porcentajeAumento'>('precioDirecto')
@@ -73,7 +67,7 @@ export default function EditarProducto({
     Descripcion: string
     Precio: number
     PorcentajeAumento: number
-    Baja: boolean | string
+    Baja: string | boolean
     Proveedor: number
   }
 
@@ -81,7 +75,7 @@ export default function EditarProducto({
     Descripcion: productoSeleccionado.Descripcion,
     Precio: productoSeleccionado.Precio,
     PorcentajeAumento: 0,
-    Baja: productoSeleccionado.Dado_de_baja,
+    Baja: productoSeleccionado.Dado_de_baja ? '2' : '1',
     Proveedor: productoSeleccionado.Proveedor
   })
 
@@ -93,7 +87,7 @@ export default function EditarProducto({
     }))
   }
 
-  const handleSelectChange = (selectedOption, setFunction, formDataName) => {
+  const handleSelectChange = (selectedOption, setFunction, formDataName): void => {
     setFunction(selectedOption)
     handleChange({ target: { name: formDataName, value: selectedOption.value } })
   }
@@ -189,7 +183,7 @@ export default function EditarProducto({
             <legend className="fieldset-legend text-sm">Estado de listado de producto: </legend>
             <select
               name="Baja"
-              defaultValue={formData.Baja ? 2 : 1}
+              defaultValue={parseInt(formData.Baja as string)}
               className="select select-bordered w-full max-w-xs mb-2"
               onChange={handleChange}
             >

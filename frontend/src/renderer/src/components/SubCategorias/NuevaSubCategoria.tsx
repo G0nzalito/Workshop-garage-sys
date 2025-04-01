@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
-import { uploadSubCategoria } from '../../../../servicies/categoriasYSubCategoriasService.js'
-import { toast } from 'sonner'
-import { BadgeCheck, X } from 'lucide-react'
-import { useConsts } from '@renderer/Contexts/constsContext.js'
 import { Database } from '@/src/types/database.types.js'
+import { useConsts } from '@renderer/Contexts/constsContext.js'
+import { BadgeCheck, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import Select from 'react-select'
+import { toast } from 'sonner'
+import { uploadSubCategoria } from '../../../../servicies/categoriasYSubCategoriasService.js'
 
 const customStyles = {
   container: (provided: any) => ({
@@ -66,17 +66,19 @@ export default function NuevaSubCategoria({
   onClose: () => void
   selectedCategoria: number | null
 }): JSX.Element {
-  const { setCategorias, categorias, setSubCategorias } = useConsts()
+  const { categorias, setSubCategorias } = useConsts()
 
   const [formData, setFormData] = useState({
     Descripcion: '',
     Categoria: ''
   })
 
-  const [Categoria, setCategoria] = useState()
+  const [Categoria, setCategoria] = useState<{ value: number; label: string | undefined } | null>(
+    null
+  )
   // const [SubCategoria, setSubCategoria] = useState()
 
-  const handleSelectChange = (selectedOption, setFunction, formDataName) => {
+  const handleSelectChange = (selectedOption, setFunction, formDataName): void => {
     setFunction(selectedOption)
     handleChange({ target: { name: formDataName, value: selectedOption.value } })
   }
@@ -85,7 +87,7 @@ export default function NuevaSubCategoria({
     if (selectedCategoria !== null) {
       setCategoria({
         value: selectedCategoria,
-        label: categorias.find((categoria) => categoria.id === selectedCategoria).Descripcion
+        label: categorias.find((categoria) => categoria.id === selectedCategoria)?.Descripcion
       })
     }
   }, [])
@@ -99,7 +101,7 @@ export default function NuevaSubCategoria({
     })
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     const toastEspera = toast.loading('Guardando proveedor...')
     const response: SubCategoria | number = await uploadSubCategoria(formData)
     console.log(response)

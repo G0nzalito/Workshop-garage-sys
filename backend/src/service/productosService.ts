@@ -177,7 +177,7 @@ async function updateProductos(
       const precioViejo = productoACambiar.Precio
 
       productoACambiar.Precio = parseFloat(
-        (precioViejo * 1 + cambios.PorcentajeAumento / 100).toFixed(2)
+        (precioViejo * (1 + cambios.PorcentajeAumento / 100)).toFixed(2)
       )
 
       await guardarPrecioAntiguo(precioViejo, productoACambiar.Codigo)

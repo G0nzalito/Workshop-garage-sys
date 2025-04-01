@@ -1,6 +1,5 @@
 import { useConsts } from '@renderer/Contexts/constsContext'
-import { getSucursales } from '../../../../servicies/sucursalesService'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Select from 'react-select'
 
 const customStyles = {
@@ -56,10 +55,8 @@ const customStyles = {
 
 export default function SeleccionSucursal({
   onClose,
-  open,
-  ...props
+  open
 }: {
-  props: any
   open: boolean
   onClose: () => void
 }): JSX.Element | null {
@@ -69,7 +66,7 @@ export default function SeleccionSucursal({
     sucursal: 0
   })
 
-  const handleChange = (e) => {
+  const handleChange = (e): void => {
     const { name, value } = e.target
 
     setFormData((prevData) => ({
@@ -78,12 +75,12 @@ export default function SeleccionSucursal({
     }))
   }
 
-  const handleSelectChange = (selectedOption, setFunction, formDataName) => {
+  const handleSelectChange = (selectedOption, setFunction, formDataName): void => {
     setFunction(selectedOption)
     handleChange({ target: { name: formDataName, value: selectedOption.value } })
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = (): void => {
     setSucursal(formData.sucursal)
     onClose()
   }
@@ -138,4 +135,3 @@ export default function SeleccionSucursal({
     </div>
   )
 }
-

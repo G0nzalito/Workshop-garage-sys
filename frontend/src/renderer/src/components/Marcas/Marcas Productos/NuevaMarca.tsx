@@ -23,7 +23,7 @@ export default function NuevaMarca({ onClose }: { onClose: () => void }): JSX.El
     })
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     const toastEspera = toast.loading('Guardando marca...')
     const response: Marca | number = await createMarcaProducto(formData)
     toast.dismiss(toastEspera)
@@ -71,4 +71,3 @@ export default function NuevaMarca({ onClose }: { onClose: () => void }): JSX.El
     </div>
   )
 }
-
