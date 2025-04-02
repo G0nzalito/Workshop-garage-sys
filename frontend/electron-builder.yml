@@ -1,10 +1,12 @@
 appId: com.electron.app
-productName: frontend
+productName: Sistema de Gestion de taller de autos MUBACOL
 directories:
   buildResources: build
+  output: dist/installers
 files:
+  - "build/**"
   - '!**/.vscode/*'
-  - '!src/**/*'
+  - '!src/**'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
@@ -12,7 +14,10 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: frontend
+  executableName: Sistema de gestión de taller de autos MUBACOL
+  icon: build/icon.ico  # Ruta relativa al icono
+  # target: nsis
+  # signAndEditExecutable: false  # Opcional: desactiva firma temporalmente
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

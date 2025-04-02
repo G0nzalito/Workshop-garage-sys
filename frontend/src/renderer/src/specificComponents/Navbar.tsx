@@ -1,13 +1,13 @@
-import { useLocation } from 'wouter'
+import { useHashLocation } from 'wouter/use-hash-location'
 
 export default function NavBar(): JSX.Element {
-  const [, setLocation] = useLocation()
+  const [, setLocation] = useHashLocation()
 
   return (
     <div className="flex justify-between p-4 bg-base-100">
       <div className="badge badge-soft badge-info badge-xl">
         <button className="btn btn-ghost" onClick={() => setLocation('/')}>
-        <h1 className="text-lg">Sistema de gestion de lubricentro</h1>
+          <h1 className="text-lg">Sistema de gestion de lubricentro</h1>
         </button>
       </div>
       <div className="flex items-end justify-end">
@@ -69,4 +69,3 @@ export default function NavBar(): JSX.Element {
     </div>
   )
 }
-

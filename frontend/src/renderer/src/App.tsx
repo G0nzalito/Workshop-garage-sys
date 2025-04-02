@@ -1,4 +1,5 @@
-import { Route, Switch } from 'wouter'
+import { Route, Router } from 'wouter'
+import { useHashLocation } from 'wouter/use-hash-location'
 import WelcomeComponent from '@renderer/components/WelcomeComponent'
 import ODTMain from '@renderer/components/Ordenes de trabajo/ODTMain'
 import { Toaster } from '../../../components/ui/sonner'
@@ -15,13 +16,13 @@ function App(): JSX.Element {
       <ConstsProvider>
         <NavBar />
 
-        <Switch>
+        <Router hook={useHashLocation}>
           <Route path="/" component={WelcomeComponent} />
           <Route path="/OrdenesDeTrabajo" component={ODTMain} />
           {/* Productos */}
           <Route path="/Productos" component={ProductosMain} />
           <Route path="/Vehiculos" component={VehiculosMain} />
-        </Switch>
+        </Router>
         <Toaster
           closeButton
           richColors
