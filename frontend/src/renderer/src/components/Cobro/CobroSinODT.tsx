@@ -101,19 +101,22 @@ export default function CobroSinODT({
 
     Supervisor: '',
 
-    Descripcion: ''
+    Descripcion: '',
+
+    Tipo_de_comprobante: 0
   })
 
   const [cliente, setCliente] = useState()
   const [formaPago, setFormaPaga] = useState()
   const [marketing, setMarketing] = useState()
+  const [comprobante, setComprobante] = useState()
   const [tarjeta, setTarjeta] = useState()
   const {
     clientes,
     formasPago,
     tarjetas,
     marketing: marketingOptions,
-    // comprobantes, Despues lo agregamos
+    comprobantes,
     sucursalSeleccionada
   } = useConsts()
 
@@ -222,7 +225,8 @@ export default function CobroSinODT({
         Operador_2: formData.Operador2,
         Supervisor: formData.Supervisor,
         Descripcion: formData.Descripcion,
-        Sucursal_id: sucursalSeleccionada
+        Sucursal_id: sucursalSeleccionada,
+        Tipo_de_comprobante: formData.Tipo_de_comprobante
       })
 
       toast.dismiss(toastCargando)
@@ -456,6 +460,27 @@ export default function CobroSinODT({
               {formData.Marketing === 'Falta' && (
                 <span className="text-red-500 text-xs mt-1">
                   Por favor, ingrese el medio de marketing en el campo superior
+                </span>
+              )}
+            </div>
+            <span className="text-right pr-4 self-center font-bold">Comprobante:</span>
+            <div className="flex flex-col">
+              <Select
+                className="rounded-lg bg-black/90 text-lg w-full"
+                name="Marketing"
+                options={comprobantes.map((comprobante) => ({
+                  value: comprobante.id,
+                  name: comprobante.Nombre,
+                  label: `${comprobante.Nombre}`
+                }))}
+                onChange={(e) => handleSelectChange(e, setComprobante, 'Tipo_de_comprobante')}
+                value={comprobante}
+                styles={customStyles}
+                placeholder="¿Se entrega factura?"
+              />
+              {formData.Tipo_de_comprobante === 0 && (
+                <span className="text-red-500 text-xs mt-1">
+                  Por favor, ingrese el concepto de factura en el campo superior
                 </span>
               )}
             </div>

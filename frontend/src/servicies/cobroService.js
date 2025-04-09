@@ -19,7 +19,8 @@ async function generarCobroSinODT({
   Operador_2,
   Supervisor,
   Descripcion,
-  sucursal_id
+  sucursal_id,
+  Tipo_de_comprobante
 }) {
   if (
     !Forma_de_Pago ||
@@ -43,11 +44,11 @@ async function generarCobroSinODT({
     }
   }
 
-  console.log('data', data)
+  // console.log('data', data)
 
   const response = await axios.post(`${URLCaja}/create`, data)
 
-  console.log('response', response)
+  // console.log('response', response)
 
   if (response.status === 201) {
     return response.status
