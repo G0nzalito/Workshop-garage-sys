@@ -8,7 +8,7 @@ import {
 } from '../../../../servicies/categoriasYSubCategoriasService.js'
 import BusquedaProductos from '@renderer/components/Productos/BusquedaProductos.js'
 import NuevoProducto from '@renderer/components/Productos/NuevoProducto.js'
-import AumentarPrecioPorCategoria from '@renderer/components/Productos/AumentarPrecioPorCategoria.js'
+import AumentarPrecioPorCategoriaYMarca from '@renderer/components/Productos/AumentarPrecioPorCategoriaYMarca.js'
 import { getSucursales } from '../../../../servicies/sucursalesService'
 
 export default function ProductosMain(): JSX.Element {
@@ -60,7 +60,7 @@ export default function ProductosMain(): JSX.Element {
       </div>
       {activo === 'busqueda' && <BusquedaProductos />}
       {activo === 'nuevo' && <NuevoProducto />}
-      {activo === 'aumento' && <AumentarPrecioPorCategoria />}
+      {activo === 'aumento' && <AumentarPrecioPorCategoriaYMarca />}
     </div>
   )
 }

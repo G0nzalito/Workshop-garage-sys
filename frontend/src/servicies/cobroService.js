@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { modificarStockProducto } from './productosService.js'
+// import { modificarStockProducto } from './productosService.ts'
 
 const URLCaja = 'http://localhost:4001/api/ventas'
 

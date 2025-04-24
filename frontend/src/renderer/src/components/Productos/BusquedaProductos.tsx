@@ -12,7 +12,7 @@ import {
   getProductoByCodigo,
   obtenerFiltrados,
   obtenerStockProductos
-} from '../../../../servicies/productosService.js'
+} from '../../../../servicies/productosService'
 
 type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
 type Productos = Database['public']['Tables']['Productos']['Row']
@@ -156,13 +156,13 @@ export default function BusquedaProductos(): JSX.Element {
     setSubcategoriaSelec({ value: 0, label: 'Selecciona una subcategoría...' })
   }, [categoria])
 
-  useEffect(() => {
-    if (editarProducto === false && eliminarProducto === false && aumentarStock === false) {
-      limiparFiltros()
-    }
-  }, [editarProducto, eliminarProducto, aumentarStock])
+  // useEffect(() => {
+  //   if (editarProducto === false && eliminarProducto === false && aumentarStock === false) {
+  //     limpiarFiltros()
+  //   }
+  // }, [editarProducto, eliminarProducto])
 
-  const limiparFiltros = (): void => {
+  const limpiarFiltros = (): void => {
     setFormData({
       descripcion: '',
       marca: 0,
@@ -184,15 +184,20 @@ export default function BusquedaProductos(): JSX.Element {
     setSubCategoriasLocal([])
   }
 
-  const handleFilterCodigo = async (codigo, sucursal): Promise<ProductosConStock[]> => {
+  const handleFilterCodigo = async (codigo, sucursal): Promise<ProductosConStock[] | number> => {
     const productoConStock: ProductosConStock[] = []
     const producto = await getProductoByCodigo(codigo)
     if (producto) {
-      const stock = await obtenerStockProductos(codigo, sucursal)
-      productoConStock.push({ Producto: producto, Stock: stock[0].Cantidad })
+      if (typeof producto === 'number') {
+        return producto
+      } else {
+        const stock = await obtenerStockProductos(codigo, sucursal)
+        productoConStock.push({ Producto: producto, Stock: stock[0].Cantidad })
+        return productoConStock
+      }
+    } else {
+      return 404
     }
-
-    return productoConStock
   }
 
   const handleFilter = (e): void => {
@@ -209,18 +214,30 @@ export default function BusquedaProductos(): JSX.Element {
     if (formdata.codigo !== '') {
       setCargando(true)
       handleFilterCodigo(formdata.codigo, sucursalSeleccionada).then((data) => {
-        // limiparFiltros()
-        setProductos(data as ProductosConStock[])
-        setCargando(false)
-        toast.dismiss(toastLoading)
+        console.log(data)
+        if (typeof data === 'number') {
+          toast.dismiss(toastLoading)
+          toast.error('No se encontró el producto')
+          setCargando(false)
+          return
+        } else {
+          console.log('hola')
+          setProductos(data as ProductosConStock[])
+          setCargando(false)
+          toast.dismiss(toastLoading)
+          return
+        }
       })
-      return
+    } else {
+      obtenerFiltrados(filtros, sucursalSeleccionada).then((data) => {
+        // limpiarFiltros()
+        if (typeof data !== 'number') {
+          console.log('hola')
+          setProductos(data)
+          toast.dismiss(toastLoading)
+        }
+      })
     }
-    obtenerFiltrados(filtros, sucursalSeleccionada).then((data) => {
-      // limiparFiltros()
-      setProductos(data)
-      toast.dismiss(toastLoading)
-    })
   }
 
   // console.log(productos ? productos[0] : 'No hay productos')
@@ -236,7 +253,7 @@ export default function BusquedaProductos(): JSX.Element {
         <div className="flex gap-2">
           <form onSubmit={handleFilter} className="flex flex-wrap gap-3" id="formBusquedaProductos">
             <fieldset>
-              <legend className="fieldset-legend"> Codigo Producto:</legend>
+              <legend className="fieldset-legend"> Codigo Producto Exacto:</legend>
               <input
                 type="text"
                 className="input input-md outline-1 w-60"
@@ -330,7 +347,7 @@ export default function BusquedaProductos(): JSX.Element {
         >
           Buscar
         </button>
-        <button className="btn btn-warning" onClick={() => limiparFiltros()}>
+        <button className="btn btn-warning" onClick={() => limpiarFiltros()}>
           Limpiar Filtros
         </button>
       </div>
@@ -447,7 +464,17 @@ export default function BusquedaProductos(): JSX.Element {
         )}
       </div>
       <Modal
-        Component={() => <AumentarStock onClose={() => setAumentarStock(false)} />}
+        Component={() => (
+          <AumentarStock
+            onClose={(exito?: boolean) => {
+              setAumentarStock(false)
+              if (exito) {
+                console.log('Eliminado')
+                limpiarFiltros()
+              }
+            }}
+          />
+        )}
         mainTitle="Aumentar Stock Producto"
         onClose={() => {
           setAumentarStock(false)
@@ -455,7 +482,17 @@ export default function BusquedaProductos(): JSX.Element {
         open={aumentarStock}
       />
       <Modal
-        Component={() => <EliminarProducto onClose={() => setEliminarProducto(false)} />}
+        Component={() => (
+          <EliminarProducto
+            onClose={(exito?: boolean) => {
+              setEliminarProducto(false)
+              if (exito) {
+                console.log('Eliminado')
+                limpiarFiltros()
+              }
+            }}
+          />
+        )}
         mainTitle="Eliminar Producto"
         onClose={() => {
           setEliminarProducto(false)
@@ -463,7 +500,17 @@ export default function BusquedaProductos(): JSX.Element {
         open={eliminarProducto}
       />
       <Modal
-        Component={() => <EditarProducto onClose={() => setEditarProducto(false)} />}
+        Component={() => (
+          <EditarProducto
+            onClose={(exito?: boolean) => {
+              setEditarProducto(false)
+              if (exito) {
+                console.log('Eliminado')
+                limpiarFiltros()
+              }
+            }}
+          />
+        )}
         mainTitle="Editar Producto"
         onClose={() => {
           setEditarProducto(false)

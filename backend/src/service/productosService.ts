@@ -54,7 +54,7 @@ async function getProductosFiltrados(
   let query = supabase.from("Productos").select("*").eq("Dado_de_baja", false)
 
   if (descripcion !== "") {
-    query = query.like("Descripcion", `%${descripcion}%`)
+    query = query.or(`Descripcion.ilike.%${descripcion}%`)
   }
   if (cateogria !== 0) {
     query = query.eq("Categoria", cateogria)
@@ -284,7 +284,8 @@ async function guardarStockSucursal(stock: StockAInsertar) {
 async function aumentarPrecioPorCatYSCat(
   categoria: number,
   PorcentajeAumento: number,
-  subCategoria?: number
+  subCategoria?: number,
+  marca?: number
 ) {
   let productos: Producto[] = []
 
@@ -294,8 +295,13 @@ async function aumentarPrecioPorCatYSCat(
     productos = await getProductosFiltrados("", categoria, subCategoria, 0, 0)
     console.log("con subcategorias", productos)
   } else {
-    console.log("sin subcategorias", productos)
-    productos = await getProductosFiltrados("", categoria, 0, 0, 0)
+    if (marca) {
+      categoria === -1
+        ? (productos = await getProductosFiltrados("", 0, 0, marca, 0))
+        : (productos = await getProductosFiltrados("", categoria, 0, marca, 0))
+    } else {
+      productos = await getProductosFiltrados("", categoria, 0, 0, 0)
+    }
   }
 
   for (const producto of productos) {

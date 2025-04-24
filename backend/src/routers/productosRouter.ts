@@ -182,7 +182,6 @@ productosRouter.put("/update", async (req, res) => {
     res.status(400).json({ error: "Codigo is required" })
   } else {
     try {
-
       const productoActualizado = await updateProductos(Codigo, {
         Descripcion,
         Precio,
@@ -198,9 +197,7 @@ productosRouter.put("/update", async (req, res) => {
 })
 
 productosRouter.put("/updatePrecioCategoria", async (req, res) => {
-  const { Categoria, SubCategoria, Porcentaje } = req.body
-
-  console.log(req.body.SubCategoria)
+  const { Categoria, SubCategoria, Marca, Porcentaje } = req.body
 
   if (!Categoria || !Porcentaje) {
     res.status(400).json({ error: "Categoria y Porcentaje son requeridos" })
@@ -209,7 +206,8 @@ productosRouter.put("/updatePrecioCategoria", async (req, res) => {
       await aumentarPrecioPorCatYSCat(
         Categoria,
         Porcentaje,
-        parseInt(SubCategoria)
+        parseInt(SubCategoria),
+        parseInt(Marca)
       )
       res.status(200).json("Productos Actualizados con éxito")
     } catch (error) {
@@ -255,7 +253,7 @@ productosRouter.delete("/delete", async (req, res) => {
   } else {
     try {
       await deleteProductos(Codigo as string)
-      res.status(204).end()
+      res.status(204).json("Producto dado de baja")
     } catch (error) {
       res.status(500).json({ error })
     }

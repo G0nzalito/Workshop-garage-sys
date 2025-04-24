@@ -1,7 +1,7 @@
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { useState } from 'react'
 import Select from 'react-select'
-import { modificarProducto } from '../../../../../servicies/productosService.js'
+import { modificarProducto } from '../../../../../servicies/productosService'
 import { toast } from 'sonner'
 
 const customStyles = {
@@ -59,7 +59,11 @@ const customStyles = {
   })
 }
 
-export default function EditarProducto({ onClose }: { onClose: () => void }): JSX.Element {
+export default function EditarProducto({
+  onClose
+}: {
+  onClose: (exito?: boolean) => void
+}): JSX.Element {
   const { productoSeleccionado, proveedores } = useConsts()
   const [Proveedor, setProveedor] = useState()
   const [activeTab, setActiveTab] = useState<'precioDirecto' | 'porcentajeAumento'>('precioDirecto')
@@ -101,7 +105,7 @@ export default function EditarProducto({ onClose }: { onClose: () => void }): JS
     modificarProducto(productoSeleccionado.Codigo, formData)
       .then(() => {
         toast.success('Producto editado correctamente', { id: toastLoading })
-        onClose()
+        onClose(true)
       })
       .catch((error) => {
         toast.error(`Error al editar el producto: ${error}`, { id: toastLoading })
