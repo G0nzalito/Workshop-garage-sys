@@ -297,7 +297,12 @@ export default function WelcomeComponent(): JSX.Element {
             Cancelar venta
           </button>
           <ModalNoX
-            Component={() => <SeleccionSucursal onClose={() => setSeleccionSucursal(false)} open={seleccionSucursal} />}
+            Component={() => (
+              <SeleccionSucursal
+                onClose={() => setSeleccionSucursal(false)}
+                open={seleccionSucursal}
+              />
+            )}
             open={seleccionSucursal}
             onClose={() => setSeleccionSucursal(false)}
             mainTitle="Seleccion de sucursal"

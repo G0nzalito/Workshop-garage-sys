@@ -1,11 +1,12 @@
 import { getMarcasVehiculos, getModeloVehiculos } from '../../../../servicies/marcaVehiculosService'
 import BusquedaVehiculo from '@renderer/components/Vehiculos/BusquedaVehiculo'
+import { getClientes } from '../../../../servicies/clientesService'
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { useState, useEffect } from 'react'
 
 export default function VehiculosMain(): JSX.Element {
   const [activo, setActivo] = useState('')
-  const { setMarcasVehiculos, setModelos } = useConsts()
+  const { setMarcasVehiculos, setModelos, clientes, setClientes } = useConsts()
 
   useEffect(() => {
     getMarcasVehiculos().then((data) => {
@@ -14,6 +15,12 @@ export default function VehiculosMain(): JSX.Element {
     getModeloVehiculos().then((data) => {
       setModelos(data)
     })
+
+    if (clientes.length === 0) {
+      getClientes().then((data) => {
+        setClientes(data)
+      })
+    }
   }, [])
 
   return (
