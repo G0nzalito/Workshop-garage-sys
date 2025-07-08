@@ -23,7 +23,7 @@ export default function NavBar(): JSX.Element {
         <button
           className="btn btn-outline m-1 text-white"
           onClick={() => {
-            setLocation('/ordenesDeTrabajo')
+            setLocation('/Clientes')
           }}
         >
           {' '}
@@ -50,7 +50,7 @@ export default function NavBar(): JSX.Element {
         <button
           className="btn btn-outline m-1 text-white"
           onClick={() => {
-            setLocation('/ordenesDeTrabajo')
+            setLocation('/Administrativo')
           }}
         >
           {' '}
@@ -59,7 +59,7 @@ export default function NavBar(): JSX.Element {
         <button
           className="btn btn-outline m-1 text-white"
           onClick={() => {
-            setLocation('/ordenesDeTrabajo')
+            setLocation('/Gastos')
           }}
         >
           {' '}

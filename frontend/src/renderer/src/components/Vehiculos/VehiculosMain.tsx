@@ -3,6 +3,7 @@ import BusquedaVehiculo from '@renderer/components/Vehiculos/BusquedaVehiculo'
 import { getClientes } from '../../../../servicies/clientesService'
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { useState, useEffect } from 'react'
+import NuevoVehiculo from '@renderer/components/Vehiculos/NuevoVehiculo'
 
 export default function VehiculosMain(): JSX.Element {
   const [activo, setActivo] = useState('')
@@ -48,7 +49,7 @@ export default function VehiculosMain(): JSX.Element {
         </button> */}
       </div>
       {activo === 'busqueda' && <BusquedaVehiculo />}
-      {/* {activo === 'nuevo' && <NuevoProducto />} */}
+      {activo === 'nuevo' && <NuevoVehiculo />}
       {/* {activo === 'aumento' && <AumentarPrecioPorCategoria />} */}
     </div>
   )
