@@ -1,6 +1,8 @@
 import { PostgrestError } from "@supabase/supabase-js"
 import supabase from "../supabase/client"
 import { Database } from "../supabase/database.types"
+import { convertirFechaLocal } from "../support/supportFunctions"
+import { getModeloById } from "./modelosService"
 
 type VehiculoAInsertar = Database["public"]["Tables"]["Vehiculo"]["Insert"]
 type Vehiculo = Database["public"]["Tables"]["Vehiculo"]["Row"]
@@ -30,7 +32,10 @@ async function getVehiculoByPatente(patente: string) {
   }
 }
 
-async function uploadVehiculo(nuevoVehiculo: VehiculoAInsertar, cliente: Cliente) {
+async function uploadVehiculo(
+  nuevoVehiculo: VehiculoAInsertar,
+  cliente: Cliente
+) {
   const { data, error } = await supabase
     .from("Vehiculo")
     .insert(nuevoVehiculo)
@@ -38,7 +43,12 @@ async function uploadVehiculo(nuevoVehiculo: VehiculoAInsertar, cliente: Cliente
   if (error) {
     throw error
   } else {
-    await asignarVehiculoACliente(nuevoVehiculo.Patente, cliente)
+    const date = new Date()
+    await asignarVehiculoACliente(
+      nuevoVehiculo.Patente,
+      cliente,
+      convertirFechaLocal(date)
+    )
     return data as VehiculoAInsertar[]
   }
 }
@@ -66,13 +76,18 @@ async function upodateKilometersOfVehiculo(
   return data as Vehiculo
 }
 
-async function asignarVehiculoACliente(patente: string, cliente: Cliente) {
+async function asignarVehiculoACliente(
+  patente: string,
+  cliente: Cliente,
+  fechaAsignacion: string
+) {
   const { data, error } = await supabase
     .from("Vehiculos_de_clientes")
     .insert({
       Patente_Vehiculo: patente,
       Numero_Documento_Cliente: cliente.Numero_Documento,
       Tipo_Documento_Cliente: cliente.Tipo_Documento,
+      Fecha_Asignacion_Cliente: fechaAsignacion,
     })
     .select()
 
@@ -80,6 +95,51 @@ async function asignarVehiculoACliente(patente: string, cliente: Cliente) {
     throw error
   }
   return data as VehiculoXCliente[]
+}
+
+async function getVehiculosByFiltros(
+  patente: string,
+  Numero_Documento: number,
+  Tipo_Documento: number,
+  marca: number,
+  modelo: number,
+  motor: string
+) {
+  const request = supabase.from("Vehiculo")
+    .select()
+  
+  if (patente) {
+    request.eq("Patente", patente)
+  }
+  if (marca){
+    request.eq("Marca", marca)
+  }
+  if (modelo){
+    const modelovehiculo = await getModeloById(modelo)
+    if (modelovehiculo && modelovehiculo.Marca === marca) {
+      request.eq("Modelo", modelo)
+    }else{
+      throw new ReferenceError("El modelo no existe o no pertence a la marca seleccionada")
+    }
+  }
+  if (motor){
+    request.eq("Motor", motor)
+  }
+
+  if (Numero_Documento && Tipo_Documento) {
+    const { data, error} = await supabase
+      .from("Vehiculos_de_clientes")
+      .select("Patente_Vehiculo")
+      .eq("Numero_Documento_Cliente", Numero_Documento)
+      .eq("Tipo_Documento_Cliente", Tipo_Documento)
+      .eq("Fecha_Remocion_Cliente", {})
+    
+    if (error) {
+      throw error
+    }
+
+    
+  }
 }
 
 export {

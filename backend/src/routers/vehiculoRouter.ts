@@ -10,10 +10,13 @@ import { getClientByDocument } from "../service/clienteService"
 import { Database } from "../supabase/database.types"
 import { getModeloById } from "../service/modelosService"
 import { getMarca_de_VehiculosById } from "../service/marcaVehiculoService"
-import { PostgrestError } from "@supabase/supabase-js"
+import { z, ZodError } from "zod"
+import { validateSchema } from "../middlewares/validation"
+import { vehiculoCreateSchema } from "../middlewares/schemas/vehiculoSchemas"
 
 type VehiculoAInsertar = Database["public"]["Tables"]["Vehiculo"]["Insert"]
 type Vehiculo = Database["public"]["Tables"]["Vehiculo"]["Row"]
+type Cliente = Database["public"]["Tables"]["Cliente"]["Row"]
 type VehiculoAMostrar = Omit<Vehiculo, "Marca" | "Modelo"> & {
   Marca: string
   Modelo: string
@@ -63,73 +66,51 @@ vehiculoRouter.get("/specific", async (req, res) => {
   }
 })
 
-vehiculoRouter.post("/create", async (req, res) => {
-  try {
-    const {
-      Patente,
-      Marca,
-      Modelo,
-      Año,
-      Kilometros,
-      Motor,
-      Numero_Documento,
-      Tipo_Documento,
-    } = req.body
+vehiculoRouter.post(
+  "/create",
+  validateSchema(vehiculoCreateSchema),
+  async (req, res) => {
+    try {
+      const {
+        vehiculo,
+        dueño,
+      }: { vehiculo: VehiculoAInsertar; dueño: Cliente } = req.body
 
-    if (
-      !Patente ||
-      !Marca ||
-      !Modelo ||
-      !Año ||
-      !Kilometros ||
-      !Motor ||
-      !Numero_Documento ||
-      !Tipo_Documento
-    ) {
-      throw new ReferenceError("Todos los campos son requeridos")
-    }
+      if (await getVehiculoByPatente(vehiculo.Patente)) {
+        throw new ReferenceError("Patente Duplicada")
+      }
 
-    if(await getVehiculoByPatente(Patente)){
-      throw new ReferenceError("Patente Duplicada")
-    }
+      const modelo = await getModeloById(vehiculo.Modelo)
 
-    const Vehiculo: VehiculoAInsertar = {
-      Patente: Patente,
-      Marca: Marca,
-      Modelo: Modelo,
-      Año: Año,
-      Kilometros: Kilometros,
-      Motor: Motor,
-    }
+      if (!modelo) {
+        throw new ReferenceError("Modelo no encontrado")
+      }
 
-    const modelo = await getModeloById(Modelo)
+      if (modelo.Marca !== vehiculo.Marca) {
+        throw new ReferenceError("El modelo no corresponde a la marca")
+      }
 
-    if (!modelo) {
-      throw new ReferenceError("Modelo no encontrado")
-    }
+      const cliente = await getClientByDocument(
+        dueño.Tipo_Documento,
+        dueño.Numero_Documento
+      )
 
-    if (modelo.Marca !== Marca) {
-      throw new ReferenceError("El modelo no corresponde a la marca")
-    }
+      if (!cliente) {
+        throw new ReferenceError("Cliente no encontrado")
+      }
 
-    const cliente = await getClientByDocument(Tipo_Documento, Numero_Documento)
+      await uploadVehiculo(vehiculo, cliente)
 
-    if (!cliente) {
-      throw new ReferenceError("Cliente no encontrado")
-    }
-
-    await uploadVehiculo(Vehiculo, cliente)
-
-    res.status(201).json({ message: "Vehiculo creado exitosamente" })
-  } catch (e: unknown) {
-    if (e instanceof ReferenceError) {
-      res.status(400).json({ message: e.message })
-    }
-    else {
-      res.status(500).json({ message: "Interal server error", e: e })
+      res.status(201).json({ message: "Vehiculo creado exitosamente" })
+    } catch (e: unknown) {
+      if (e instanceof ReferenceError) {
+        res.status(400).json({ message: e.message })
+      } else {
+        res.status(500).json({ message: "Interal server error", e: e })
+      }
     }
   }
-})
+)
 
 vehiculoRouter.put("/updateKilometers", async (req, res) => {
   const { Patente, Kilometros } = req.body
