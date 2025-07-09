@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { toast } from 'sonner'
 import { crearVehiculo } from '../../../../servicies/vehiculosService'
+import CreateMarca from '@renderer/components/Marcas/Marcas Vehiculos/CreateMarcaVehiculo'
+import CreateMarcaProducto from '@renderer/components/Marcas/Marcas Productos/CreateMarcaProducto'
+import CreateMarcaVehiculo from '@renderer/components/Marcas/Marcas Vehiculos/CreateMarcaVehiculo'
 
 type formDataNuevoVehiculo = {
   Patente: string
@@ -405,8 +408,7 @@ export default function NuevoProducto(): JSX.Element {
       {/* Open the modal using document.getElementById('ID').showModal() method */}
       <dialog id="NuevaMarca" className="modal">
         <div className="modal-box">
-          <h3 className="font-bold text-lg">Nueva Marca</h3>
-          <p className="py-4">Press ESC key or click outside to close</p>
+          {CreateMarcaVehiculo()}
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>

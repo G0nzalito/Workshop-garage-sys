@@ -70,7 +70,7 @@ subCategoriasRouter.post("/create", async (req, res) => {
       res.status(400).json({ message: "SubCategoria ya existe" })
     } else {
       const nuevaSubCategoria: SubCategoriaAInsertar = {
-        Descripción: Descripcion,
+        Descripcion: Descripcion,
         Categoria: Categoria,
       }
 

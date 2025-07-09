@@ -32,6 +32,24 @@ async function getVehiculoByPatente(patente: string) {
   }
 }
 
+async function getDueñoByPatente(patente: string) {
+  const { data, error } = await supabase
+    .from("Vehiculos_de_clientes")
+    .select("*")
+    .eq("Patente_Vehiculo", patente)
+    .is("Fecha_Remocion_Cliente", null)
+    .single()
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      return null
+    }
+    throw new Error(error.message)
+  } else {
+    return data as VehiculoXCliente
+  }
+}
+
 async function uploadVehiculo(
   nuevoVehiculo: VehiculoAInsertar,
   cliente: Cliente
@@ -98,47 +116,58 @@ async function asignarVehiculoACliente(
 }
 
 async function getVehiculosByFiltros(
-  patente: string,
-  Numero_Documento: number,
-  Tipo_Documento: number,
-  marca: number,
-  modelo: number,
-  motor: string
+  marca?: number,
+  modelo?: number,
+  motor?: string,
+  Numero_Documento?: number,
+  Tipo_Documento?: number
 ) {
-  const request = supabase.from("Vehiculo")
-    .select()
-  
-  if (patente) {
-    request.eq("Patente", patente)
-  }
-  if (marca){
+  const request = supabase.from("Vehiculo").select()
+  if (marca) {
     request.eq("Marca", marca)
   }
-  if (modelo){
+  if (modelo) {
     const modelovehiculo = await getModeloById(modelo)
     if (modelovehiculo && modelovehiculo.Marca === marca) {
       request.eq("Modelo", modelo)
-    }else{
-      throw new ReferenceError("El modelo no existe o no pertence a la marca seleccionada")
+    } else {
+      throw new ReferenceError(
+        "El modelo no existe o no pertence a la marca seleccionada"
+      )
     }
   }
-  if (motor){
+  if (motor) {
     request.eq("Motor", motor)
   }
 
   if (Numero_Documento && Tipo_Documento) {
-    const { data, error} = await supabase
+    const { data, error } = await supabase
       .from("Vehiculos_de_clientes")
       .select("Patente_Vehiculo")
       .eq("Numero_Documento_Cliente", Numero_Documento)
       .eq("Tipo_Documento_Cliente", Tipo_Documento)
-      .eq("Fecha_Remocion_Cliente", {})
-    
+      .is("Fecha_Remocion_Cliente", null)
+
     if (error) {
       throw error
+    } else {
+      const { data: result, error } = await request.in(
+        "Patente",
+        data?.map((vehiculo) => vehiculo.Patente_Vehiculo) || []
+      )
+      if (error) {
+        throw error
+      } else {
+        return result as Vehiculo[]
+      }
     }
-
-    
+  } else {
+    const { data, error } = await request
+    if (error) {
+      throw error
+    } else {
+      return data as Vehiculo[]
+    }
   }
 }
 
@@ -148,4 +177,6 @@ export {
   getVehiculoByPatente,
   uploadVehiculo,
   upodateKilometersOfVehiculo,
+  getVehiculosByFiltros,
+  getDueñoByPatente
 }

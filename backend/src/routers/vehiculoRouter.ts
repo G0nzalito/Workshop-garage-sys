@@ -1,8 +1,10 @@
 import appExpress from "express"
 import {
   asignarVehiculoACliente,
+  getDueñoByPatente,
   getVehiculoByPatente,
   getVehiculos,
+  getVehiculosByFiltros,
   uploadVehiculo,
   upodateKilometersOfVehiculo,
 } from "../service/vehiculoService"
@@ -11,15 +13,22 @@ import { Database } from "../supabase/database.types"
 import { getModeloById } from "../service/modelosService"
 import { getMarca_de_VehiculosById } from "../service/marcaVehiculoService"
 import { z, ZodError } from "zod"
-import { validateSchema } from "../middlewares/validation"
-import { vehiculoCreateSchema } from "../middlewares/schemas/vehiculoSchemas"
+import {
+  validateSchemaBody,
+  validateSchemaQuery,
+} from "../middlewares/validation"
+import {
+  vehiculoCreateSchema,
+  vehiculoFilterSchema,
+} from "../middlewares/schemas/vehiculoSchemas"
 
 type VehiculoAInsertar = Database["public"]["Tables"]["Vehiculo"]["Insert"]
 type Vehiculo = Database["public"]["Tables"]["Vehiculo"]["Row"]
 type Cliente = Database["public"]["Tables"]["Cliente"]["Row"]
-type VehiculoAMostrar = Omit<Vehiculo, "Marca" | "Modelo"> & {
+type VehiculoAMostrar = Omit<Vehiculo, "Marca" | "Modelo" | "Cliente"> & {
   Marca: string
   Modelo: string
+  Cliente: string
 }
 
 export const vehiculoRouter = appExpress.Router()
@@ -33,11 +42,16 @@ async function cargarVehiculosAMostrar(vehiculos: Vehiculo[]) {
     //@ts-expect-error Siempre va a existir el modelo de un vehiculo
     const nombreModelo = (await getModeloById(vehiculo.Modelo)).Nombre
 
+    const dueño = await getDueñoByPatente(vehiculo.Patente)
+
     const { Marca, Modelo, ...resto } = vehiculo
 
     const vehiculoAMostrar: VehiculoAMostrar = {
       Marca: nombreMarca,
       Modelo: nombreModelo,
+      Cliente: dueño
+        ? `${dueño.Tipo_Documento_Cliente}-${dueño.Numero_Documento_Cliente}`
+        : "Sin dueño",
       ...resto,
     }
     vehiculosAMostrar.push(vehiculoAMostrar)
@@ -54,9 +68,9 @@ vehiculoRouter.get("/all", async (req, res) => {
 })
 
 vehiculoRouter.get("/specific", async (req, res) => {
-  const { Patente } = req.body
+  const { Patente } = req.query
 
-  const vehiculo = await getVehiculoByPatente(Patente)
+  const vehiculo = await getVehiculoByPatente(Patente as string)
 
   if (vehiculo) {
     const vehiculoAMostrar = await cargarVehiculosAMostrar([vehiculo])
@@ -66,15 +80,48 @@ vehiculoRouter.get("/specific", async (req, res) => {
   }
 })
 
+vehiculoRouter.get(
+  "/filter",
+  validateSchemaQuery(vehiculoFilterSchema),
+  async (req, res) => {
+    const { Marca, Modelo, Motor, Tipo_Documento, Numero_Documento } = req.query
+
+    try {
+      const vehiculos = await getVehiculosByFiltros(
+        Marca ? parseInt(Marca as string) : undefined,
+        Modelo ? parseInt(Modelo as string) : undefined,
+        Motor ? (Motor as string) : undefined,
+        Numero_Documento ? parseInt(Numero_Documento as string) : undefined,
+        Tipo_Documento ? parseInt(Tipo_Documento as string) : undefined
+      )
+
+      const vehiculosAMostrar = await cargarVehiculosAMostrar(vehiculos)
+
+      res.status(200).json(vehiculosAMostrar)
+    } catch (e: unknown) {
+      if (e instanceof ZodError) {
+        res.status(400).json({ message: e.message })
+      } else if (e instanceof ReferenceError) {
+        res.status(400).json({ message: e.message })
+      } else {
+        res.status(500).json({ message: "Interal server error", e: e })
+      }
+    }
+  }
+)
+
 vehiculoRouter.post(
   "/create",
-  validateSchema(vehiculoCreateSchema),
+  validateSchemaBody(vehiculoCreateSchema),
   async (req, res) => {
     try {
       const {
         vehiculo,
         dueño,
-      }: { vehiculo: VehiculoAInsertar; dueño: Cliente } = req.body
+      }: {
+        vehiculo: VehiculoAInsertar
+        dueño: { Tipo_Documento: number; Numero_Documento: number }
+      } = req.body
 
       if (await getVehiculoByPatente(vehiculo.Patente)) {
         throw new ReferenceError("Patente Duplicada")

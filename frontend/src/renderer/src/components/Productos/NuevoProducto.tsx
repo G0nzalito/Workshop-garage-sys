@@ -1,5 +1,5 @@
 import { Database } from '@/src/types/database.types'
-import NuevaMarca from '@renderer/components/Marcas/Marcas Productos/NuevaMarca'
+import CreateMarcaProducto from '@renderer/components/Marcas/Marcas Productos/CreateMarcaProducto'
 import NuevoProveedor from '@renderer/components/Proveedores/NuevoProveedor'
 import { useConsts } from '@renderer/Contexts/constsContext'
 import CategoriaYSubCategoriaTabs from '@renderer/specificComponents/CategoriaYSubCategoriaTabs'
@@ -462,7 +462,7 @@ export default function NuevoProducto(): JSX.Element {
         onClose={() => {
           setNuevaMarca(false)
         }}
-        Component={() => <NuevaMarca onClose={() => setNuevaMarca(false)} />}
+        Component={() => <CreateMarcaProducto onClose={() => setNuevaMarca(false)} />}
         mainTitle="Nueva Marca"
       />
       <Modal

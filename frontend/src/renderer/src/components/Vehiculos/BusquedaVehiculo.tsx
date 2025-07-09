@@ -1,8 +1,13 @@
+import {
+  getVehiculoPorPatente,
+  getVehiculosFiltrados
+} from '../../../../servicies/vehiculosService'
 import { Database } from '@/src/types/database.types'
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { Pencil, Trash } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Select from 'react-select'
+import { toast } from 'sonner'
 
 const customStyles = {
   container: (provided: any) => ({
@@ -57,6 +62,7 @@ const customStyles = {
 
 type Modelo = Database['public']['Tables']['Modelos']['Row']
 type Vehiculo = Database['public']['Tables']['Vehiculo']['Row']
+type VehiculoAMostrar = Omit<Vehiculo, 'Cliente'> & { Cliente: string }
 
 export default function BusquedaVehiculo(): JSX.Element {
   const [formdata, setFormData] = useState({
@@ -65,7 +71,8 @@ export default function BusquedaVehiculo(): JSX.Element {
     modelo: 0,
     // año: 0,
     // kilometros: 0,
-    motor: ''
+    motor: '',
+    cliente: ''
   })
 
   const { marcasVehiculos, modelos, clientes } = useConsts()
@@ -75,15 +82,29 @@ export default function BusquedaVehiculo(): JSX.Element {
   const [cliente, setCliente] = useState(null)
   const [modelosLocal, setModelosLocal] = useState<Modelo[]>([])
 
-  const [vehiculos, setVehiculos] = useState<Vehiculo[] | null>(null)
+  const [vehiculos, setVehiculos] = useState<VehiculoAMostrar[] | null>(null)
   const [cargando, setCargando] = useState(false)
 
   const handleChange = (e): void => {
-    const { name, value } = e.target
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value
-    }))
+    const { name, value, type } = e.target
+    if (name === 'patente') {
+      setFormData((prevState) => ({
+        ...prevState,
+        [name]: value.toUpperCase() // Convertir a mayúsculas al ingresar la patente
+      }))
+    } else {
+      if (type === 'number') {
+        setFormData((prevState) => ({
+          ...prevState,
+          [name]: value === '' ? -1 : parseInt(value, 10) // Convertir a número
+        }))
+      } else {
+        setFormData((prevState) => ({
+          ...prevState,
+          [name]: value
+        }))
+      }
+    }
   }
 
   const handleSelectChange = (selectedOption, setState, name): void => {
@@ -96,7 +117,36 @@ export default function BusquedaVehiculo(): JSX.Element {
 
   const handleFilter = (e): void => {
     e.preventDefault()
-    console.log(formdata)
+
+    const toastLoading = toast.loading('Cargando vehiculos...')
+    if (formdata.patente !== '') {
+      getVehiculoPorPatente(formdata.patente).then((data) => {
+        setVehiculos([data])
+        setCargando(false)
+        toast.dismiss(toastLoading)
+        toast.success('Vehiculo cargado correctamente')
+      })
+    } else {
+      getVehiculosFiltrados(
+        formdata.marca !== 0 ? formdata.marca : undefined,
+        formdata.modelo !== 0 ? formdata.modelo : undefined,
+        formdata.motor !== '' ? formdata.motor : undefined,
+        formdata.cliente !== '' ? parseInt(formdata.cliente.split('-')[0]) : undefined,
+        formdata.cliente !== '' ? parseInt(formdata.cliente.split('-')[1]) : undefined
+      )
+        .then((data) => {
+          console.log(data)
+          setVehiculos(data)
+          setCargando(false)
+          toast.dismiss(toastLoading)
+          toast.success('Vehiculos cargados correctamente')
+        })
+        .catch((error) => {
+          console.error('Error al cargar los vehiculos:', error)
+          toast.dismiss(toastLoading)
+          toast.error('Error al cargar los vehiculos')
+        })
+    }
   }
 
   const limpiarFiltros = (): void => {
@@ -106,11 +156,13 @@ export default function BusquedaVehiculo(): JSX.Element {
       modelo: 0,
       // año: 0,
       // kilometros: 0,
-      motor: ''
+      motor: '',
+      cliente: ''
     })
     setMarca(null)
     setModelo(null)
     setCliente(null)
+    setVehiculos(null)
   }
 
   useEffect(() => {
@@ -140,27 +192,18 @@ export default function BusquedaVehiculo(): JSX.Element {
                 value={formdata.patente}
               />
             </fieldset>
-            {/* <fieldset>
-              <legend className="fieldset-legend"> Marca:</legend>
-              <input
-                type="text"
-                className="input input-md outline-1 w-60"
-                placeholder="Ingresa la descripción..."
-                name="descripcion"
-                onChange={handleChange}
-                value={formdata.descripcion}
-              />
-            </fieldset> */}
             <fieldset>
               <legend className="fieldset-legend"> Cliente:</legend>
               <Select
                 name="Cliente"
-                options={clientes.map((cliente) => {
-                  return {
-                    value: cliente.id,
-                    label: `${cliente.Nombre} ${cliente.Numero_Documento === -1 ? ` ` : `(${cliente.Numero_Documento} - ${cliente.Tipo_Documento === 2 ? 'CUIT' : 'DNI'})`}`
-                  }
-                })}
+                options={clientes
+                  .filter((cliente) => cliente.id !== 0)
+                  .map((cliente) => {
+                    return {
+                      value: `${cliente.Tipo_Documento}-${cliente.Numero_Documento}`,
+                      label: `${cliente.Nombre} ${cliente.Numero_Documento === -1 ? ` ` : `(${cliente.Numero_Documento} - ${cliente.Tipo_Documento === 2 ? 'CUIT' : 'DNI'})`}`
+                    }
+                  })}
                 onChange={(e) => {
                   handleSelectChange(e, setCliente, 'cliente')
                 }}
@@ -255,7 +298,6 @@ export default function BusquedaVehiculo(): JSX.Element {
         {vehiculos && !cargando ? (
           <table className="table outline-1">
             <th>Patente</th>
-            <th>Marca</th>
             <th>Cliente</th>
             <th>Marca</th>
             <th>Modelo</th>
@@ -269,7 +311,19 @@ export default function BusquedaVehiculo(): JSX.Element {
                   return (
                     <tr key={vehiculo.id}>
                       <td>{vehiculo.Patente}</td>
-                      <td>{'Ya te guardo'}</td>
+                      <td>
+                        {vehiculo.Cliente === 'Sin dueño'
+                          ? 'Sin dueño'
+                          : `${
+                              clientes.find(
+                                (cliente) =>
+                                  cliente.Tipo_Documento ===
+                                    parseInt(vehiculo.Cliente.split('-')[0], 10) &&
+                                  cliente.Numero_Documento ===
+                                    parseInt(vehiculo.Cliente.split('-')[1], 10)
+                              )?.Nombre
+                            }`}
+                      </td>
                       <td>{vehiculo.Marca}</td>
                       <td>{vehiculo.Modelo}</td>
                       <td>{vehiculo.Año}</td>

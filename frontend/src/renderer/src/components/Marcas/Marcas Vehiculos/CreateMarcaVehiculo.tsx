@@ -7,7 +7,7 @@ import { useConsts } from '@renderer/Contexts/constsContext.js'
 
 type Marca = Database['public']['Tables']['Marca_de_Productos']['Row']
 
-export default function NuevaMarca({ onClose }: { onClose: () => void }): JSX.Element {
+export default function CreateMarcaVehiculo(): JSX.Element {
   const { setMarcasProductos } = useConsts()
 
   const [formData, setFormData] = useState({
@@ -42,7 +42,6 @@ export default function NuevaMarca({ onClose }: { onClose: () => void }): JSX.El
       if (typeof response !== 'number') {
         setMarcasProductos((prev) => [...prev, response])
       }
-      onClose()
     }
   }
 
