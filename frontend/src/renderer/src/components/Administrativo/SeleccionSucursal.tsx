@@ -107,7 +107,7 @@ export default function SeleccionSucursal({
           options={sucursales.map((sucursal) => {
             return {
               value: sucursal.id,
-              label: `${sucursal.Nombre} - ${sucursal.Dirección}`
+              label: `${sucursal.Nombre} - ${sucursal.Direccion}`
             }
           })}
           onChange={(e) => handleSelectChange(e, setSucursalSelect, 'sucursal')}

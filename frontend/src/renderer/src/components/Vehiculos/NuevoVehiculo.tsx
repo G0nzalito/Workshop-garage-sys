@@ -5,9 +5,9 @@ import { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { toast } from 'sonner'
 import { crearVehiculo } from '../../../../servicies/vehiculosService'
-import CreateMarca from '@renderer/components/Marcas/Marcas Vehiculos/CreateMarcaVehiculo'
-import CreateMarcaProducto from '@renderer/components/Marcas/Marcas Productos/CreateMarcaProducto'
 import CreateMarcaVehiculo from '@renderer/components/Marcas/Marcas Vehiculos/CreateMarcaVehiculo'
+import MarcaYModeloTabs from '@renderer/specificComponents/MarcaYModeloTabs'
+import CreateModeloVehiculo from '@renderer/components/Modelo/NuevoModelo'
 
 type formDataNuevoVehiculo = {
   Patente: string
@@ -90,6 +90,7 @@ export default function NuevoProducto(): JSX.Element {
   const [Modelo, setModelo] = useState()
   const [Cliente, setCliente] = useState()
   const [ModelosLocal, setModelosLocal] = useState<Modelo[]>()
+  const [marcaModalKey, setMarcaModalKey] = useState(0)
 
   const handleChange = (e): void => {
     const { name, value, type } = e.target
@@ -102,7 +103,7 @@ export default function NuevoProducto(): JSX.Element {
       if (type === 'number') {
         setFormData((prevData) => ({
           ...prevData,
-          [name]: value === '' ? -1 : parseInt(value, 10)
+          [name]: parseInt(value, 10)
         }))
       } else {
         setFormData((prevData) => ({
@@ -122,11 +123,13 @@ export default function NuevoProducto(): JSX.Element {
     let falta = false
 
     for (const key in formData) {
+      console.log(typeof NaN)
       if (
         formData[key] === '' ||
         formData[key] === 'Falta' ||
         formData[key] === 0 ||
-        formData[key] === -1
+        formData[key] === -1 ||
+        Number.isNaN(formData[key])
       ) {
         falta = true
         if (typeof formData[key] === 'string') {
@@ -207,9 +210,17 @@ export default function NuevoProducto(): JSX.Element {
     setModelosLocal(modelos.filter((modelo) => modelo.Marca === formData.Marca))
   }, [Marca])
 
-  // useEffect(() => {
-  //   setCLientesValidos(clientes.filter((cliente) => cliente.id !== 0))
-  // }, [])
+  useEffect(() => {
+    setFormData((prevData) => ({
+      ...prevData,
+      Marca: 0,
+      Modelo: 0
+    }))
+    //@ts-ignore - No se puede asignar un número a un string
+    setMarca({ value: 0, label: 'Seleccione una Marca' })
+    //@ts-ignore - No se puede asignar un número a un string
+    setModelo({ value: 0, label: 'Seleccione un modelo' })
+  }, [marcaModalKey])
 
   return (
     <div className="flex flex-col p-4">
@@ -261,12 +272,14 @@ export default function NuevoProducto(): JSX.Element {
         <div className="flex flex-col">
           <Select
             name="Marca"
-            options={marcasVehiculos.map((Marca) => {
-              return {
-                value: Marca.id,
-                label: Marca.Nombre
-              }
-            })}
+            options={marcasVehiculos
+              .filter((marca) => marca.Dada_de_baja === false)
+              .map((Marca) => {
+                return {
+                  value: Marca.id,
+                  label: Marca.Nombre
+                }
+              })}
             onChange={(e) => handleSelectChange(e, setMarca, 'Marca')}
             value={Marca}
             styles={customStyles}
@@ -343,7 +356,7 @@ export default function NuevoProducto(): JSX.Element {
             placeholder="Seleccione el dueño del vehículo"
             className="w-full"
           />
-          {formData.Cliente === -2 && (
+          {formData.Cliente === '' && (
             <span className="text-red-500 text-xs mt-1">
               Debe seleccionar un dueño para el vehículo
             </span>
@@ -406,9 +419,29 @@ export default function NuevoProducto(): JSX.Element {
         </div>
       </form>
       {/* Open the modal using document.getElementById('ID').showModal() method */}
-      <dialog id="NuevaMarca" className="modal">
+      <dialog
+        id="NuevaMarca"
+        className="modal"
+        onClose={(): void => {
+          setMarcaModalKey((prev) => prev + 1)
+          // formData.Marca = 0
+        }}
+      >
         <div className="modal-box">
-          {CreateMarcaVehiculo()}
+          <div className="badge badge-soft badge-success">
+            <span className="font-bold italic text-3xl">Nueva Marca</span>
+          </div>
+          <MarcaYModeloTabs
+            key={marcaModalKey} // Add key here
+            selectedMarca={ModelosLocal !== undefined ? formData.Marca : null}
+            defaultTab="marca"
+          />
+          <div className="modal-action">
+            <form method="dialog">
+              {/* if there is a button in form, it will close the modal */}
+              <button className="btn btn-soft btn-error">Cerrar</button>
+            </form>
+          </div>
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>
@@ -416,8 +449,10 @@ export default function NuevoProducto(): JSX.Element {
       </dialog>
       <dialog id="NuevoModelo" className="modal">
         <div className="modal-box">
-          <h3 className="font-bold text-lg">Nuevo Modelo</h3>
-          <p className="py-4">Press ESC key or click outside to close</p>
+          <div className="badge badge-soft badge-success">
+            <span className="font-bold italic text-3xl">Nuevo Modelo</span>
+          </div>
+          <CreateModeloVehiculo marca={formData.Marca} />
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>
@@ -427,6 +462,21 @@ export default function NuevoProducto(): JSX.Element {
         <div className="modal-box">
           <h3 className="font-bold text-lg">Nuevo Cliente</h3>
           <p className="py-4">Press ESC key or click outside to close</p>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+      <dialog id="my_modal_1" className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Hello!</h3>
+          <p className="py-4">Press ESC key or click the button below to close</p>
+          <div className="modal-action">
+            <form method="dialog">
+              {/* if there is a button in form, it will close the modal */}
+              <button className="btn">Close</button>
+            </form>
+          </div>
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>

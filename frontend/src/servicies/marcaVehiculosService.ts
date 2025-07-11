@@ -39,4 +39,25 @@ export const createMarcaVehiculos = async (marcaVehiculo): Promise<number | Marc
     }
   }
 }
+export const createModeloVehiculos = async (
+  nombreModelo: string,
+  marcaAsocidad: number
+): Promise<number | Modelo> => {
+  console.log('Creando modelo: ', nombreModelo, ' con marca: ', marcaAsocidad)
+  try {
+    const response = await axios.post(`${URLModelo}/create`, {
+      Nombre: nombreModelo,
+      Marca: marcaAsocidad
+    })
+    return response.data.modelo
+  } catch (e: unknown) {
+    const error = e as AxiosError
+    if (error.status === 400) {
+      return error.status
+    } else {
+      console.log('Error en la creacion de modelos: ', e)
+      return error.status || 500
+    }
+  }
+}
 

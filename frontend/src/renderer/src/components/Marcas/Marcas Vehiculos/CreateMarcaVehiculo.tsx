@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { createMarcaProducto } from '../../../../../servicies/marcaProductoService.js'
 import { toast } from 'sonner'
 import { BadgeCheck, X } from 'lucide-react'
 import { Database } from '@/src/types/database.types.js'
 import { useConsts } from '@renderer/Contexts/constsContext.js'
+import { createMarcaVehiculos } from '../../../../../servicies/marcaVehiculosService'
 
-type Marca = Database['public']['Tables']['Marca_de_Productos']['Row']
+type Marca = Database['public']['Tables']['Marca_de_Vehiculos']['Row']
 
 export default function CreateMarcaVehiculo(): JSX.Element {
-  const { setMarcasProductos } = useConsts()
+  const { setMarcasVehiculos } = useConsts()
 
   const [formData, setFormData] = useState({
     Nombre: ''
@@ -25,7 +25,7 @@ export default function CreateMarcaVehiculo(): JSX.Element {
 
   const handleSubmit = async (): Promise<void> => {
     const toastEspera = toast.loading('Guardando marca...')
-    const response: Marca | number = await createMarcaProducto(formData)
+    const response: Marca | number = await createMarcaVehiculos(formData)
     toast.dismiss(toastEspera)
     if (response === 400) {
       toast.error('Error al guardar la marca', {
@@ -40,25 +40,25 @@ export default function CreateMarcaVehiculo(): JSX.Element {
         icon: <BadgeCheck />
       })
       if (typeof response !== 'number') {
-        setMarcasProductos((prev) => [...prev, response])
+        setMarcasVehiculos((prev) => [...prev, response])
       }
     }
   }
 
   return (
-    <div className="h-46 w-96">
+    <div className="flex flex-col items-center justify-center p-4">
       <form
         id="formNuevoProveedor"
-        className="grid grid-cols-[140px_1fr] gap-y-4 p-4 max-w-2xl mx-auto"
+        className="grid grid-cols-3 gap-4 w-full"
         onSubmit={(e) => {
           e.preventDefault()
           handleSubmit()
         }}
       >
-        <span className="text-left pr-4 self-center font-bold">Nombre Marca: </span>
+        <span className="text-left self-center font-bold">Nombre Marca: </span>
         <input
           type="text"
-          className="input input-bordered appearance-none"
+          className="input input-bordered outline-1 appearance-none"
           placeholder="Nombre de la marca..."
           onChange={handleChange}
           name="Nombre"

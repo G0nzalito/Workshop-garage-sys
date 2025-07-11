@@ -353,7 +353,7 @@ export default function NuevoProducto(): JSX.Element {
                 options={subCategoriasLocal.map((SubCategoria) => {
                   return {
                     value: SubCategoria.id,
-                    label: SubCategoria.Descripción
+                    label: SubCategoria.Descripcion
                   }
                 })}
                 onChange={(e) => handleSelectChange(e, setSubCategoria, 'SubCategoria')}

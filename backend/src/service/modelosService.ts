@@ -58,13 +58,17 @@ async function uploadModelo(nuevoModelo: ModeloAInsertar) {
   try {
     const ModeloExistente = await getModeloByNombre(nuevoModelo.Nombre)
 
-    throw new ReferenceError("El modelo ya existe")
-  } catch (e: unknown) {
-    if (e instanceof ReferenceError === false) {
+    console.log("Modelo existente:", ModeloExistente)
+
+    if (ModeloExistente) {
+      throw new ReferenceError("El modelo ya existe")
+    } else {
       const marca = await getMarca_de_VehiculosById(nuevoModelo.Marca as number)
 
       if (!marca) {
-        throw new ReferenceError("La marca a la que pertenece el modelo no existe")
+        throw new ReferenceError(
+          "La marca a la que pertenece el modelo no existe"
+        )
       }
 
       if (marca.Dada_de_baja === true) {
@@ -83,9 +87,9 @@ async function uploadModelo(nuevoModelo: ModeloAInsertar) {
       } else {
         return data as ModeloAInsertar
       }
-    } else {
-      throw e
     }
+  } catch (e: unknown) {
+    console.log("Error al verificar el modelo existente:", e)
   }
 }
 
