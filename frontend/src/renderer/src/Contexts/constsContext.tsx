@@ -2,6 +2,7 @@ import { Database } from '@types'
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 
 type Cliente = Database['public']['Tables']['Cliente']['Row']
+type TipoDocumento = Database['public']['Tables']['Tipo_documento']['Row']
 type FormaDePago = Database['public']['Tables']['Medios Pago']['Row']
 type Tarjeta = Database['public']['Tables']['Tarjetas']['Row']
 type Marketing = Database['public']['Tables']['Fuente MKT']['Row']
@@ -15,12 +16,17 @@ type SubCategoria = Database['public']['Tables']['SubCategorias']['Row']
 type Sucursal = Database['public']['Tables']['Sucursales']['Row']
 type Producto = Database['public']['Tables']['Productos']['Row']
 type Vehiculo = Database['public']['Tables']['Vehiculo']['Row']
+type VehiculoSeleccionado = Database['public']['Tables']['Vehiculo']['Row'] & {
+  Cliente: string
+}
 
 type ConstContextData = {
   sucursalSeleccionada: number
   setSucursalSeleccionada: React.Dispatch<React.SetStateAction<number>>
   clientes: Cliente[]
   setClientes: React.Dispatch<React.SetStateAction<Cliente[]>>
+  tiposDocumento: TipoDocumento[]
+  setTiposDocumento: React.Dispatch<React.SetStateAction<TipoDocumento[]>>
   formasPago: FormaDePago[]
   setFormasPago: React.Dispatch<React.SetStateAction<FormaDePago[]>>
   tarjetas: Tarjeta[]
@@ -47,12 +53,15 @@ type ConstContextData = {
   setProductoSeleccionado: React.Dispatch<React.SetStateAction<Producto>>
   vehiculos: Vehiculo[]
   setVehiculos: React.Dispatch<React.SetStateAction<Vehiculo[]>>
+  vehiculoSeleccionado: VehiculoSeleccionado
+  setVehiculoSeleccionado: React.Dispatch<React.SetStateAction<VehiculoSeleccionado>>
 }
 
 export const ConstContext = createContext<ConstContextData | undefined>(undefined)
 
 export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [clientes, setClientes] = useState<Cliente[]>([])
+  const [tiposDocumento, setTiposDocumento] = useState<TipoDocumento[]>([])
   const [formasPago, setFormasPago] = useState<FormaDePago[]>([])
   const [tarjetas, setTarjetas] = useState<Tarjeta[]>([])
   const [marketing, setMarketing] = useState<Marketing[]>([])
@@ -72,6 +81,7 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   })
   const [sucursales, setSucursales] = useState<Sucursal[]>([])
   const [productoSeleccionado, setProductoSeleccionado] = useState<Producto>({} as Producto)
+  const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState<VehiculoSeleccionado>(null)
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([])
 
   // useEffect(() => {
@@ -93,6 +103,8 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         setSucursalSeleccionada,
         clientes,
         setClientes,
+        tiposDocumento,
+        setTiposDocumento,
         formasPago,
         setFormasPago,
         tarjetas,
@@ -117,6 +129,8 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         setSucursales,
         productoSeleccionado,
         setProductoSeleccionado,
+        vehiculoSeleccionado,
+        setVehiculoSeleccionado,
         vehiculos,
         setVehiculos
       }}

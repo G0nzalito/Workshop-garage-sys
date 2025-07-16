@@ -3,10 +3,7 @@ import { toast } from 'sonner'
 import { BadgeCheck, X } from 'lucide-react'
 import { Database } from '@/src/types/database.types.js'
 import { useConsts } from '@renderer/Contexts/constsContext.js'
-import {
-  createMarcaVehiculos,
-  createModeloVehiculos
-} from '../../../../servicies/marcaVehiculosService'
+import { createModeloVehiculos } from '../../../../../servicies/marcaVehiculosService'
 import Select from 'react-select'
 
 const customStyles = {
@@ -34,6 +31,12 @@ const customStyles = {
     ...provided,
 
     backgroundColor: 'black'
+  }),
+
+  menuList: (provided) => ({
+    ...provided,
+    maxHeight: '220px', // Altura máxima antes de mostrar el scroll
+    overflowY: 'auto' // Muestra el scroll solo cuando es necesario
   }),
 
   option: (provided: any, state: any) => ({
@@ -186,6 +189,7 @@ export default function CreateModeloVehiculo({
             </span>
           )}
         </div>
+
         <div className="col-span-2 flex justify-end mt-4">
           <button className="btn btn-success btn-soft">Guardar Modelo</button>
         </div>

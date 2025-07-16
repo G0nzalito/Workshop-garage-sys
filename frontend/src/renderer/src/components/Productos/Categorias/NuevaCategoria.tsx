@@ -3,7 +3,7 @@ import { useConsts } from '@renderer/Contexts/constsContext.js'
 import { BadgeCheck, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { uploadCategoria } from '../../../../servicies/categoriasYSubCategoriasService.js'
+import { uploadCategoria } from '../../../../../servicies/categoriasYSubCategoriasService.js'
 
 type Categoria = Database['public']['Tables']['Categorias']['Row']
 

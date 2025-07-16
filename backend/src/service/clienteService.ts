@@ -4,16 +4,26 @@ import { Database } from "../supabase/database.types"
 
 type ClienteAInsertar = Database["public"]["Tables"]["Cliente"]["Insert"]
 type Cliente = Database["public"]["Tables"]["Cliente"]["Row"]
+type TiposDocumento = Database["public"]["Tables"]["Tipo_documento"]["Row"]
 
 async function getClientes() {
   const { data, error } = await supabase.from("Cliente").select("*")
   return data as Cliente[]
 }
 
+async function getTiposDocumento() {
+  const { data, error } = await supabase.from("Tipo_documento").select("*")
+  if (error) {
+    throw new Error(error.message)
+  }
+  console.log("Tipos de documento obtenidos:", data)
+  return data as TiposDocumento[]
+}
+
 async function getClientByDocument(tipoDocumento, numeroDocumento) {
   const { data, error } = await supabase
     .from("Cliente")
-    .select('*')
+    .select("*")
     .eq("Tipo_Documento", tipoDocumento)
     .eq("Numero_Documento", numeroDocumento)
     .eq("Dado_de_baja", false)
@@ -101,6 +111,7 @@ async function deleteClient(tipoDocumento, numeroDocumento) {
 
 export {
   getClientes,
+  getTiposDocumento,
   getClientByDocument,
   uploadClient,
   updateClient,

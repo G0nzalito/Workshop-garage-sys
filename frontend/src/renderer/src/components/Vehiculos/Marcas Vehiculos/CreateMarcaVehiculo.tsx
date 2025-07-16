@@ -63,6 +63,9 @@ export default function CreateMarcaVehiculo(): JSX.Element {
           onChange={handleChange}
           name="Nombre"
         />
+
+
+
         <div className="col-span-2 flex justify-end mt-4">
           <button className="btn btn-success btn-soft">Guardar Marca</button>
         </div>
@@ -70,3 +73,4 @@ export default function CreateMarcaVehiculo(): JSX.Element {
     </div>
   )
 }
+

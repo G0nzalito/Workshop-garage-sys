@@ -20,7 +20,9 @@ import {
 import {
   vehiculoCreateSchema,
   vehiculoFilterSchema,
+  vehiculoUpdateSchema,
 } from "../middlewares/schemas/vehiculoSchemas"
+import { convertirFechaLocal } from "../support/supportFunctions"
 
 type VehiculoAInsertar = Database["public"]["Tables"]["Vehiculo"]["Insert"]
 type Vehiculo = Database["public"]["Tables"]["Vehiculo"]["Row"]
@@ -159,20 +161,49 @@ vehiculoRouter.post(
   }
 )
 
-vehiculoRouter.put("/updateKilometers", async (req, res) => {
-  const { Patente, Kilometros } = req.body
+vehiculoRouter.put(
+  "/update",
+  validateSchemaBody(vehiculoUpdateSchema),
+  async (req, res) => {
+    const { Patente, Kilometros, Dueño } = req.body
 
-  if (Patente && Kilometros) {
-    try {
-      await upodateKilometersOfVehiculo(Patente, { kilometros: Kilometros })
+    console.log("Dueño", Dueño)
+    console.log("Patente", Patente)
 
-      res.status(200).json({ message: "Kilometros actualizados" })
-    } catch (e: unknown) {
-      res
-        .status(500)
-        .json({ message: "Error al actualizar los kilometros", error: e })
+
+    if (Patente) {
+      const cambios = {}
+      try {
+        if (Dueño) {
+          const today = new Date()
+          const todayString = convertirFechaLocal(today)
+          const nuevoDueño = await asignarVehiculoACliente(
+            Patente,
+            Dueño.Tipo_Documento,
+            Dueño.Numero_Documento,
+            todayString
+          )
+          cambios[
+            "Dueño"
+            //@ts-expect-error
+          ] = `${nuevoDueño.Tipo_Documento_Cliente}-${nuevoDueño.Numero_Documento_Cliente}`
+        }
+
+        if (Kilometros) {
+          const nuevoKilometraje = (
+            await upodateKilometersOfVehiculo(Patente, Kilometros)
+          ).Kilometros
+          cambios["Kilometros"] = nuevoKilometraje
+        }
+
+        res.status(200).json({ message: "Vehiculo actualizados", cambios })
+      } catch (e: unknown) {
+        res
+          .status(500)
+          .json({ message: "Error al actualizar el vehiculo", e })
+      }
+    } else {
+      res.status(400).json({ message: "Información suficiente no brindada" })
     }
-  } else {
-    res.status(400).json({ message: "Información suficiente no brindada" })
   }
-})
+)

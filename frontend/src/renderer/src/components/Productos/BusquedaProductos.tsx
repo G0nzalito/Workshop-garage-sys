@@ -386,10 +386,10 @@ export default function BusquedaProductos(): JSX.Element {
                           ? subCategoriasLocal.length > 0
                             ? subCategoriasLocal.find(
                                 (subCategoria) => subCategoria.id === producto.Producto.SubCategoria
-                              )?.Descripción
+                              )?.Descripcion
                             : subCategorias.find(
                                 (subCategoria) => subCategoria.id === producto.Producto.SubCategoria
-                              )?.Descripción
+                              )?.Descripcion
                           : 'No posee Sub categoria'}
                       </td>
                       <td>

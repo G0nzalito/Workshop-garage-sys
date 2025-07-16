@@ -3,8 +3,7 @@ import { Database } from '@/src/types/database.types'
 
 type Vehiculo = Database['public']['Tables']['Vehiculo']['Row']
 type VehiculoAInsertar = Database['public']['Tables']['Vehiculo']['Insert']
-type VehiculoAMostrar = Omit<Vehiculo, "Cliente"> & { Cliente: string }
-
+type VehiculoAMostrar = Omit<Vehiculo, 'Cliente'> & { Cliente: string }
 
 const baseUrl = 'http://localhost:4001/api/vehiculos'
 
@@ -16,16 +15,6 @@ export const getAllVehicle = async (): Promise<Vehiculo[]> => {
     throw new Error(`Error al obtener vehiculos: ${response.statusText}`)
   }
 }
-
-// export async function getVehiculoFiltrado(
-//   patenteVehiculo: string,
-//   cliente: string,
-//   marca: number,
-//   mnodelo: number,
-//   motor: string
-// ){
-
-// }
 
 export async function getVehiculoPorPatente(Patente: string): Promise<VehiculoAMostrar> {
   const response = await axios.get(`${baseUrl}/specific`, { params: { Patente } })
@@ -58,12 +47,27 @@ export const crearVehiculo = async (
   vehiculo: VehiculoAInsertar,
   dueño: { Tipo_Documento: number; Numero_Documento: number }
 ): Promise<Vehiculo> => {
-  console.log(typeof vehiculo.Kilometros)
-  console.log(typeof console.log(vehiculo))
   const response = await axios.post(`${baseUrl}/create`, { vehiculo, dueño })
   if (response.status === 201) {
     return response.data
   } else {
     throw new Error(`Error al crear vehiculo: ${response.statusText}`)
+  }
+}
+
+export const editarVehiculo = async (
+  Patente: string,
+  Kilometros: number,
+  Dueño: { Tipo_Documento: number; Numero_Documento: number }
+) => {
+  const response = await axios.put(`${baseUrl}/update`, {
+    Patente,
+    Kilometros,
+    Dueño
+  })
+  if (response.status === 200) {
+    return response.data
+  } else {
+    throw new Error(`Error al editar vehiculo: ${response.statusText}`)
   }
 }

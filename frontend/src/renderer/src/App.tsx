@@ -8,6 +8,7 @@ import { ConstsProvider } from '@renderer/Contexts/constsContext'
 import ProductosMain from '@renderer/components/Productos/ProductosMain'
 import VehiculosMain from '@renderer/components/Vehiculos/VehiculosMain'
 import OnDev from '@renderer/components/onDev'
+import ClientesMain from '@renderer/components/Clientes/ClientesMain'
 
 function App(): JSX.Element {
   // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
@@ -19,14 +20,16 @@ function App(): JSX.Element {
 
         <Router hook={useHashLocation}>
           <Route path="/" component={WelcomeComponent} />
-          <Route path="/OrdenesDeTrabajo" component={() => OnDev({nombre: "Ordenes de trabajo"})} />
+          <Route
+            path="/OrdenesDeTrabajo"
+            component={() => OnDev({ nombre: 'Ordenes de trabajo' })}
+          />
           {/* Productos */}
           <Route path="/Productos" component={ProductosMain} />
           <Route path="/Vehiculos" component={VehiculosMain} />
-          <Route path="/Clientes" component={() => OnDev({nombre: "Clientes"})} />
-          <Route path="/Administrativo" component={() => OnDev({nombre: "Administrativo"})} />
-          <Route path="/Gastos" component={() => OnDev({nombre: "Gastos"})} />
-
+          <Route path="/Clientes" component={ClientesMain} />
+          <Route path="/Administrativo" component={() => OnDev({ nombre: 'Administrativo' })} />
+          <Route path="/Gastos" component={() => OnDev({ nombre: 'Gastos' })} />
         </Router>
         <Toaster
           closeButton

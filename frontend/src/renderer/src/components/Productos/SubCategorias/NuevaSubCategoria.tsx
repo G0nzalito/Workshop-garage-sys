@@ -4,7 +4,7 @@ import { BadgeCheck, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { toast } from 'sonner'
-import { uploadSubCategoria } from '../../../../servicies/categoriasYSubCategoriasService.js'
+import { uploadSubCategoria } from '../../../../../servicies/categoriasYSubCategoriasService.js'
 
 const customStyles = {
   container: (provided: any) => ({

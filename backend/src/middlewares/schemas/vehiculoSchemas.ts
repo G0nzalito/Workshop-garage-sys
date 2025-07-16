@@ -25,6 +25,12 @@ export const vehiculoFilterSchema = z.object({
   ),
 })
 
+export const vehiculoUpdateSchema = z.object({
+  Patente: z.string().min(1, "La patente es requerida"),
+  Kilometros: z.number().int().nonnegative("Los kilómetros deben ser un número no negativo"),
+  Dueño: z.optional(clienteConsultSchema),
+})
+
 export const vehiculoCreateSchema = z.object({
   vehiculo: vehiculoSchema,
   dueño: clienteConsultSchema,

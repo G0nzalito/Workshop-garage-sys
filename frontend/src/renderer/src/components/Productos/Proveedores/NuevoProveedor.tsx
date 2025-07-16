@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { uploadProveedor } from '../../../../servicies/proveedoresService.js'
+import { uploadProveedor } from '../../../../../servicies/proveedoresService.js'
 import { toast } from 'sonner'
 import { BadgeCheck, X } from 'lucide-react'
 import { useConsts } from '@renderer/Contexts/constsContext.js'

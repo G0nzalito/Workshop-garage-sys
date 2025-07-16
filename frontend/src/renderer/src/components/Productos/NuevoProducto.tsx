@@ -1,6 +1,6 @@
 import { Database } from '@/src/types/database.types'
-import CreateMarcaProducto from '@renderer/components/Marcas/Marcas Productos/CreateMarcaProducto'
-import NuevoProveedor from '@renderer/components/Proveedores/NuevoProveedor'
+import CreateMarcaProducto from '@renderer/components/Productos/Marcas Productos/CreateMarcaProducto'
+import NuevoProveedor from '@renderer/components/Productos/Proveedores/NuevoProveedor'
 import { useConsts } from '@renderer/Contexts/constsContext'
 import CategoriaYSubCategoriaTabs from '@renderer/specificComponents/CategoriaYSubCategoriaTabs'
 import Modal from '@renderer/specificComponents/Modal'

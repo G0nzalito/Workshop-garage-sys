@@ -5,6 +5,7 @@ import {
   uploadClient,
   updateClient,
   deleteClient,
+  getTiposDocumento,
 } from "../service/clienteService"
 import { PostgrestError } from "@supabase/supabase-js"
 import { Database } from "../supabase/database.types"
@@ -33,6 +34,23 @@ clientRouter.get("/specific", async (req, res) => {
   }
 })
 
+clientRouter.get("/tiposDocumento", async (rqq, res) => {
+  try {
+    const tiposDocumento = await getTiposDocumento()
+    res.status(200).json(tiposDocumento)
+  } catch (e: unknown) {
+    if (e instanceof PostgrestError) {
+      res.status(500).json({
+        message: e.message,
+      })
+    } else {
+      res.status(500).json({
+        message: "Internal server error",
+      })
+    }
+  }
+})
+
 clientRouter.post("/create", async (req, res) => {
   try {
     const {
@@ -42,7 +60,7 @@ clientRouter.post("/create", async (req, res) => {
       Telefono,
       Direccion,
       Email,
-      Numero_Socio
+      Numero_Socio,
     } = req.body
 
     if (!Nombre || !Numero_Documento) {
@@ -56,7 +74,7 @@ clientRouter.post("/create", async (req, res) => {
       Telefono: Telefono,
       Direccion: Direccion,
       Email: Email,
-      Numero_Socio: Numero_Socio
+      Numero_Socio: Numero_Socio,
     })
 
     res.status(201).json(clientCreated)
@@ -74,11 +92,22 @@ clientRouter.post("/create", async (req, res) => {
 })
 
 clientRouter.put("/update", (req, res) => {
-  const { Direccion, Email, Telefono, Numero_Documento, Tipo_Documento, Numero_Socio } =
-    req.body
+  const {
+    Direccion,
+    Email,
+    Telefono,
+    Numero_Documento,
+    Tipo_Documento,
+    Numero_Socio,
+  } = req.body
 
   try {
-    updateClient(Numero_Documento, Tipo_Documento, {direccion: Direccion, telefono: Telefono, email: Email, numeroSocio: Numero_Socio})
+    updateClient(Numero_Documento, Tipo_Documento, {
+      direccion: Direccion,
+      telefono: Telefono,
+      email: Email,
+      numeroSocio: Numero_Socio,
+    })
   } catch (e: unknown) {
     res.status(400).json({
       message: "Error",

@@ -1,5 +1,5 @@
-import NuevaCategoria from '@renderer/components/Categorias/NuevaCategoria'
-import NuevaSubCategoria from '@renderer/components/SubCategorias/NuevaSubCategoria'
+import NuevaCategoria from '@renderer/components/Productos/Categorias/NuevaCategoria'
+import NuevaSubCategoria from '@renderer/components/Productos/SubCategorias/NuevaSubCategoria'
 import { useEffect, useState } from 'react'
 
 export default function CategoriaYSubCategoriaTabs({
@@ -51,4 +51,3 @@ export default function CategoriaYSubCategoriaTabs({
     </>
   )
 }
-

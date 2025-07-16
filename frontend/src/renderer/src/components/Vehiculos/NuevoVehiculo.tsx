@@ -5,9 +5,9 @@ import { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { toast } from 'sonner'
 import { crearVehiculo } from '../../../../servicies/vehiculosService'
-import CreateMarcaVehiculo from '@renderer/components/Marcas/Marcas Vehiculos/CreateMarcaVehiculo'
+import CreateMarcaVehiculo from '@renderer/components/Vehiculos/Marcas Vehiculos/CreateMarcaVehiculo'
 import MarcaYModeloTabs from '@renderer/specificComponents/MarcaYModeloTabs'
-import CreateModeloVehiculo from '@renderer/components/Modelo/NuevoModelo'
+import CreateModeloVehiculo from '@renderer/components/Vehiculos/Modelo/NuevoModelo'
 
 type formDataNuevoVehiculo = {
   Patente: string
@@ -74,7 +74,7 @@ const customStyles = {
   })
 }
 
-export default function NuevoProducto(): JSX.Element {
+export default function NuevoVehiculo(): JSX.Element {
   const [formData, setFormData] = useState<formDataNuevoVehiculo>({
     Patente: '',
     Motor: '',
@@ -427,21 +427,25 @@ export default function NuevoProducto(): JSX.Element {
           // formData.Marca = 0
         }}
       >
-        <div className="modal-box">
-          <div className="badge badge-soft badge-success">
-            <span className="font-bold italic text-3xl">Nueva Marca</span>
+        <div className="modal-box max-w-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <div className="badge badge-soft badge-success">
+              <span className="font-bold italic text-3xl">Nueva Marca</span>
+            </div>
+            <div className="modal-action">
+              <form method="dialog">
+                {/* if there is a button in form, it will close the modal */}
+                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+                  ✕
+                </button>
+              </form>
+            </div>
           </div>
           <MarcaYModeloTabs
             key={marcaModalKey} // Add key here
             selectedMarca={ModelosLocal !== undefined ? formData.Marca : null}
             defaultTab="marca"
           />
-          <div className="modal-action">
-            <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
-              <button className="btn btn-soft btn-error">Cerrar</button>
-            </form>
-          </div>
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>
@@ -449,34 +453,26 @@ export default function NuevoProducto(): JSX.Element {
       </dialog>
       <dialog id="NuevoModelo" className="modal">
         <div className="modal-box">
-          <div className="badge badge-soft badge-success">
-            <span className="font-bold italic text-3xl">Nuevo Modelo</span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="badge badge-soft badge-success">
+              <span className="font-bold italic text-3xl">Nuevo Modelo</span>
+            </div>
+            <div className="modal-action">
+              <form method="dialog">
+                {/* if there is a button in form, it will close the modal */}
+                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+                  ✕
+                </button>
+              </form>
+            </div>
           </div>
           <CreateModeloVehiculo marca={formData.Marca} />
         </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
       </dialog>
       <dialog id="NuevoCliente" className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Nuevo Cliente</h3>
           <p className="py-4">Press ESC key or click outside to close</p>
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
-      <dialog id="my_modal_1" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Hello!</h3>
-          <p className="py-4">Press ESC key or click the button below to close</p>
-          <div className="modal-action">
-            <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
-              <button className="btn">Close</button>
-            </form>
-          </div>
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>

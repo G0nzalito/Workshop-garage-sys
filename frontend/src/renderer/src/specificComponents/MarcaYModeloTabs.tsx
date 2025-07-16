@@ -1,5 +1,5 @@
-import CreateModeloVehiculo from '@renderer/components/Modelo/NuevoModelo'
-import CreateMarcaVehiculo from '@renderer/components/Marcas/Marcas Vehiculos/CreateMarcaVehiculo'
+import CreateModeloVehiculo from '@renderer/components/Vehiculos/Modelo/NuevoModelo'
+import CreateMarcaVehiculo from '@renderer/components/Vehiculos/Marcas Vehiculos/CreateMarcaVehiculo'
 
 import { useState } from 'react'
 
@@ -11,6 +11,8 @@ export default function MarcaYModeloTabs({
   defaultTab?: 'marca' | 'modelo'
 }): JSX.Element {
   const [selectedTab, setSelectedTab] = useState<'marca' | 'modelo'>('marca')
+
+  // console.log('hola')
 
   return (
     <>

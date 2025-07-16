@@ -3,6 +3,7 @@ import {
   getVehiculosFiltrados
 } from '../../../../servicies/vehiculosService'
 import { Database } from '@/src/types/database.types'
+import EditarVehiculo from '@renderer/components/Vehiculos/AccionesVehiculo/EditarVehiculo'
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { Pencil, Trash } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -75,7 +76,8 @@ export default function BusquedaVehiculo(): JSX.Element {
     cliente: ''
   })
 
-  const { marcasVehiculos, modelos, clientes } = useConsts()
+  const { marcasVehiculos, modelos, clientes, setVehiculoSeleccionado, vehiculoSeleccionado } =
+    useConsts()
 
   const [marca, setMarca] = useState(null)
   const [modelo, setModelo] = useState(null)
@@ -84,6 +86,8 @@ export default function BusquedaVehiculo(): JSX.Element {
 
   const [vehiculos, setVehiculos] = useState<VehiculoAMostrar[] | null>(null)
   const [cargando, setCargando] = useState(false)
+
+  const [EditarVehiculoKey, setEditarVehiculoKey] = useState(0)
 
   const handleChange = (e): void => {
     const { name, value, type } = e.target
@@ -170,6 +174,8 @@ export default function BusquedaVehiculo(): JSX.Element {
   }, [marca])
 
   // console.log(vehiculos ? 'Vehiculos cargados' : 'No se cargaron vehiculos')
+
+  console.log(EditarVehiculoKey)
 
   return (
     <>
@@ -334,33 +340,15 @@ export default function BusquedaVehiculo(): JSX.Element {
                           <button
                             type="button"
                             className="btn btn-warning btn-soft tooltip"
-                            data-tip="Editar Producto"
-                            // onClick={() => {
-                            //   openModals(vehiculo.Producto, setEditarProducto)
-                            // }}
+                            data-tip="Editar Vehículo"
+                            onClick={() => {
+                              setVehiculoSeleccionado(vehiculo)
+                              //@ts-ignore siempre existe el modal
+                              document.getElementById('EditarVehiculo').showModal()
+                            }}
                           >
                             <Pencil size={16} />
                           </button>
-                          <button
-                            type="button"
-                            className="btn btn-error btn-soft tooltip"
-                            data-tip="Eliminar Producto"
-                            // onClick={() => {
-                            //   openModals(vehiculo.Producto, setEliminarProducto)
-                            // }}
-                          >
-                            <Trash size={16} />
-                          </button>
-                          {/* <button
-                            type="button"
-                            className="btn btn-info btn-soft tooltip"
-                            data-tip="Agregar Stock"
-                            onClick={() => {
-                              openModals(vehiculo.Producto, setAumentarStock)
-                            }}
-                          >
-                            <PlusCircle size={16} />
-                          </button> */}
                         </div>
                       </td>
                     </tr>
@@ -379,6 +367,34 @@ export default function BusquedaVehiculo(): JSX.Element {
           </div>
         )}
       </div>
+      <dialog
+        id="EditarVehiculo"
+        className="modal"
+        onClose={(): void => {
+          setVehiculoSeleccionado(null)
+          // formData.Marca = 0
+        }}
+      >
+        <div className="modal-box">
+          <div className="flex justify-between items-center mb-4">
+            <div className="badge badge-soft badge-success">
+              <span className="font-bold italic text-3xl">Editar Vehículo</span>
+            </div>
+            <div className="modal-action">
+              <form method="dialog">
+                {/* if there is a button in form, it will close the modal */}
+                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+                  ✕
+                </button>
+              </form>
+            </div>
+          </div>
+          {vehiculoSeleccionado !== null && <EditarVehiculo />}
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
     </>
   )
 }

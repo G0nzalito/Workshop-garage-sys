@@ -64,7 +64,8 @@ async function uploadVehiculo(
     const date = new Date()
     await asignarVehiculoACliente(
       nuevoVehiculo.Patente,
-      cliente,
+      cliente.Tipo_Documento,
+      cliente.Numero_Documento,
       convertirFechaLocal(date)
     )
     return data as VehiculoAInsertar[]
@@ -73,46 +74,59 @@ async function uploadVehiculo(
 
 async function upodateKilometersOfVehiculo(
   patente: string,
-  cambios: { kilometros: number }
+  kilometros: number
 ) {
   const vehiculo = await getVehiculoByPatente(patente)
 
   if (!vehiculo) {
     throw new ReferenceError("404 Vehiculo no encontrado")
   }
-  vehiculo.Kilometros += cambios.kilometros
+  vehiculo.Kilometros = kilometros
 
   const { data, error } = await supabase
     .from("Vehiculo")
     .update(vehiculo)
     .eq("Patente", patente)
-    .single()
-
-  if (error) {
-    throw error
-  }
-  return data as Vehiculo
-}
-
-async function asignarVehiculoACliente(
-  patente: string,
-  cliente: Cliente,
-  fechaAsignacion: string
-) {
-  const { data, error } = await supabase
-    .from("Vehiculos_de_clientes")
-    .insert({
-      Patente_Vehiculo: patente,
-      Numero_Documento_Cliente: cliente.Numero_Documento,
-      Tipo_Documento_Cliente: cliente.Tipo_Documento,
-      Fecha_Asignacion_Cliente: fechaAsignacion,
-    })
     .select()
 
   if (error) {
     throw error
   }
-  return data as VehiculoXCliente[]
+  return data[0] as Vehiculo
+}
+
+async function asignarVehiculoACliente(
+  patente: string,
+  Tipo_Documento_Dueño: number,
+  Numero_Documento_Dueño: number,
+  fechaAsignacion: string
+) {
+  const { data, error } = await supabase
+    .from("Vehiculos_de_clientes")
+    .update({
+      Fecha_Remocion_Cliente: fechaAsignacion,
+    })
+    .eq("Patente_Vehiculo", patente)
+    .is("Fecha_Remocion_Cliente", null)
+
+  if (error) {
+    throw error
+  } else {
+    const { data: newData, error: insertError } = await supabase
+      .from("Vehiculos_de_clientes")
+      .insert({
+        Patente_Vehiculo: patente,
+        Numero_Documento_Cliente: Numero_Documento_Dueño,
+        Tipo_Documento_Cliente: Tipo_Documento_Dueño,
+        Fecha_Asignacion_Cliente: fechaAsignacion,
+      })
+      .select()
+
+    if (insertError) {
+      throw insertError
+    }
+    return newData as VehiculoXCliente[]
+  }
 }
 
 async function getVehiculosByFiltros(
@@ -178,5 +192,5 @@ export {
   uploadVehiculo,
   upodateKilometersOfVehiculo,
   getVehiculosByFiltros,
-  getDueñoByPatente
+  getDueñoByPatente,
 }

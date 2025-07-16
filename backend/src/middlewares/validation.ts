@@ -6,6 +6,7 @@ app.use(appExpress.json())
 
 export const validateSchemaBody = (schema: Schema) => (req, res, next) => {
   try {
+    console.log(req.body)
     schema.parse(req.body)
     next()
   } catch (error) {
