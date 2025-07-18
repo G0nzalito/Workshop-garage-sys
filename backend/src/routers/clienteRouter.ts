@@ -6,13 +6,17 @@ import {
   updateClient,
   deleteClient,
   getTiposDocumento,
+  createTipoDocuemnto,
 } from "../service/clienteService"
 import { PostgrestError } from "@supabase/supabase-js"
 import { Database } from "../supabase/database.types"
+import { validateSchemaBody } from "../middlewares/validation"
+import { clienteInsertSchema } from "../middlewares/schemas/clienteSchemas"
 
 const clientRouter = appExpress.Router()
 
 type ClienteAInsertar = Database["public"]["Tables"]["Cliente"]["Insert"]
+type Cliente = Database["public"]["Tables"]["Cliente"]["Row"]
 
 clientRouter.get("/all", async (req, res) => {
   const clientes = await getClientes()
@@ -51,33 +55,25 @@ clientRouter.get("/tiposDocumento", async (rqq, res) => {
   }
 })
 
-clientRouter.post("/create", async (req, res) => {
+clientRouter.post("/tiposDocumento/create", async (req, res) => {
   try {
-    const {
-      Nombre,
-      Numero_Documento,
-      Tipo_Documento,
-      Telefono,
-      Direccion,
-      Email,
-      Numero_Socio,
-    } = req.body
+    const { Nombre } = req.body
 
-    if (!Nombre || !Numero_Documento) {
-      throw new ReferenceError("Name and Document Number are required")
+    if (!Nombre) {
+      throw new ReferenceError("Nombre is required")
     }
 
-    const clientCreated: ClienteAInsertar[] = await uploadClient({
-      Nombre: Nombre,
-      Numero_Documento: Numero_Documento,
-      Tipo_Documento: Tipo_Documento,
-      Telefono: Telefono,
-      Direccion: Direccion,
-      Email: Email,
-      Numero_Socio: Numero_Socio,
-    })
+    const tiposDocumento = await getTiposDocumento()
+    const existingTipo = tiposDocumento.find(
+      (tipo) => tipo.Nombre.toLowerCase() === Nombre.toLowerCase()
+    )
 
-    res.status(201).json(clientCreated)
+    if (existingTipo) {
+      throw new ReferenceError("Tipo de documento already exists")
+    }
+
+    const nuevoTipo = await createTipoDocuemnto(Nombre)
+    res.status(201).json(nuevoTipo)
   } catch (e: unknown) {
     if (e instanceof ReferenceError) {
       res.status(400).json({
@@ -85,11 +81,66 @@ clientRouter.post("/create", async (req, res) => {
       })
     } else {
       res.status(500).json({
-        message: "This client already exists",
+        message: e,
       })
     }
   }
 })
+
+clientRouter.post(
+  "/create",
+  validateSchemaBody(clienteInsertSchema),
+  async (req, res) => {
+    try {
+      const {
+        Nombre,
+        Numero_Documento,
+        Tipo_Documento,
+        Telefono,
+        Direccion,
+        Email,
+        Asociacion,
+      } = req.body
+
+      if (!Nombre || !Numero_Documento) {
+        throw new ReferenceError("Name and Document Number are required")
+      }
+
+      const existingClient = await getClientByDocument(
+        Tipo_Documento,
+        Numero_Documento
+      )
+
+      if (existingClient) {
+        throw new ReferenceError("Client already exists")
+      }
+
+      const clientCreated: Cliente = await uploadClient(
+        {
+          Nombre: Nombre,
+          Numero_Documento: Numero_Documento,
+          Tipo_Documento: Tipo_Documento,
+          Telefono: Telefono,
+          Direccion: Direccion,
+          Email: Email,
+        },
+        Asociacion
+      )
+
+      res.status(201).json(clientCreated)
+    } catch (e: unknown) {
+      if (e instanceof ReferenceError) {
+        res.status(400).json({
+          message: e.message,
+        })
+      } else {
+        res.status(500).json({
+          message: "This client already exists",
+        })
+      }
+    }
+  }
+)
 
 clientRouter.put("/update", (req, res) => {
   const {

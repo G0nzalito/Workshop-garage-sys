@@ -36,8 +36,6 @@ export default function ClientesMain(): JSX.Element {
     }
   }, [])
 
-  console.log(tiposDocumento)
-
   return (
     <div className="flex w-full flex-col bg-base-100 text-white gap-2 p-4">
       <div className="italic badge badge-soft badge-info text-2xl">Clientes</div>

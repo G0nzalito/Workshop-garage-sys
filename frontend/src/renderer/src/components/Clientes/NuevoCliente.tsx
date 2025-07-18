@@ -6,15 +6,17 @@ import Select from 'react-select'
 import { toast } from 'sonner'
 import MarcaYModeloTabs from '@renderer/specificComponents/MarcaYModeloTabs'
 import CreateModeloVehiculo from '@renderer/components/Vehiculos/Modelo/NuevoModelo'
+import { crearCliente } from '../../../../servicies/clientesService'
+import CreateTipoDocumento from '@renderer/components/Clientes/TiposDocumento/CreateTipoDocumento'
 
 type formDataNuevoCliente = {
   Nombre: string
   Tipo_Documento: number
   Numero_Documento: number
   Direccion: string
-  Email: string
+  Email: string | null
   Telefono: number
-  Asociacion?: number
+  Asociacion?: number | boolean
 }
 
 type Modelo = Database['public']['Tables']['Modelos']['Row']
@@ -84,17 +86,11 @@ export default function NuevoCliente(): JSX.Element {
 
   const { tiposDocumento } = useConsts()
   const [TipoDoc, setTipoDoc] = useState()
-  const [Modelo, setModelo] = useState()
-  const [Cliente, setCliente] = useState()
-  const [ModelosLocal, setModelosLocal] = useState<Modelo[]>()
-  const [marcaModalKey, setMarcaModalKey] = useState(0)
 
   const handleChange = (e): void => {
     const { name, value, type } = e.target
 
-    console.log(name, value, type)
-
-    if (type === 'number') {
+    if (type === 'number' || type === 'radio') {
       setFormData((prevData) => ({
         ...prevData,
         [name]: parseInt(value, 10)
@@ -112,118 +108,83 @@ export default function NuevoCliente(): JSX.Element {
     handleChange({ target: { name: formDataName, value: selectedOption.value } })
   }
 
-  const handleRadioChange = (event) => {
-    console.log(event.target.value)
+  const handleSubmit = async (): Promise<void> => {
+    const camposOpcionales = ['Direccion', 'Email', 'Telefono', 'Asociacion']
+    let falta = false
+
+    for (const key in formData) {
+      if (
+        !camposOpcionales.includes(key) &&
+        (formData[key] === '' ||
+          formData[key] === 'Falta' ||
+          formData[key] === 0 ||
+          formData[key] === -1 ||
+          Number.isNaN(formData[key]))
+      ) {
+        falta = true
+        if (typeof formData[key] === 'string') {
+          setFormData((prevData) => ({
+            ...prevData,
+            [key]: 'Falta'
+          }))
+        } else {
+          setFormData((prevData) => ({
+            ...prevData,
+            [key]: -1
+          }))
+        }
+      }
+    }
+    if (!falta) {
+      formData.Asociacion === 1 ? (formData.Asociacion = true) : (formData.Asociacion = false)
+      formData.Email === '' ? (formData.Email = null) : formData.Email
+      console.log('Enviando datos')
+      const toastEspera = toast.loading('Agregando Cliente', {
+        description: 'Agregando cliente a la base de datos'
+      })
+
+      const respuesta = await crearCliente(formData)
+      toast.dismiss(toastEspera)
+      if (typeof respuesta === 'string') {
+        if (respuesta === 'Cliente Duplicado') {
+          toast.error('Cliente Duplicado', {
+            description: 'El cliente con ese tipo y numero de documento ya existe',
+            duration: 5000,
+            icon: <X />
+          })
+        } else {
+          toast.error('Error desconocido', {
+            description: `Contactar al programador inmediatamente`,
+            duration: 5000,
+            icon: <X />
+          })
+          console.log('Error al crear el cliente:', respuesta)
+        }
+      } else {
+        toast.success('Cliente agregado', {
+          description: `Cliente ${formData.Nombre} agregado`,
+          duration: 6000,
+          icon: <BadgeCheck />
+        })
+        limpiarCampos()
+      }
+    }
+  }
+
+  const limpiarCampos = (): void => {
     setFormData((prevData) => ({
       ...prevData,
-      Asociacion: event.target.value === 1 ? true : false
+      Nombre: '',
+      Tipo_Documento: 0,
+      Numero_Documento: 0,
+      Direccion: '',
+      Email: '',
+      Telefono: 0,
+      Asociacion: formData.Asociacion === true ? 1 : 0
     }))
+    //@ts-ignore - No se puede asignar un número a un string
+    setTipoDoc({ value: 0, label: 'Seleccione un Tipo de Documento' })
   }
-
-  const handleSubmit = async (): Promise<void> => {
-    console.log(formData)
-
-    // let falta = false
-
-    // for (const key in formData) {
-    //   console.log(typeof NaN)
-    //   if (
-    //     formData[key] === '' ||
-    //     formData[key] === 'Falta' ||
-    //     formData[key] === 0 ||
-    //     formData[key] === -1 ||
-    //     Number.isNaN(formData[key])
-    //   ) {
-    //     falta = true
-    //     if (typeof formData[key] === 'string') {
-    //       setFormData((prevData) => ({
-    //         ...prevData,
-    //         [key]: 'Falta'
-    //       }))
-    //     } else {
-    //       setFormData((prevData) => ({
-    //         ...prevData,
-    //         [key]: -1
-    //       }))
-    //     }
-    //   }
-    // }
-
-    // const NuevoVehiculo: VehiculoAInsterar = {
-    //   Patente: formData.Patente,
-    //   Motor: formData.Motor,
-    //   Modelo: formData.Modelo,
-    //   Marca: formData.Marca,
-    //   Kilometros: formData.Kilometros,
-    //   Año: formData.Año
-    // }
-
-    // if (!falta) {
-    //   console.log('Enviando datos')
-    //   const toastEspera = toast.loading('Agregando Vehiculo', {
-    //     description: 'Agregando vehiculo a la base de datos'
-    //   })
-
-    //   const respuesta = await crearVehiculo(NuevoVehiculo, {
-    //     Tipo_Documento: parseInt(formData.Cliente.split('-')[0]),
-    //     Numero_Documento: parseInt(formData.Cliente.split('-')[1])
-    //   })
-    //   toast.dismiss(toastEspera)
-    //   if (typeof respuesta === 'string') {
-    //     toast.error('Codigo Duplicado', {
-    //       description: 'El código del producto ya existe',
-    //       duration: 5000,
-    //       icon: <X />
-    //     })
-    //     console.log('Error al crear el vehiculo:', respuesta)
-    //   } else {
-    //     toast.success('Vehiculo agregado', {
-    //       description: `Vehiculo de patente ${formData.Patente} agregado`,
-    //       duration: 6000,
-    //       icon: <BadgeCheck />
-    //     })
-    //     limpiarCampos()
-    //   }
-    // }
-  }
-
-  // const limpiarCampos = (): void => {
-  //   setFormData((prevData) => ({
-  //     ...prevData,
-  //     Codigo: '',
-  //     Descripcion: '',
-  //     Categoria: 0,
-  //     Marca: 0,
-  //     SubCategoria: 0,
-  //     Proveedor: 0
-  //   }))
-  //   //@ts-ignore - No se puede asignar un número a un string
-  //   setMarca({ value: 0, label: 'Seleccione una Marca' })
-  //   //@ts-ignore - No se puede asignar un número a un string
-  //   setModelo({ value: 0, label: 'Seleccione un modelo' })
-  // }
-
-  // useEffect(() => {
-  //   setFormData((prevData) => {
-  //     return {
-  //       ...prevData,
-  //       Modelo: 0
-  //     }
-  //   })
-  //   setModelosLocal(modelos.filter((modelo) => modelo.Marca === formData.Marca))
-  // }, [Marca])
-
-  // useEffect(() => {
-  //   setFormData((prevData) => ({
-  //     ...prevData,
-  //     Marca: 0,
-  //     Modelo: 0
-  //   }))
-  //   //@ts-ignore - No se puede asignar un número a un string
-  //   setMarca({ value: 0, label: 'Seleccione una Marca' })
-  //   //@ts-ignore - No se puede asignar un número a un string
-  //   setModelo({ value: 0, label: 'Seleccione un modelo' })
-  // }, [marcaModalKey])
 
   return (
     <div className="flex flex-col p-4">
@@ -285,7 +246,7 @@ export default function NuevoCliente(): JSX.Element {
             type="button"
             className="btn btn-sm btn-success btn-soft"
             //@ts-ignore el objeto es un modal que dentro de la propia pagina me incitan a usarlo así
-            onClick={() => document.getElementById('NuevaMarca').showModal()}
+            onClick={() => document.getElementById('NuevoTipoDocumento').showModal()}
           >
             <PlusCircle size={20} />
           </button>
@@ -297,11 +258,10 @@ export default function NuevoCliente(): JSX.Element {
         </span>
         <div className="flex flex-col">
           <input
-            type="text"
+            type="number"
             name="Numero_Documento"
-            className="input input-bordered outline-1 w-full"
+            className="input input-bordered outline-1 w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             placeholder="Ingrese el numero de documento"
-            value={formData.Numero_Documento}
             onChange={handleChange}
           />
           {formData.Numero_Documento === -1 && (
@@ -319,7 +279,6 @@ export default function NuevoCliente(): JSX.Element {
             className="input input-bordered outline-1 w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             placeholder="Ingrese el teléfono del cliente"
             onChange={handleChange}
-            value={formData.Telefono}
           />
         </div>
         <div className="pl-2 self-center"></div>
@@ -385,18 +344,11 @@ export default function NuevoCliente(): JSX.Element {
         </div>
       </form>
       {/* Open the modal using document.getElementById('ID').showModal() method */}
-      <dialog
-        id="NuevaMarca"
-        className="modal"
-        onClose={(): void => {
-          setMarcaModalKey((prev) => prev + 1)
-          // formData.Marca = 0
-        }}
-      >
-        <div className="modal-box max-w-2xl">
+      <dialog id="NuevoTipoDocumento" className="modal">
+        <div className="modal-box">
           <div className="flex items-center justify-between mb-4">
             <div className="badge badge-soft badge-success">
-              <span className="font-bold italic text-3xl">Nueva Marca</span>
+              <span className="font-bold italic text-3xl">Nuevo Tipo de Documento</span>
             </div>
             <div className="modal-action">
               <form method="dialog">
@@ -407,38 +359,9 @@ export default function NuevoCliente(): JSX.Element {
               </form>
             </div>
           </div>
-          <MarcaYModeloTabs
-            key={marcaModalKey} // Add key here
-            selectedMarca={ModelosLocal !== undefined ? formData.Marca : null}
-            defaultTab="marca"
-          />
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
-      <dialog id="NuevoModelo" className="modal">
-        <div className="modal-box">
-          <div className="flex items-center justify-between mb-4">
-            <div className="badge badge-soft badge-success">
-              <span className="font-bold italic text-3xl">Nuevo Modelo</span>
-            </div>
-            <div className="modal-action">
-              <form method="dialog">
-                {/* if there is a button in form, it will close the modal */}
-                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-                  ✕
-                </button>
-              </form>
-            </div>
+          <div className='flex flex-col items-center justify-center p-4'>
+          <CreateTipoDocumento />
           </div>
-          <CreateModeloVehiculo marca={formData.Marca} />
-        </div>
-      </dialog>
-      <dialog id="NuevoCliente" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Nuevo Cliente</h3>
-          <p className="py-4">Press ESC key or click outside to close</p>
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>
