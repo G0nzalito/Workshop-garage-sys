@@ -782,14 +782,17 @@ export type Database = {
         Row: {
           id: number
           Nombre: string
+          "Tipo de cliente": string | null
         }
         Insert: {
           id?: number
           Nombre: string
+          "Tipo de cliente"?: string | null
         }
         Update: {
           id?: number
           Nombre?: string
+          "Tipo de cliente"?: string | null
         }
         Relationships: []
       }

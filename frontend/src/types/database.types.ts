@@ -411,7 +411,7 @@ export type Database = {
           Fecha?: string
           Monto: number
           Observaciones?: string | null
-          Sucursal_id?: number
+          Sucursal_id: number
           Turno: number
         }
         Update: {
@@ -776,14 +776,17 @@ export type Database = {
         Row: {
           id: number
           Nombre: string
+          'Tipo de cliente': string | null
         }
         Insert: {
           id?: number
           Nombre: string
+          'Tipo de cliente'?: string | null
         }
         Update: {
           id?: number
           Nombre?: string
+          'Tipo de cliente'?: string | null
         }
         Relationships: []
       }

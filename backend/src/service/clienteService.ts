@@ -1,6 +1,7 @@
 import { PostgrestError } from "@supabase/supabase-js"
 import supabase from "../supabase/client"
 import { Database } from "../supabase/database.types"
+import { string } from "zod"
 
 type ClienteAInsertar = Database["public"]["Tables"]["Cliente"]["Insert"]
 type Cliente = Database["public"]["Tables"]["Cliente"]["Row"]
@@ -18,6 +19,42 @@ async function getTiposDocumento() {
   }
   console.log("Tipos de documento obtenidos:", data)
   return data as TiposDocumento[]
+}
+
+async function getClientesFiltrados(
+  tipoDocumento?: number,
+  numeroDocumento?: number,
+  nombre?: string,
+  numeroSocio?: number
+) {
+  const query = supabase.from("Cliente").select("*")
+  let filtroActivo = true
+
+  if (tipoDocumento) {
+    query.eq("Tipo_Documento", tipoDocumento)
+    if (numeroDocumento) {
+      query.eq("Numero_Documento", numeroDocumento)
+      filtroActivo = false
+    }
+  }
+  if (nombre) {
+    query.ilike("Nombre", `%${nombre}%`)
+  }
+  if (numeroSocio) {
+    query.eq("Numero_Socio", numeroSocio)
+  }
+
+  if (filtroActivo) {
+    query.eq("Dado_de_baja", false)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw error
+  } else {
+    return data as Cliente[]
+  }
 }
 
 async function getClientByDocument(tipoDocumento, numeroDocumento) {
@@ -97,10 +134,10 @@ async function uploadClient(
   }
 }
 
-async function createTipoDocuemnto(nombre: string) {
+async function createTipoDocuemnto(nombre: string, TipoCliente: string) {
   const { data, error } = await supabase
     .from("Tipo_documento")
-    .insert({ Nombre: nombre })
+    .insert({ Nombre: nombre, "Tipo de cliente": TipoCliente })
     .select()
     .single()
 
@@ -174,6 +211,7 @@ export {
   getClientes,
   getTiposDocumento,
   getClientByDocument,
+  getClientesFiltrados,
   uploadClient,
   createTipoDocuemnto,
   updateClient,

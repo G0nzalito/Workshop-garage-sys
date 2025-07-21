@@ -11,7 +11,7 @@ export const validateSchemaBody = (schema: Schema) => (req, res, next) => {
     next()
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json({
+      return res.status(406).json({
         message: "Validation error",
         errors: error.errors,
       })
@@ -25,11 +25,12 @@ export const validateSchemaBody = (schema: Schema) => (req, res, next) => {
 
 export const validateSchemaQuery = (schema: Schema) => (req, res, next) => {
   try {
+    console.log(req.query)
     schema.parse(req.query)
     next()
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json({
+      return res.status(406).json({
         message: "Validation error",
         errors: error.errors,
       })

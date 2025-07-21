@@ -20,3 +20,14 @@ export const clienteInsertSchema = z.object({
   Email: z.string().email("Email inválido").optional().nullable(),
   Asociacion: z.boolean(),
 })
+
+export const clientFilterSchema = z.object({
+  Tipo_Documento: z.optional(
+    z.string().min(1, "Tipo de documento es requerido")
+  ),
+  Numero_Documento: z.optional(
+    z.string().min(1, "Número de documento es requerido")
+  ),
+  Nombre: z.optional(z.string().min(1, "Nombre es requerido")),
+  Numero_Socio: z.optional(z.string().min(1, "Número de socio es requerido")),
+})

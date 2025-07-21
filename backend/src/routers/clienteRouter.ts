@@ -7,11 +7,19 @@ import {
   deleteClient,
   getTiposDocumento,
   createTipoDocuemnto,
+  getClientesFiltrados,
 } from "../service/clienteService"
 import { PostgrestError } from "@supabase/supabase-js"
 import { Database } from "../supabase/database.types"
-import { validateSchemaBody } from "../middlewares/validation"
-import { clienteInsertSchema } from "../middlewares/schemas/clienteSchemas"
+import {
+  validateSchemaBody,
+  validateSchemaQuery,
+} from "../middlewares/validation"
+import {
+  clienteInsertSchema,
+  clientFilterSchema,
+} from "../middlewares/schemas/clienteSchemas"
+import { parse } from "dotenv"
 
 const clientRouter = appExpress.Router()
 
@@ -38,6 +46,35 @@ clientRouter.get("/specific", async (req, res) => {
   }
 })
 
+clientRouter.get(
+  "/filter",
+  validateSchemaQuery(clientFilterSchema),
+  async (req, res) => {
+    const { Tipo_Documento, Numero_Documento, Nombre, Numero_Socio } = req.query
+
+    try {
+      const clientes = await getClientesFiltrados(
+        Tipo_Documento ? parseInt(Tipo_Documento as string) : undefined,
+        Numero_Documento ? parseInt(Numero_Documento as string) : undefined,
+        Nombre ? (Nombre as string) : undefined,
+        Numero_Socio ? parseInt(Numero_Socio as string) : undefined
+      )
+
+      res.status(200).json(clientes)
+    } catch (e: unknown) {
+      if (e instanceof PostgrestError) {
+        res.status(500).json({
+          message: e.message,
+        })
+      } else {
+        res.status(500).json({
+          message: "Internal server error",
+        })
+      }
+    }
+  }
+)
+
 clientRouter.get("/tiposDocumento", async (rqq, res) => {
   try {
     const tiposDocumento = await getTiposDocumento()
@@ -57,10 +94,10 @@ clientRouter.get("/tiposDocumento", async (rqq, res) => {
 
 clientRouter.post("/tiposDocumento/create", async (req, res) => {
   try {
-    const { Nombre } = req.body
+    const { Nombre, TipoCliente } = req.body
 
-    if (!Nombre) {
-      throw new ReferenceError("Nombre is required")
+    if (!Nombre || !TipoCliente) {
+      throw new ReferenceError("Nombre and TipoCliente are required")
     }
 
     const tiposDocumento = await getTiposDocumento()
@@ -72,7 +109,7 @@ clientRouter.post("/tiposDocumento/create", async (req, res) => {
       throw new ReferenceError("Tipo de documento already exists")
     }
 
-    const nuevoTipo = await createTipoDocuemnto(Nombre)
+    const nuevoTipo = await createTipoDocuemnto(Nombre, TipoCliente)
     res.status(201).json(nuevoTipo)
   } catch (e: unknown) {
     if (e instanceof ReferenceError) {

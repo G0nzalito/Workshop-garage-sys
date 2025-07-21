@@ -25,6 +25,8 @@ type ConstContextData = {
   setSucursalSeleccionada: React.Dispatch<React.SetStateAction<number>>
   clientes: Cliente[]
   setClientes: React.Dispatch<React.SetStateAction<Cliente[]>>
+  clienteSeleccionado: Cliente | undefined
+  setClienteSeleccionado: React.Dispatch<React.SetStateAction<Cliente | undefined>>
   tiposDocumento: TipoDocumento[]
   setTiposDocumento: React.Dispatch<React.SetStateAction<TipoDocumento[]>>
   formasPago: FormaDePago[]
@@ -61,6 +63,7 @@ export const ConstContext = createContext<ConstContextData | undefined>(undefine
 
 export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [clientes, setClientes] = useState<Cliente[]>([])
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | undefined>(undefined)
   const [tiposDocumento, setTiposDocumento] = useState<TipoDocumento[]>([])
   const [formasPago, setFormasPago] = useState<FormaDePago[]>([])
   const [tarjetas, setTarjetas] = useState<Tarjeta[]>([])
@@ -103,6 +106,8 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         setSucursalSeleccionada,
         clientes,
         setClientes,
+        clienteSeleccionado,
+        setClienteSeleccionado,
         tiposDocumento,
         setTiposDocumento,
         formasPago,

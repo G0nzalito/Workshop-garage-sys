@@ -87,8 +87,6 @@ export default function BusquedaVehiculo(): JSX.Element {
   const [vehiculos, setVehiculos] = useState<VehiculoAMostrar[] | null>(null)
   const [cargando, setCargando] = useState(false)
 
-  const [EditarVehiculoKey, setEditarVehiculoKey] = useState(0)
-
   const handleChange = (e): void => {
     const { name, value, type } = e.target
     if (name === 'patente') {
@@ -174,8 +172,6 @@ export default function BusquedaVehiculo(): JSX.Element {
   }, [marca])
 
   // console.log(vehiculos ? 'Vehiculos cargados' : 'No se cargaron vehiculos')
-
-  console.log(EditarVehiculoKey)
 
   return (
     <>

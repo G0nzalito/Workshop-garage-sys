@@ -11,7 +11,8 @@ export default function CreateTipoDocumento(): JSX.Element {
   const { setTiposDocumento } = useConsts()
 
   const [formData, setFormData] = useState({
-    Nombre: ''
+    Nombre: '',
+    TipoDeCliente: ''
   })
 
   const handleChange = (e): undefined => {
@@ -25,7 +26,10 @@ export default function CreateTipoDocumento(): JSX.Element {
 
   const handleSubmit = async (): Promise<void> => {
     const toastEspera = toast.loading('Guardando tipo de documento...')
-    const response: TipoDocumento | string = await crearTipoDocumento(formData.Nombre)
+    const response: TipoDocumento | string = await crearTipoDocumento(
+      formData.Nombre,
+      formData.TipoDeCliente
+    )
     toast.dismiss(toastEspera)
     if (typeof response === 'string') {
       if (response === 'Tipo de Documento Duplicado') {
@@ -69,6 +73,17 @@ export default function CreateTipoDocumento(): JSX.Element {
             placeholder="Nombre del tipo de documento..."
             onChange={handleChange}
             name="Nombre"
+          />
+        </div>
+
+        <div className="flex items-center justify-center gap-4 w-full">
+          <span className="text-left self-center font-bold">¿Que tipo de cliente es?: </span>
+          <input
+            type="text"
+            className="input input-bordered outline-1 appearance-none"
+            placeholder="Nombre del tipo de cliente..."
+            onChange={handleChange}
+            name="TipoDeCliente"
           />
         </div>
 

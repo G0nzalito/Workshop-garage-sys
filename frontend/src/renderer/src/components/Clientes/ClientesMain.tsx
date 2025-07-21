@@ -4,6 +4,7 @@ import { getClientes, getTiposDocumento } from '../../../../servicies/clientesSe
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { useState, useEffect } from 'react'
 import NuevoCliente from '@renderer/components/Clientes/NuevoCliente'
+import BusquedaCliente from '@renderer/components/Clientes/BusquedaCliente'
 
 export default function ClientesMain(): JSX.Element {
   const [activo, setActivo] = useState('')
@@ -54,7 +55,7 @@ export default function ClientesMain(): JSX.Element {
           Agregar Cliente
         </button>
       </div>
-      {activo === 'busqueda' && <BusquedaVehiculo />}
+      {activo === 'busqueda' && <BusquedaCliente />}
       {activo === 'nuevo' && <NuevoCliente />}
       {/* {activo === 'aumento' && <AumentarPrecioPorCategoria />} */}
     </div>
