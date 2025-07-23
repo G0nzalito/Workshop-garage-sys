@@ -124,3 +124,43 @@ export const crearCliente = async (
     }
   }
 }
+
+export const editarCliente = async (
+  tipoDocumento: number,
+  numeroDocumento: number,
+  direccion?: string,
+  telefono?: number,
+  email?: string,
+  asociacion?: boolean,
+  baja?: boolean
+): Promise<Cliente | string> => {
+  try {
+    const response = await axios.put(`${URL}/update`, {
+      Tipo_Documento: tipoDocumento,
+      Numero_Documento: numeroDocumento,
+      Direccion: direccion,
+      Telefono: telefono,
+      Email: email,
+      Asociacion: asociacion,
+      Baja: baja
+    })
+    if (response.status === 200) {
+      return response.data
+    } else {
+      console.log(response)
+      return 'Error Desconocido'
+    }
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status
+      if (status === 400) {
+        return 'Cliente No Existente'
+      } else {
+        console.log(error.response)
+        return 'Error Desconocido'
+      }
+    } else {
+      return 'Error desconocido'
+    }
+  }
+}

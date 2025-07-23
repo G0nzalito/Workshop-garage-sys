@@ -344,7 +344,7 @@ export default function BusquedaCliente(): JSX.Element {
               </form>
             </div>
           </div>
-          {clienteSeleccionado !== undefined && <EditarCliente />}
+          {clienteSeleccionado !== undefined && <EditarCliente setClientes={setClientes} />}
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>

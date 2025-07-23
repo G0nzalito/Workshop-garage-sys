@@ -63,7 +63,6 @@ async function getClientByDocument(tipoDocumento, numeroDocumento) {
     .select("*")
     .eq("Tipo_Documento", tipoDocumento)
     .eq("Numero_Documento", numeroDocumento)
-    .eq("Dado_de_baja", false)
     .single()
   if (error) {
     if (error.code === "PGRST116") {
@@ -155,7 +154,7 @@ async function updateClient(
     direccion: string
     telefono: number
     email: string
-    numeroSocio: number
+    asociacion?: boolean
   }
 ) {
   const cliente = await getClientByDocument(tipoDocumento, numeroDocumento)
@@ -173,28 +172,43 @@ async function updateClient(
   if (cambios.email) {
     cliente.Email = cambios.email
   }
-  if (cambios.numeroSocio) {
-    cliente.Numero_Socio = cambios.numeroSocio
+  if (cambios.asociacion) {
+    await asociarCliente(tipoDocumento, numeroDocumento)
+  } else {
+    cliente.Numero_Socio = null
+  }
+  if (cliente.Dado_de_baja) {
+    cliente.Dado_de_baja = false
   }
 
-  const { error } = await supabase.from("Cliente").update(cliente).match({
-    Numero_Documento: numeroDocumento,
-    Tipo_Documento: tipoDocumento,
-  })
-
-  if (error) {
-    throw new Error(error.message)
+  const { data, error } = await supabase
+    .from("Cliente")
+    .update(cliente)
+    .eq("Numero_Documento", numeroDocumento)
+    .eq("Tipo_Documento", tipoDocumento)
+    .select()
+    .single()
+  if (data) {
+    if (cambios.asociacion) {
+      const clienteAsociado = await asociarCliente(
+        tipoDocumento,
+        numeroDocumento
+      )
+      return clienteAsociado as Cliente
+    } else {
+      return data as Cliente
+    }
+  } else {
+    throw error
   }
 }
 
 async function deleteClient(tipoDocumento, numeroDocumento) {
   const { data } = await supabase
     .from("Cliente")
-    .delete()
-    .match({
-      Numero_Documento: numeroDocumento,
-      Tipo_Documento: tipoDocumento,
-    })
+    .update({ Dado_de_baja: true })
+    .eq("Tipo_Documento", tipoDocumento)
+    .eq("Numero_Documento", numeroDocumento)
     .select()
   if (data?.length === 0) {
     throw new PostgrestError({

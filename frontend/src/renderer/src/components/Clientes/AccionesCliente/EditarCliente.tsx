@@ -1,10 +1,9 @@
 import { useConsts } from '@renderer/Contexts/constsContext'
-import { useEffect, useState } from 'react'
-import Select from 'react-select'
-import { modificarProducto } from '../../../../../servicies/productosService'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Database } from '@/src/types/database.types'
-import { editarVehiculo } from '../../../../../servicies/vehiculosService'
+import { editarCliente } from '../../../../../servicies/clientesService'
+import { X } from 'lucide-react'
 
 type Cliente = Database['public']['Tables']['Cliente']['Row']
 
@@ -63,18 +62,21 @@ const customStyles = {
   })
 }
 
-export default function EditarCliente(): JSX.Element {
-  const { clientes, clienteSeleccionado } = useConsts()
+export default function EditarCliente({
+  setClientes
+}: {
+  setClientes: React.Dispatch<React.SetStateAction<Cliente[] | null>>
+}): JSX.Element {
+  const { clienteSeleccionado, tiposDocumento } = useConsts()
 
-  const [Cliente, setCliente] = useState()
   const [cargado, setCargado] = useState(true)
 
   interface FormData {
     Telefono: number
     Email: string
     Direccion: string
-    Asociacion: boolean
-    Baja: boolean
+    Asociacion: boolean | string
+    Baja: boolean | string
   }
 
   const [formData, setFormData] = useState<FormData>({
@@ -101,27 +103,42 @@ export default function EditarCliente(): JSX.Element {
     }
   }
 
-  const handleSelectChange = (selectedOption, setFunction, formDataName): void => {
-    setFunction(selectedOption)
-    handleChange({ target: { name: formDataName, value: selectedOption.value } })
-  }
-
   const handleSubmit = (e): void => {
     e.preventDefault()
 
-    console.log('Form data:', formData)
+    formData.Asociacion === '1' ? (formData.Asociacion = true) : (formData.Asociacion = false)
+    formData.Baja === '0' ? (formData.Baja = true) : (formData.Baja = false)
 
-    // const toastLoading = toast.loading('Guardando cambios...')
-    // editarVehiculo(formData.Patente, formData.Kilometros, {
-    //   Tipo_Documento: parseInt(formData.Cliente.split('-')[0]),
-    //   Numero_Documento: parseInt(formData.Cliente.split('-')[1])
-    // })
-    //   .then(() => {
-    //     toast.success('Producto editado correctamente', { id: toastLoading })
-    //   })
-    //   .catch((error) => {
-    //     toast.error(`Error al editar el producto: ${error}`, { id: toastLoading })
-    //   })
+    const toastLoading = toast.loading('Guardando cambios...')
+    editarCliente(
+      clienteSeleccionado!.Tipo_Documento,
+      clienteSeleccionado!.Numero_Documento,
+      formData.Direccion,
+      formData.Telefono,
+      formData.Email,
+      formData.Asociacion,
+      formData.Baja
+    ).then((data) => {
+      toast.dismiss(toastLoading)
+      if (typeof data === 'string') {
+        if (data === 'Cliente No Existente') {
+          toast.error('El cliente no existe en la BD', {
+            description: 'Comuniquese con el administrador del sistema',
+            icon: <X />,
+            duration: 5000
+          })
+        } else {
+          toast.error('Error interno del sistema', {
+            description: 'Comuniquese con el administrador del sistema',
+            icon: <X />,
+            duration: 5000
+          })
+        }
+      } else {
+        toast.success('Cliente editado correctamente')
+        setClientes(null)
+      }
+    })
   }
 
   // useEffect(() => {
@@ -138,7 +155,7 @@ export default function EditarCliente(): JSX.Element {
   //   setCargado(true)
   // }, [clienteSeleccionado])
 
-  console.log(formData)
+  // console.log(formData)
 
   return (
     <div className="w-full ">
@@ -149,7 +166,7 @@ export default function EditarCliente(): JSX.Element {
               Usted esta editando el cliente con documento:{' '}
               <span className="font-bold">
                 &quot;
-                {`${clienteSeleccionado?.Numero_Documento} - ${clienteSeleccionado?.Tipo_Documento}`}
+                {`${clienteSeleccionado?.Numero_Documento} - ${tiposDocumento.find((td) => td.id === clienteSeleccionado?.Tipo_Documento)?.Nombre}`}
                 &quot;
               </span>{' '}
             </p>
@@ -162,7 +179,7 @@ export default function EditarCliente(): JSX.Element {
                   name="Telefono"
                   onChange={handleChange}
                   defaultValue={formData.Telefono}
-                  className="input input-bordered w-full max-w-xs"
+                  className="input input-bordered w-full max-w-xs outline-1"
                   placeholder="Ingrese el nuevo teléfono"
                 />
               </fieldset>
@@ -173,7 +190,7 @@ export default function EditarCliente(): JSX.Element {
                   name="Email"
                   onChange={handleChange}
                   defaultValue={formData.Email}
-                  className="input input-bordered w-full max-w-xs"
+                  className="input input-bordered w-full max-w-xs outline-1"
                   placeholder="Ingrese el nuevo email"
                 />
               </fieldset>
@@ -184,7 +201,7 @@ export default function EditarCliente(): JSX.Element {
                   name="Direccion"
                   onChange={handleChange}
                   defaultValue={formData.Direccion}
-                  className="input input-bordered w-full max-w-xs"
+                  className="input input-bordered w-full max-w-xs outline-1"
                   placeholder="Ingrese la nueva dirección"
                 />
               </fieldset>
@@ -218,7 +235,7 @@ export default function EditarCliente(): JSX.Element {
                 <select
                   name="Baja"
                   defaultValue={formData.Baja ? '0' : '1'}
-                  className="select select-bordered w-full max-w-xs mb-2"
+                  className="select select-bordered w-full max-w-xs mb-2 outline-1"
                   onChange={handleChange}
                 >
                   <option value={1} label="Listado" />

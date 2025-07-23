@@ -18,6 +18,7 @@ import {
 import {
   clienteInsertSchema,
   clientFilterSchema,
+  clientUpdateSchema,
 } from "../middlewares/schemas/clienteSchemas"
 import { parse } from "dotenv"
 
@@ -179,33 +180,55 @@ clientRouter.post(
   }
 )
 
-clientRouter.put("/update", (req, res) => {
-  const {
-    Direccion,
-    Email,
-    Telefono,
-    Numero_Documento,
-    Tipo_Documento,
-    Numero_Socio,
-  } = req.body
+clientRouter.put(
+  "/update",
+  validateSchemaBody(clientUpdateSchema),
+  async (req, res) => {
+    const {
+      Direccion,
+      Email,
+      Telefono,
+      Numero_Documento,
+      Tipo_Documento,
+      Asociacion,
+      Baja,
+    } = req.body
 
-  try {
-    updateClient(Numero_Documento, Tipo_Documento, {
-      direccion: Direccion,
-      telefono: Telefono,
-      email: Email,
-      numeroSocio: Numero_Socio,
-    })
-  } catch (e: unknown) {
-    res.status(400).json({
-      message: "Error",
-    })
+    try {
+      if (Baja) {
+        const cliente = await deleteClient(Tipo_Documento, Numero_Documento)
+        res.status(200).json(cliente)
+      } else {
+        const clienteActualizado: Cliente = await updateClient(
+          Numero_Documento,
+          Tipo_Documento,
+          {
+            direccion: Direccion,
+            telefono: Telefono,
+            email: Email,
+            asociacion: Asociacion,
+          }
+        )
+
+        res.status(200).json(clienteActualizado)
+      }
+    } catch (e: unknown) {
+      if (e instanceof ReferenceError) {
+        res.status(404).json({
+          message: e.message,
+        })
+      } else if (e instanceof PostgrestError) {
+        res.status(500).json(e)
+      } else {
+        res.status(500).json({
+          message: "Internal server error",
+          error: e,
+        })
+      }
+      res.status(400).json()
+    }
   }
-
-  res.status(200).json({
-    message: "Client updated",
-  })
-})
+)
 
 clientRouter.delete("/delete", async (req, res) => {
   const { tipoDocumento, numeroDocumento } = req.body
