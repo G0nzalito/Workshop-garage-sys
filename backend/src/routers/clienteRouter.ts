@@ -195,7 +195,12 @@ clientRouter.put(
     } = req.body
 
     try {
-      if (Baja) {
+      const cliente = await getClientByDocument(
+        Tipo_Documento,
+        Numero_Documento
+      )
+
+      if (Baja && !cliente?.Dado_de_baja ) {
         const cliente = await deleteClient(Tipo_Documento, Numero_Documento)
         res.status(200).json(cliente)
       } else {
@@ -207,7 +212,8 @@ clientRouter.put(
             telefono: Telefono,
             email: Email,
             asociacion: Asociacion,
-          }
+          },
+          Baja
         )
 
         res.status(200).json(clienteActualizado)

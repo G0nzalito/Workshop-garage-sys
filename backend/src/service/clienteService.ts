@@ -155,7 +155,8 @@ async function updateClient(
     telefono: number
     email: string
     asociacion?: boolean
-  }
+  },
+  baja: boolean
 ) {
   const cliente = await getClientByDocument(tipoDocumento, numeroDocumento)
 
@@ -172,12 +173,12 @@ async function updateClient(
   if (cambios.email) {
     cliente.Email = cambios.email
   }
-  if (cambios.asociacion) {
-    await asociarCliente(tipoDocumento, numeroDocumento)
-  } else {
+
+  if (cliente.Numero_Socio && !cambios.asociacion) {
     cliente.Numero_Socio = null
   }
-  if (cliente.Dado_de_baja) {
+
+  if (cliente.Dado_de_baja && !baja) {
     cliente.Dado_de_baja = false
   }
 
@@ -189,7 +190,8 @@ async function updateClient(
     .select()
     .single()
   if (data) {
-    if (cambios.asociacion) {
+    if (cliente.Numero_Socio === null && cambios.asociacion) {
+      console.log("Asociando cliente...")
       const clienteAsociado = await asociarCliente(
         tipoDocumento,
         numeroDocumento

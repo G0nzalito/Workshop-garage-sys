@@ -83,8 +83,8 @@ export default function EditarCliente({
     Telefono: clienteSeleccionado?.Telefono || 0,
     Email: clienteSeleccionado?.Email || '',
     Direccion: clienteSeleccionado?.Direccion || '',
-    Asociacion: clienteSeleccionado?.Numero_Socio !== null ? true : false,
-    Baja: clienteSeleccionado?.Dado_de_baja || false
+    Asociacion: clienteSeleccionado?.Numero_Socio !== null ? '1' : '0',
+    Baja: clienteSeleccionado?.Dado_de_baja ? '0' : '1'
   })
 
   const handleChange = (e): void => {
@@ -105,6 +105,8 @@ export default function EditarCliente({
 
   const handleSubmit = (e): void => {
     e.preventDefault()
+
+    console.log(formData)
 
     formData.Asociacion === '1' ? (formData.Asociacion = true) : (formData.Asociacion = false)
     formData.Baja === '0' ? (formData.Baja = true) : (formData.Baja = false)
@@ -215,7 +217,7 @@ export default function EditarCliente({
                     name="Asociacion"
                     value={1}
                     className="radio radio-success outline-1"
-                    defaultChecked={formData.Asociacion}
+                    defaultChecked={formData.Asociacion === '1'}
                     onChange={handleChange}
                   />
                   <span> Si </span>
@@ -224,7 +226,7 @@ export default function EditarCliente({
                     name="Asociacion"
                     value={0}
                     className="radio radio-error outline-1"
-                    defaultChecked={!formData.Asociacion}
+                    defaultChecked={formData.Asociacion === '0'}
                     onChange={handleChange}
                   />
                   <span> No </span>

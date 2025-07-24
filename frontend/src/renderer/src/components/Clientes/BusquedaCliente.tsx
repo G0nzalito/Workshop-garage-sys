@@ -1,6 +1,7 @@
 import { getClientesByFiltros } from '../../../../servicies/clientesService'
 import { Database } from '@/src/types/database.types'
 import EditarCliente from '@renderer/components/Clientes/AccionesCliente/EditarCliente'
+import EliminarCliente from '@renderer/components/Clientes/AccionesCliente/EliminarCliente'
 import { useConsts } from '@renderer/Contexts/constsContext'
 import { Pencil, Trash, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -154,9 +155,7 @@ export default function BusquedaCliente(): JSX.Element {
     setCargando(false)
   }
 
-  // console.log(vehiculos ? 'Vehiculos cargados' : 'No se cargaron vehiculos')
-  console.log(clienteSeleccionado)
-
+  // console.log(vehiculos ? 'Vehiculos
   return (
     <>
       <div className="">
@@ -298,8 +297,11 @@ export default function BusquedaCliente(): JSX.Element {
                               type="button"
                               className="btn btn-error btn-soft tooltip"
                               data-tip="Eliminar Producto"
+                              disabled={cliente.Dado_de_baja}
                               onClick={() => {
-                                console.log('Guau, me tocaste > _ <')
+                                setClienteSeleccionado(cliente)
+                                //@ts-ignore siempre existe el modal
+                                document.getElementById('EliminarCliente').showModal()
                               }}
                             >
                               <Trash size={16} />
@@ -345,6 +347,34 @@ export default function BusquedaCliente(): JSX.Element {
             </div>
           </div>
           {clienteSeleccionado !== undefined && <EditarCliente setClientes={setClientes} />}
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+      <dialog
+        id="EliminarCliente"
+        className="modal"
+        onClose={(): void => {
+          setClienteSeleccionado(undefined)
+          // formData.Marca = 0
+        }}
+      >
+        <div className="modal-box">
+          <div className="flex justify-between items-center mb-4">
+            <div className="badge badge-soft badge-error">
+              <span className="font-bold italic text-3xl">Eliminar Cliente</span>
+            </div>
+            <div className="modal-action">
+              <form method="dialog">
+                {/* if there is a button in form, it will close the modal */}
+                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+                  ✕
+                </button>
+              </form>
+            </div>
+          </div>
+          {clienteSeleccionado !== undefined && <EliminarCliente setClientes={setClientes} />}
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>
