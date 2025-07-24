@@ -118,10 +118,8 @@ async function agregarDetallesOrdenDeTrabajo(
           Cantidad: diccionario[codigo],
           Descripcion: detallesOrden[0].Descripcion,
           Fecha: detallesOrden[0].Fecha,
-          KilometroXDia: detallesOrden[0].KilometroXDia,
           Orden_Trabajo: detallesOrden[0].Orden_Trabajo,
           Producto: codigo,
-          Proximo_Service: detallesOrden[0].Proximo_Service,
           SubTotal: producto.Precio * diccionario[codigo],
         }
 

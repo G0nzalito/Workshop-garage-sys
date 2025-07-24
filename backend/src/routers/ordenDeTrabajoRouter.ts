@@ -83,7 +83,6 @@ ordenDeTrabajoRouter.post("/create", async (req, res) => {
 
 ordenDeTrabajoRouter.post("/addDetail", async (req, res) => {
   const {
-    KilometrosXDia,
     OrdenTrabajo,
     Productos,
     Descripcion,
@@ -99,9 +98,7 @@ ordenDeTrabajoRouter.post("/addDetail", async (req, res) => {
           Orden_Trabajo: OrdenTrabajo,
           Producto: producto.codigoProducto,
           Cantidad: producto.cantidad,
-          KilometroXDia: KilometrosXDia,
           Fecha: getDateWithTimeZone(new Date()),
-          Proximo_Service: formatDateDashARG(new Date()),
           SubTotal: 0,
           Descripcion: Descripcion ? Descripcion : "Sin comentarios",
         }

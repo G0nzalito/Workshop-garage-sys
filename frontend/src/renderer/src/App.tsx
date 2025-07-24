@@ -9,6 +9,7 @@ import ProductosMain from '@renderer/components/Productos/ProductosMain'
 import VehiculosMain from '@renderer/components/Vehiculos/VehiculosMain'
 import OnDev from '@renderer/components/onDev'
 import ClientesMain from '@renderer/components/Clientes/ClientesMain'
+import ODTMain from '@renderer/components/Ordenes de trabajo/ODTMain'
 
 function App(): JSX.Element {
   // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
@@ -20,10 +21,7 @@ function App(): JSX.Element {
 
         <Router hook={useHashLocation}>
           <Route path="/" component={WelcomeComponent} />
-          <Route
-            path="/OrdenesDeTrabajo"
-            component={() => OnDev({ nombre: 'Ordenes de trabajo' })}
-          />
+          <Route path="/OrdenesDeTrabajo" component={ODTMain} />
           {/* Productos */}
           <Route path="/Productos" component={ProductosMain} />
           <Route path="/Vehiculos" component={VehiculosMain} />

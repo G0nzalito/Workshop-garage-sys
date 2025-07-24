@@ -1,17 +1,48 @@
-import { useLocation } from 'wouter'
+import {  getTiposDocumento } from '../../../../servicies/clientesService'
+import { useConsts } from '@renderer/Contexts/constsContext'
+import { useState, useEffect } from 'react'
+import BusquedaCliente from '@renderer/components/Clientes/BusquedaCliente'
+import NuevaODT from '@renderer/components/Ordenes de trabajo/NuevaODT'
 
 export default function ODTMain(): JSX.Element {
-  const [, setLocation] = useLocation()
+  const [activo, setActivo] = useState('')
+  const {
+    setTiposDocumento,
+    tiposDocumento
+  } = useConsts()
+
+  useEffect(() => {
+    if (tiposDocumento.length === 0) {
+      getTiposDocumento().then((data) => {
+        setTiposDocumento(data)
+      })
+    }
+  }, [])
 
   return (
-    <div>
-      <h1>Ordenes de trabajo</h1>
-
-      <button className="" onClick={() => setLocation('/')}>
-        {' '}
-        Volver al inicio
-      </button>
+    <div className="flex w-full flex-col bg-base-100 text-white gap-2 p-4">
+      <div className="italic badge badge-soft badge-info text-2xl">Ordenes de trabajo</div>
+      <div className="italic text-xl">Seleccione una opción</div>
+      <div className="flex justify-start gap-2">
+        <button
+          className={`btn btn-accent ${activo === 'busqueda' ? '' : 'btn-soft'}`}
+          onClick={() => setActivo('busqueda')}
+        >
+          Histórico de ordenes 
+        </button>
+        <button
+          className={`btn btn-accent ${activo === 'nuevo' ? '' : 'btn-soft'}`}
+          onClick={() => setActivo('nuevo')}
+        >
+          Nueva Orden
+        </button>
+      </div>
+      {activo === 'busqueda' && <BusquedaCliente />}
+      {activo === 'nuevo' && <NuevaODT />}
+      {/* {activo === 'aumento' && <AumentarPrecioPorCategoria />} */}
     </div>
   )
 }
+
+
 
