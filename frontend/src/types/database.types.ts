@@ -316,37 +316,34 @@ export type Database = {
       }
       'Consumos Stock': {
         Row: {
-          Cantidad: number
+          Cantidad: number | null
           Descripcion: string | null
           Fecha: string
           id: number
-          KilometroXDia: number
           Orden_Trabajo: number | null
           Producto: string
-          Proximo_Service: string
           SubTotal: number
+          Sucursal: number
         }
         Insert: {
-          Cantidad: number
+          Cantidad?: number | null
           Descripcion?: string | null
           Fecha?: string
           id?: number
-          KilometroXDia: number
           Orden_Trabajo?: number | null
           Producto: string
-          Proximo_Service: string
           SubTotal: number
+          Sucursal: number
         }
         Update: {
-          Cantidad?: number
+          Cantidad?: number | null
           Descripcion?: string | null
           Fecha?: string
           id?: number
-          KilometroXDia?: number
           Orden_Trabajo?: number | null
           Producto?: string
-          Proximo_Service?: string
           SubTotal?: number
+          Sucursal?: number
         }
         Relationships: [
           {
@@ -362,6 +359,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'Productos'
             referencedColumns: ['Codigo']
+          },
+          {
+            foreignKeyName: 'Consumos Stock_Sucursal_fkey'
+            columns: ['Sucursal']
+            isOneToOne: false
+            referencedRelation: 'Sucursales'
+            referencedColumns: ['id']
           }
         ]
       }
@@ -556,6 +560,7 @@ export type Database = {
           id: number
           Numero_Documento_Cliente: number
           Patente_Vehiculo: string
+          Razon: string
           Tipo_Documento_Cliente: number
         }
         Insert: {
@@ -564,6 +569,7 @@ export type Database = {
           id?: number
           Numero_Documento_Cliente: number
           Patente_Vehiculo: string
+          Razon?: string
           Tipo_Documento_Cliente: number
         }
         Update: {
@@ -572,6 +578,7 @@ export type Database = {
           id?: number
           Numero_Documento_Cliente?: number
           Patente_Vehiculo?: string
+          Razon?: string
           Tipo_Documento_Cliente?: number
         }
         Relationships: [

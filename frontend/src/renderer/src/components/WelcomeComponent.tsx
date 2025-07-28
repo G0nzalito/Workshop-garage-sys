@@ -84,6 +84,7 @@ export default function WelcomeComponent(): JSX.Element {
             return item
           })
         )
+        toast.dismiss(toastLoading)
         toast.success('Producto agregado con exito', {
           description: 'Figura en la tabla',
           duration: 3000

@@ -32,7 +32,6 @@ export async function getVehiculosFiltrados(
   Tipo_Documento?: number,
   Numero_Documento?: number
 ): Promise<VehiculoAMostrar[]> {
-  console.log(typeof Numero_Documento)
   const response = await axios.get(`${baseUrl}/filter`, {
     params: { Marca, Modelo, Motor, Tipo_Documento, Numero_Documento }
   })

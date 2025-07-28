@@ -7,6 +7,7 @@ import {
   modificarStockProducto,
   obtenerStockProducto,
 } from "./productosService"
+import { convertirFechaLocal } from "../support/supportFunctions"
 
 type OrdenDeTrabajoAInsertar =
   Database["public"]["Tables"]["Ordenes de trabajo"]["Insert"]
@@ -47,7 +48,10 @@ async function getOrdenDeTrabajoById(id: number) {
   return data as OrdenDeTrabajo
 }
 
-async function createOrdenTrabajo(orden: OrdenDeTrabajoAInsertar) {
+async function createOrdenTrabajo(
+  orden: OrdenDeTrabajoAInsertar,
+  Detalles?: DetalleOrdenDeTrabajoAInsertar[]
+) {
   if (!orden.Numero_Documento_Cliente || !orden.Tipo_Documento_Cliente) {
     throw new ReferenceError("Falta el numero o tipo de documento del cliente")
   } else {
@@ -77,14 +81,23 @@ async function createOrdenTrabajo(orden: OrdenDeTrabajoAInsertar) {
   if (error) {
     throw error
   }
+  if (Detalles && Detalles.length > 0) {
+    const detallesOrden = await agregarDetallesOrdenDeTrabajo(Detalles, data.id)
+    if (!detallesOrden) {
+      throw new ReferenceError(
+        "No se pudieron agregar los detalles de la orden"
+      )
+    }
+  }
   return data as OrdenDeTrabajo
 }
 
 async function agregarDetallesOrdenDeTrabajo(
-  detallesOrden: DetalleOrdenDeTrabajoAInsertar[]
+  detallesOrden: DetalleOrdenDeTrabajoAInsertar[],
+  ordenDeTrabajo: number
 ) {
   //@ts-ignore Lidire contigo más tarde
-  const orden = await getOrdenDeTrabajoById(detallesOrden[0].Orden_Trabajo)
+  const orden = await getOrdenDeTrabajoById(ordenDeTrabajo)
   if (!orden) {
     throw new ReferenceError("Orden de trabajo no encontrada")
   } else {
@@ -94,6 +107,8 @@ async function agregarDetallesOrdenDeTrabajo(
   }
   const diccionario = {}
 
+  // console.log("Detalles a agregar:", detallesOrden)
+
   for (const detalle of detallesOrden) {
     if (diccionario.hasOwnProperty(detalle.Producto)) {
       diccionario[detalle.Producto] += detalle.Cantidad
@@ -101,6 +116,8 @@ async function agregarDetallesOrdenDeTrabajo(
       diccionario[detalle.Producto] = detalle.Cantidad
     }
   }
+
+  const hoy = convertirFechaLocal(new Date())
 
   const detallesOrdenAGuardar: DetalleOrdenDeTrabajoAInsertar[] = []
 
@@ -116,17 +133,21 @@ async function agregarDetallesOrdenDeTrabajo(
       } else {
         const detalle: DetalleOrdenDeTrabajoAInsertar = {
           Cantidad: diccionario[codigo],
-          Descripcion: detallesOrden[0].Descripcion,
-          Fecha: detallesOrden[0].Fecha,
-          Orden_Trabajo: detallesOrden[0].Orden_Trabajo,
+          Descripcion:
+            "Producto usado para la orden de trabajo " + ordenDeTrabajo,
+          Fecha: hoy,
+          Orden_Trabajo: ordenDeTrabajo,
           Producto: codigo,
           SubTotal: producto.Precio * diccionario[codigo],
+          Sucursal: detallesOrden[0].Sucursal,
         }
 
         detallesOrdenAGuardar.push(detalle)
       }
     }
   }
+
+  console.log("Detalles a guardar:", detallesOrdenAGuardar)
 
   const { data, error } = await supabase
     .from("Consumos Stock")

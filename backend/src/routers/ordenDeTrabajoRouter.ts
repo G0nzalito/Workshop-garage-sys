@@ -6,8 +6,13 @@ import {
   agregarDetallesOrdenDeTrabajo,
   completarOrdenDeTrabajo,
 } from "../service/ordenDeTrabajoService"
-import { getDateWithTimeZone, formatDateDashARG } from "../support/supportFunctions"
+import {
+  getDateWithTimeZone,
+  formatDateDashARG,
+} from "../support/supportFunctions"
 import { Database } from "../supabase/database.types"
+import { validateSchemaBody } from "../middlewares/validation"
+import { ordenDeTrabajoCreateSchema } from "../middlewares/schemas/ordenDeTrabajoSchema"
 
 type OrdenDeTrabajoAInsertar =
   Database["public"]["Tables"]["Ordenes de trabajo"]["Insert"]
@@ -53,40 +58,43 @@ ordenDeTrabajoRouter.get("/specific", async (req, res) => {
   }
 })
 
-ordenDeTrabajoRouter.post("/create", async (req, res) => {
-  const { Tipo_Documento, Numero_Documento, Patente } = req.body
+ordenDeTrabajoRouter.post(
+  "/create",
+  validateSchemaBody(ordenDeTrabajoCreateSchema),
+  async (req, res) => {
+    const { Tipo_Documento, Numero_Documento, Patente, Razon, Detalles } =
+      req.body
 
-  if (!Tipo_Documento || !Numero_Documento || !Patente) {
-    res.status(400).json({ error: "Todos los datos son requeridos" })
-  } else {
-    try {
-      const isoLocalString = getDateWithTimeZone(new Date())
-      const orden: OrdenDeTrabajoAInsertar = {
-        Fecha_creacion: isoLocalString,
-        Numero_Documento_Cliente: Numero_Documento,
-        Tipo_Documento_Cliente: Tipo_Documento,
-        Patente_Vehiculo: Patente,
-      }
+    if (!Tipo_Documento || !Numero_Documento || !Patente) {
+      res.status(400).json({ error: "Todos los datos son requeridos" })
+    } else {
+      try {
+        const isoLocalString = getDateWithTimeZone(new Date())
+        const orden: OrdenDeTrabajoAInsertar = {
+          Fecha_creacion: isoLocalString,
+          Numero_Documento_Cliente: Numero_Documento,
+          Tipo_Documento_Cliente: Tipo_Documento,
+          Patente_Vehiculo: Patente,
+          Razon: Razon,
+        }
 
-      const ordenCreada = await createOrdenTrabajo(orden)
+        const ordenCreada = await createOrdenTrabajo(orden, Detalles)
 
-      res.status(201).json(ordenCreada)
-    } catch (error) {
-      if (error instanceof ReferenceError) {
-        res.status(400).json({ message: error.message })
-      } else {
-        res.status(500).json(error)
+        res.status(201).json(ordenCreada)
+      } catch (error) {
+        if (error instanceof ReferenceError) {
+          res.status(400).json({ message: error.message })
+        } else {
+          res.status(500).json(error)
+        }
       }
     }
   }
-})
+)
 
 ordenDeTrabajoRouter.post("/addDetail", async (req, res) => {
-  const {
-    OrdenTrabajo,
-    Productos,
-    Descripcion,
-  }: DetalleOrdenDeTrabajo = req.body
+  const { OrdenTrabajo, Productos, Descripcion }: DetalleOrdenDeTrabajo =
+    req.body
 
   if (!OrdenTrabajo || !Productos) {
     res.status(400).json({ error: "Todos los datos son requeridos" })
@@ -101,12 +109,14 @@ ordenDeTrabajoRouter.post("/addDetail", async (req, res) => {
           Fecha: getDateWithTimeZone(new Date()),
           SubTotal: 0,
           Descripcion: Descripcion ? Descripcion : "Sin comentarios",
+          Sucursal: 1, // Proximo a ser cambiado
         }
         detallesOrden.push(detalle)
       })
 
       const detallesOrdenCreadas = await agregarDetallesOrdenDeTrabajo(
-        detallesOrden
+        detallesOrden,
+        OrdenTrabajo
       )
 
       res
@@ -115,7 +125,7 @@ ordenDeTrabajoRouter.post("/addDetail", async (req, res) => {
     } catch (error) {
       if (error instanceof ReferenceError) {
         res.status(400).json({ message: error.message })
-      }else{
+      } else {
         if (error instanceof SyntaxError) {
           res.status(422).json({ message: error.message })
         } else {

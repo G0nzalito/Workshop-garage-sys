@@ -67,7 +67,7 @@ export default function EditarCliente({
 }: {
   setClientes: React.Dispatch<React.SetStateAction<Cliente[] | null>>
 }): JSX.Element {
-  const { clienteSeleccionado, tiposDocumento } = useConsts()
+  const { clienteSeleccionado, tiposDocumento, setClientes: setClientesConst } = useConsts()
 
   const [cargado, setCargado] = useState(true)
 
@@ -139,6 +139,17 @@ export default function EditarCliente({
       } else {
         toast.success('Cliente editado correctamente')
         setClientes(null)
+        setClientesConst((prevClientes) => {
+          if (prevClientes) {
+            return prevClientes.map((cliente) =>
+              cliente.Tipo_Documento === clienteSeleccionado!.Tipo_Documento &&
+              cliente.Numero_Documento === clienteSeleccionado!.Numero_Documento
+                ? { ...cliente, ...data }
+                : cliente
+            )
+          }
+          return prevClientes
+        })
       }
     })
   }

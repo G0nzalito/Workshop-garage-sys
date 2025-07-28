@@ -1,32 +1,29 @@
 import { Database } from '@/src/types/database.types'
 import { useConsts } from '@renderer/Contexts/constsContext'
-import { BadgeCheck, PlusCircle, X } from 'lucide-react'
+import { BadgeCheck, CirclePlus, PlusCircle, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { toast } from 'sonner'
-import MarcaYModeloTabs from '@renderer/specificComponents/MarcaYModeloTabs'
-import CreateModeloVehiculo from '@renderer/components/Vehiculos/Modelo/NuevoModelo'
-import { crearCliente } from '../../../../servicies/clientesService'
+import { createODT } from '../../../../servicies/ODTService'
 import CreateTipoDocumento from '@renderer/components/Clientes/TiposDocumento/CreateTipoDocumento'
+import { getVehiculosFiltrados } from '../../../../servicies/vehiculosService'
+import {
+  getProductoByCodigo,
+  hayStockParaVenta,
+  obtenerStockProductos
+} from '../../../../servicies/productosService'
 
 type formDataNuevoCliente = {
-  Nombre: string
-  Tipo_Documento: number
-  Numero_Documento: number
-  Direccion: string
-  Email: string | null
-  Telefono: number
-  Asociacion?: number | boolean
+  Cliente: string
+  Patente: string
+  Razon: string
 }
 
-type Modelo = Database['public']['Tables']['Modelos']['Row']
+type Vehiculo = Database['public']['Tables']['Vehiculo']['Row']
+type VehiculoAMostrar = Omit<Vehiculo, 'Cliente'> & { Cliente: string }
+type Producto = Database['public']['Tables']['Productos']['Row']
+type DetallesOrdenAInsertar = Database['public']['Tables']['Consumos Stock']['Insert']
 // type StockAActualizar = Database['public']['Tables']['Stock']['Update']
-type Detalle = {
-  Producto: string
-  Cantidad: number
-  Descripcion: string
-  PrecioXUnidad: number
-}
 
 const customStyles = {
   container: (provided: any) => ({
@@ -81,19 +78,25 @@ const customStyles = {
 
 export default function NuevaODT(): JSX.Element {
   const [formData, setFormData] = useState<formDataNuevoCliente>({
-    Nombre: '',
-    Tipo_Documento: 0,
-    Numero_Documento: 0,
-    Direccion: '',
-    Email: '',
-    Telefono: 0,
-    Asociacion: 0
+    Cliente: '',
+    Patente: '',
+    Razon: ''
   })
 
-  const { tiposDocumento } = useConsts()
-  const [TipoDoc, setTipoDoc] = useState()
+  const [formDataDetail, setFormDataDetail] = useState({
+    Codigo: '',
+    Cantidad: ''
+  })
 
-  const [detallesOrden, setDetallesOrden] = useState<Detalle[]>([])
+  const [cesta, setCesta] = useState<
+    { Producto: Producto; cantidad: number; stockMaximo: number }[]
+  >([])
+
+  const { tiposDocumento, clientes, sucursalSeleccionada } = useConsts()
+  const [Vehiculo, setVehiculo] = useState()
+  const [Cliente, setCliente] = useState()
+
+  const [vehiculosDeCliente, setVehiculosDeCliente] = useState<VehiculoAMostrar[]>([])
 
   const handleChange = (e): void => {
     const { name, value, type } = e.target
@@ -111,13 +114,31 @@ export default function NuevaODT(): JSX.Element {
     }
   }
 
+  const handleDetailChange = (e): void => {
+    const { name, value, type } = e.target
+
+    if (type === 'number' || type === 'radio') {
+      setFormDataDetail((prevData) => ({
+        ...prevData,
+        [name]: parseInt(value, 10)
+      }))
+    } else {
+      setFormDataDetail((prevData) => ({
+        ...prevData,
+        [name]: value.toUpperCase()
+      }))
+    }
+  }
+
   const handleSelectChange = (selectedOption, setFunction, formDataName): void => {
     setFunction(selectedOption)
     handleChange({ target: { name: formDataName, value: selectedOption.value } })
   }
 
   const handleSubmit = async (): Promise<void> => {
-    const camposOpcionales = ['Direccion', 'Email', 'Telefono', 'Asociacion']
+    console.log('Form Data:', formData)
+
+    const camposOpcionales = ['Razon']
     let falta = false
 
     for (const key in formData) {
@@ -144,19 +165,35 @@ export default function NuevaODT(): JSX.Element {
       }
     }
     if (!falta) {
-      formData.Asociacion === 1 ? (formData.Asociacion = true) : (formData.Asociacion = false)
-      formData.Email === '' ? (formData.Email = null) : formData.Email
       console.log('Enviando datos')
-      const toastEspera = toast.loading('Agregando Cliente', {
-        description: 'Agregando cliente a la base de datos'
+      const toastEspera = toast.loading('Creando Orden', {
+        description: 'Creando nueva orden de trabajo'
       })
 
-      const respuesta = await crearCliente(formData)
+      const detallesOrden: DetallesOrdenAInsertar[] = []
+
+      for (const item of cesta) {
+        detallesOrden.push({
+          Cantidad: item.cantidad,
+          Producto: item.Producto.Codigo,
+          SubTotal: item.Producto.Precio * item.cantidad,
+          Descripcion: item.Producto.Descripcion,
+          Sucursal: sucursalSeleccionada
+        })
+      }
+
+      const respuesta = await createODT(
+        parseInt(formData.Cliente.split('-')[1]),
+        parseInt(formData.Cliente.split('-')[0]),
+        formData.Patente,
+        formData.Razon,
+        detallesOrden
+      )
       toast.dismiss(toastEspera)
       if (typeof respuesta === 'string') {
-        if (respuesta === 'Cliente Duplicado') {
-          toast.error('Cliente Duplicado', {
-            description: 'El cliente con ese tipo y numero de documento ya existe',
+        if (respuesta === 'Error de validación') {
+          toast.error('Error de Validación', {
+            description: 'Verifique los campos ingresados',
             duration: 5000,
             icon: <X />
           })
@@ -166,12 +203,12 @@ export default function NuevaODT(): JSX.Element {
             duration: 5000,
             icon: <X />
           })
-          console.log('Error al crear el cliente:', respuesta)
+          console.log('Error al crear la orden:', respuesta)
         }
       } else {
-        toast.success('Cliente agregado', {
-          description: `Cliente ${formData.Nombre} agregado`,
-          duration: 6000,
+        toast.success('Orden Agregada', {
+          description: `Orden de trabajo creada exitosamente`,
+          duration: 5000,
           icon: <BadgeCheck />
         })
         limpiarCampos()
@@ -179,23 +216,152 @@ export default function NuevaODT(): JSX.Element {
     }
   }
 
-  const limpiarCampos = (): void => {
-    setFormData((prevData) => ({
-      ...prevData,
-      Nombre: '',
-      Tipo_Documento: 0,
-      Numero_Documento: 0,
-      Direccion: '',
-      Email: '',
-      Telefono: 0,
-      Asociacion: formData.Asociacion === true ? 1 : 0
-    }))
-    //@ts-ignore - No se puede asignar un número a un string
-    setTipoDoc({ value: 0, label: 'Seleccione un Tipo de Documento' })
+  const handleAddDetail = (data): void => {
+    console.log('Datos del detalle:', data)
+    try {
+      if (parseFloat(data.Cantidad) < 0) {
+        toast.error('Cantidad invalida', {
+          description: 'No intente agregar cantidad negativa de un producto',
+          duration: 3000
+        })
+        return
+      }
+      //@ts-ignore no va a ser nulo, no seas bobo
+      getProductos(data).then(() => {
+        console.log('Producto agregado')
+      })
+      setFormDataDetail({
+        Codigo: '',
+        Cantidad: ''
+      })
+    } catch (err) {
+      console.error(err)
+    }
   }
 
+  const getProductos = async (data): Promise<void> => {
+    const toastLoading = toast.loading('Cargando producto')
+    try {
+      const itemExistente = cesta.find((item) => item.Producto.Codigo === data.Codigo)
+
+      if (itemExistente) {
+        if (
+          parseFloat(itemExistente.cantidad.toString()) + parseFloat(data.Cantidad) >
+          itemExistente.stockMaximo
+        ) {
+          toast.error('No hay stock suficiente', {
+            description: 'No se puede agregar el producto',
+            duration: 3000
+          })
+          return
+        }
+
+        setCesta(
+          cesta.map((item) => {
+            if (item.Producto.Codigo === data.Codigo) {
+              return {
+                ...item,
+                Producto: item.Producto,
+                cantidad: parseFloat(item.cantidad.toString()) + parseFloat(data.Cantidad)
+              }
+            }
+            return item
+          })
+        )
+        toast.dismiss(toastLoading)
+        toast.success('Producto agregado con exito', {
+          description: 'Figura en la tabla',
+          duration: 3000
+        })
+        return
+      }
+
+      const producto: Producto = await getProductoByCodigo(data.Codigo, sucursalSeleccionada)
+
+      if (producto) {
+        try {
+          const hayStock = await hayStockParaVenta(
+            producto.Codigo,
+            data.Cantidad,
+            sucursalSeleccionada
+          )
+          if (hayStock) {
+            console.log('Sucursal en componente: ', sucursalSeleccionada)
+            const stock = (await obtenerStockProductos(data.Codigo, sucursalSeleccionada))[0]
+            if (cesta.length > 0) {
+              setCesta([
+                ...cesta,
+                { Producto: producto, cantidad: data.Cantidad, stockMaximo: stock.Cantidad }
+              ])
+            } else {
+              setCesta([
+                { Producto: producto, cantidad: data.Cantidad, stockMaximo: stock.Cantidad }
+              ])
+            }
+            toast.dismiss(toastLoading)
+            toast.success('Producto agregado con exito', {
+              description: 'Figura en la tabla',
+              duration: 3000
+            })
+          }
+        } catch (noProductos) {
+          toast.dismiss(toastLoading)
+          console.error(noProductos)
+          toast.error('No hay stock suficiente', {
+            description: 'No se puede agregar el producto',
+            duration: 3000
+          })
+        }
+      }
+    } catch (err) {
+      toast.dismiss(toastLoading)
+      console.error(err)
+      toast.error('Producto no encontrado', {
+        description: 'No se puede agregar el producto',
+        duration: 3000
+      })
+    }
+  }
+
+  const handleKeyDown = (e): void => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      console.log('This will not do anything')
+    }
+  }
+
+  const limpiarCampos = (): void => {
+    setFormData({
+      Cliente: '',
+      Patente: '',
+      Razon: ''
+    })
+    //@ts-ignore El valor esta bien asignado
+    setCliente({ value: 0, label: 'Seleccione un Cliente' })
+    //@ts-ignore El valor esta bien asignado
+    setVehiculo({ value: 0, label: 'Seleccione un Vehículo' })
+    setCesta([])
+    setFormDataDetail({
+      Codigo: '',
+      Cantidad: ''
+    })
+    setVehiculosDeCliente([])
+  }
+
+  useEffect(() => {
+    getVehiculosFiltrados(
+      undefined,
+      undefined,
+      undefined,
+      parseInt(formData.Cliente.split('-')[1]),
+      parseInt(formData.Cliente.split('-')[0])
+    ).then((data) => {
+      setVehiculosDeCliente(data)
+    })
+  }, [Cliente])
+
   return (
-    <div className="flex flex-col p-4">
+    <div className="flex flex-col p-4" onKeyDown={handleKeyDown}>
       <h1 className="text-lg badge badge-info badge-soft">Iniciar nueva orden: </h1>
       {/* <span className='loading loading-bars loading-md'></span> */}
       <form
@@ -208,15 +374,26 @@ export default function NuevaODT(): JSX.Element {
         {/* Nombre y Apellido del cliente */}
         <span className="fieldset-legend text-right pr-4 self-center font-medium">Cliente:</span>
         <div className="flex flex-col">
-          <input
-            type="text"
-            name="Nombre"
-            className="input input-bordered outline-1 w-full"
-            placeholder="Ingrese todos los nomberes y apellidos del cliente"
-            value={formData.Nombre}
-            onChange={handleChange}
+          <Select
+            name="cliente"
+            options={clientes
+              .filter((cliente) => cliente.id !== 0 && !cliente.Dado_de_baja)
+              .map((cliente) => {
+                return {
+                  value: `${cliente.Numero_Documento}-${cliente.Tipo_Documento}`,
+                  label: `${cliente.Nombre} (${cliente.Numero_Documento} - ${
+                    tiposDocumento.find((tipo) => tipo.id === cliente.Tipo_Documento)?.Nombre ||
+                    'Desconocido'
+                  })`
+                }
+              })}
+            onChange={(e) => handleSelectChange(e, setCliente, 'Cliente')}
+            value={Cliente}
+            styles={customStyles}
+            placeholder="Seleccione un Cliente"
+            className="w-full"
           />
-          {formData.Nombre === 'Falta' && (
+          {formData.Cliente === 'Falta' && (
             <span className="text-red-500 text-xs mt-1">El nombre es obligatorio</span>
           )}
         </div>
@@ -227,33 +404,31 @@ export default function NuevaODT(): JSX.Element {
         <div className="flex flex-col">
           <Select
             name="Vehiculo"
-            options={tiposDocumento
-              .filter((tipo) => tipo.id !== -1)
-              .map((Tipo) => {
-                return {
-                  value: Tipo.id,
-                  label: Tipo.Nombre
-                }
-              })}
-            onChange={(e) => handleSelectChange(e, setTipoDoc, 'Tipo_Documento')}
-            value={TipoDoc}
+            options={vehiculosDeCliente.map((vehiculo) => {
+              return {
+                value: vehiculo.Patente,
+                label: `${vehiculo.Patente} - (${vehiculo.Modelo})`
+              }
+            })}
+            onChange={(e) => handleSelectChange(e, setVehiculo, 'Patente')}
+            value={Vehiculo}
             styles={customStyles}
-            placeholder="Seleccione un Tipo de Documento"
+            placeholder="Seleccione un vehículo"
             className="w-full"
           />
-          {formData.Tipo_Documento === -1 && (
-            <span className="text-red-500 text-xs mt-1">Debe seleccionar un Tipo de Documento</span>
+          {formData.Patente === 'Falta' && (
+            <span className="text-red-500 text-xs mt-1">Debe seleccionar un vehículo</span>
           )}
         </div>
         <div className="pl-2 self-center">
-          <button
+          {/* <button
             type="button"
             className="btn btn-sm btn-success btn-soft"
             //@ts-ignore el objeto es un modal que dentro de la propia pagina me incitan a usarlo así
             onClick={() => document.getElementById('NuevoTipoDocumento').showModal()}
           >
             <PlusCircle size={20} />
-          </button>
+          </button> */}
         </div>
 
         {/* Numero de documento */}
@@ -263,14 +438,11 @@ export default function NuevaODT(): JSX.Element {
         <div className="flex flex-col">
           <input
             type="text"
-            name="Numero_Documento"
+            name="Razon"
             className="input input-bordered outline-1 w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            placeholder="Ingrese el numero de documento"
+            placeholder="Ingrese la razón de la orden"
             onChange={handleChange}
           />
-          {formData.Numero_Documento === -1 && (
-            <span className="text-red-500 text-xs mt-1">El numero de documento es obligatorio</span>
-          )}
         </div>
         <div className="pl-2 self-center"></div>
 
@@ -288,18 +460,17 @@ export default function NuevaODT(): JSX.Element {
                 </tr>
               </thead>
               <tbody>
-                {detallesOrden.map((detalle, index) => (
+                {cesta.map((detalle, index) => (
                   <tr key={index}>
-                    <td>{detalle.Producto}</td>
-                    <td>{detalle.Cantidad}</td>
-                    <td>{detalle.PrecioXUnidad * detalle.Cantidad}</td>
+                    <td>{detalle.Producto.Codigo}</td>
+                    <td>{detalle.cantidad}</td>
+                    <td>${detalle.Producto.Precio * detalle.cantidad}</td>
                     <td>
                       <button
+                        type="button"
                         className="btn btn-error btn-sm btn-soft"
                         onClick={() => {
-                          setDetallesOrden((prevDetalles) =>
-                            prevDetalles.filter((_, i) => i !== index)
-                          )
+                          setCesta((prevDetalles) => prevDetalles.filter((_, i) => i !== index))
                         }}
                       >
                         <X size={20} />
@@ -307,16 +478,60 @@ export default function NuevaODT(): JSX.Element {
                     </td>
                   </tr>
                 ))}
+                <tr>
+                  <td>
+                    <form
+                      id="formVenta"
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        handleAddDetail(formDataDetail)
+                      }}
+                    >
+                      <input
+                        type="text"
+                        name="Codigo"
+                        className="input input-bordered outline-1"
+                        placeholder="Codigo de producto"
+                        value={formDataDetail.Codigo}
+                        form="formVenta"
+                        onChange={handleDetailChange}
+                      />
+                    </form>
+                  </td>
+                  <td>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        handleAddDetail(formDataDetail)
+                      }}
+                    >
+                      <input
+                        type="number"
+                        name="Cantidad"
+                        className="input input-bordered outline-1 w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        placeholder="Cantidad"
+                        form="formVenta"
+                        value={formDataDetail.Cantidad}
+                        onChange={handleDetailChange}
+                      />
+                    </form>
+                  </td>
+                  <td></td>
+                </tr>
                 <tr key={-1}>
                   <td></td>
                   <td>
-                    <button className="btn btn-success btn-sm btn-soft">
+                    <button
+                      className="btn btn-success btn-sm btn-soft"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleAddDetail(formDataDetail)
+                      }}
+                    >
                       <PlusCircle size={20} />
                       <span>Agregar detalle</span>
                     </button>
                   </td>
-                  <td></td>
-                  <td></td>
                 </tr>
               </tbody>
             </table>
