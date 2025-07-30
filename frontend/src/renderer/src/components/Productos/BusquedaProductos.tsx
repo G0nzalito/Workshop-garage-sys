@@ -405,7 +405,7 @@ export default function BusquedaProductos(): JSX.Element {
                           )?.Nombre
                         }
                       </td>
-                      <td>{producto.Stock}</td>
+                      <td>{producto.Producto.Categoria === 13 ? 'Servicio' : producto.Stock}</td>
                       <td>
                         {producto.Producto.Dado_de_baja ? (
                           <span className="text-red-400"> No listado </span>
@@ -442,6 +442,7 @@ export default function BusquedaProductos(): JSX.Element {
                             onClick={() => {
                               openModals(producto.Producto, setAumentarStock)
                             }}
+                            disabled={producto.Producto.Categoria === 13}
                           >
                             <PlusCircle size={16} />
                           </button>

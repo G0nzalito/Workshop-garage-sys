@@ -7,8 +7,8 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()],
     build: {
       outDir: 'build/main',
-      rollupOptions:{
-        input: 'src/main/index.ts',
+      rollupOptions: {
+        input: 'src/main/index.ts'
       }
     }
   },
@@ -16,25 +16,26 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()],
     build: {
       outDir: 'build/preload',
-      rollupOptions:{
-        input: 'src/preload/index.ts',
+      rollupOptions: {
+        input: 'src/preload/index.ts'
       }
     }
   },
   renderer: {
     resolve: {
       alias: {
-        '@renderer': resolve('src/renderer/src')
+        '@renderer': resolve('src/renderer/src'),
+        '@': resolve('.')
       }
     },
     plugins: [react()],
     build: {
       outDir: 'build/renderer',
-      rollupOptions:{
-        input: 'src/renderer/index.html',
+      rollupOptions: {
+        input: 'src/renderer/index.html'
       },
-      emptyOutDir: true,
+      emptyOutDir: true
     },
-    root: 'src/renderer',
+    root: 'src/renderer'
   }
 })

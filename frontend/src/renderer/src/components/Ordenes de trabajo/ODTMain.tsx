@@ -3,6 +3,7 @@ import { useConsts } from '@renderer/Contexts/constsContext'
 import { useState, useEffect } from 'react'
 import BusquedaCliente from '@renderer/components/Clientes/BusquedaCliente'
 import NuevaODT from '@renderer/components/Ordenes de trabajo/NuevaODT'
+import BusquedaODT from '@renderer/components/Ordenes de trabajo/BusquedaODT'
 
 export default function ODTMain(): JSX.Element {
   const [activo, setActivo] = useState('')
@@ -42,7 +43,7 @@ export default function ODTMain(): JSX.Element {
           Nueva Orden
         </button>
       </div>
-      {activo === 'busqueda' && <BusquedaCliente />}
+      {activo === 'busqueda' && <BusquedaODT />}
       {activo === 'nuevo' && <NuevaODT />}
       {/* {activo === 'aumento' && <AumentarPrecioPorCategoria />} */}
     </div>

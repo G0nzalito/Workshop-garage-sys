@@ -236,9 +236,6 @@ export default function CobroSinODT({
           duration: 6000,
           icon: <BadgeCheck />
         })
-        productos.forEach((producto) => {
-          console.log(producto)
-        })
         await modificarStockProducto(productos, sucursalSeleccionada, false)
         console.log('Stock modificado')
         setProductos([])

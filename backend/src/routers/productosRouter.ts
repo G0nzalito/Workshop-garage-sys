@@ -87,16 +87,21 @@ productosRouter.get("/hayStock", async (req, res) => {
     console.log("encontre este error")
     res.status(404).json({ error: "Producto no encontrado" })
   } else {
-    const stock = (
-      await obtenerStockProducto(
-        Codigo as string,
-        parseInt(Sucursal_id as string)
-      )
-    )[0]
-    if (stock.Cantidad >= parseFloat(Cantidad as string)) {
-      res.status(200).json({ message: "Hay stock suficiente" })
+    if (producto.Categoria === 13) {
+      res.status(200).json({ message: "Producto no requiere stock" })
+      return
     } else {
-      res.status(400).json({ error: "No hay stock suficiente" })
+      const stock = (
+        await obtenerStockProducto(
+          Codigo as string,
+          parseInt(Sucursal_id as string)
+        )
+      )[0]
+      if (stock.Cantidad >= parseFloat(Cantidad as string)) {
+        res.status(200).json({ message: "Hay stock suficiente" })
+      } else {
+        res.status(400).json({ error: "No hay stock suficiente" })
+      }
     }
   }
 })
@@ -104,27 +109,35 @@ productosRouter.get("/hayStock", async (req, res) => {
 productosRouter.get("/stock", async (req, res) => {
   const { Codigo, Sucursal_id } = req.query
 
-  console.log("Query", req.query)
-
   try {
     const producto = await getProductosByCodigo(Codigo as string)
     if (!producto) {
       throw new ReferenceError("Producto no encontrado")
     }
 
-    console.log("sucursal id", Sucursal_id as string)
-
     if (!Sucursal_id) {
       throw new ReferenceError("Sucursal no encontrada")
     }
-    const sucursal_id = getSucursalById(parseInt(Sucursal_id as string))
+    const sucursal_id = (await getSucursalById(parseInt(Sucursal_id as string)))
+      ?.id
 
-    const stock = await obtenerStockProducto(
-      Codigo as string,
-      parseInt(Sucursal_id as string)
-    )
+    if (producto.Categoria === 13) {
+      const stock: StockAInsertar[] = [
+        {
+          Codigo: producto.Codigo,
+          Cantidad: 999,
+          Sucursal_id: parseInt(Sucursal_id as string),
+        },
+      ]
+      res.status(200).json(stock)
+    } else {
+      const stock = await obtenerStockProducto(
+        Codigo as string,
+        parseInt(Sucursal_id as string)
+      )
 
-    res.status(200).json(stock)
+      res.status(200).json(stock)
+    }
   } catch (error) {
     if (error instanceof ReferenceError) {
       res.status(404).json({ error: error.message })

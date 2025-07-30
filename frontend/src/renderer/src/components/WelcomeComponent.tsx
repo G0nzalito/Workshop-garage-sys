@@ -102,7 +102,6 @@ export default function WelcomeComponent(): JSX.Element {
             sucursalSeleccionada
           )
           if (hayStock) {
-            console.log('Sucursal en componente: ', sucursalSeleccionada)
             const stock = (await obtenerStockProductos(data.Codigo, sucursalSeleccionada))[0]
             if (cesta.length > 0) {
               setCesta([

@@ -4,6 +4,7 @@ import { Database } from '@/src/types/database.types'
 const API_URL = 'http://localhost:4001/api/productos'
 
 type Producto = Database['public']['Tables']['Productos']['Row']
+type ProductoAInsertar = Database['public']['Tables']['Productos']['Insert']
 type Stock = Database['public']['Tables']['Stock']['Row']
 
 export const getProductos = async (): Promise<Producto[]> => {
@@ -50,16 +51,18 @@ export const modificarStockProducto = async (
   const Productos: { Codigo: string; Cantidad: number }[] = []
 
   for (const producto of productos) {
-    if (suma) {
-      Productos.push({
-        Codigo: producto.Producto.Codigo,
-        Cantidad: producto.cantidad
-      })
-    } else {
-      Productos.push({
-        Codigo: producto.Producto.Codigo,
-        Cantidad: -producto.cantidad
-      })
+    if (producto.Producto.Categoria !== 13) {
+      if (suma) {
+        Productos.push({
+          Codigo: producto.Producto.Codigo,
+          Cantidad: producto.cantidad
+        })
+      } else {
+        Productos.push({
+          Codigo: producto.Producto.Codigo,
+          Cantidad: -producto.cantidad
+        })
+      }
     }
   }
 
@@ -101,13 +104,13 @@ export const obtenerFiltrados = async (
 }
 
 export const crearProducto = async (
-  nuevoProducto,
+  nuevoProducto: ProductoAInsertar,
   nuevoStock,
   sucursales
 ): Promise<Producto | number> => {
   try {
     const response = await axios.post(`${API_URL}/create`, nuevoProducto)
-    if (response.status === 201) {
+    if (response.status === 201 && nuevoProducto.Categoria !== 13) {
       for (const sucursal of sucursales) {
         if (nuevoStock.Sucursal_id === sucursal.id) {
           await crearStockProducto(nuevoStock)
