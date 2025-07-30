@@ -1,6 +1,6 @@
 import { getVehiculosFiltrados } from '../../../../servicies/vehiculosService'
 import { getClientesByFiltros } from '../../../../servicies/clientesService'
-import { Database } from '@/src/types/database.types'
+import { Database } from '../../../../types/database.types'
 import EditarCliente from '@renderer/components/Clientes/AccionesCliente/EditarCliente'
 import EliminarCliente from '@renderer/components/Clientes/AccionesCliente/EliminarCliente'
 import { useConsts } from '@renderer/Contexts/constsContext'
@@ -69,7 +69,7 @@ interface formDataCliente {
   patente?: string
   fechaDesde?: Date
   fechaHasta?: Date
-  finalizadas?: boolean
+  finalizadas?: boolean | number
 }
 
 type Cliente = Database['public']['Tables']['Cliente']['Row']
@@ -81,7 +81,7 @@ export default function BusquedaODT(): JSX.Element {
     cliente: '',
     patente: '',
     fechaDesde: undefined,
-    finalizadas: false
+    finalizadas: undefined
   })
 
   const {
@@ -98,7 +98,7 @@ export default function BusquedaODT(): JSX.Element {
   const [Vehiculo, setVehiculo] = useState(null)
   const [vehiculosDeCliente, setVehiculosDeCliente] = useState<Vehiculo[]>([])
 
-  const [ordenes, setOrdenes] = useState<ODT[]>([])
+  const [ordenes, setOrdenes] = useState<ODT[]>()
 
   // const [date, setDate] = React.useState<Date | undefined>(new Date())
 
@@ -108,7 +108,8 @@ export default function BusquedaODT(): JSX.Element {
 
   const handleChange = (e): void => {
     const { name, value, type } = e.target
-    if (type === 'number') {
+    if (type === 'number' || type === 'radio') {
+      console.log('Valor del input:', value)
       setFormData((prevState) => ({
         ...prevState,
         [name]: value === '' ? -1 : parseInt(value, 10) // Convertir a número
@@ -149,7 +150,10 @@ export default function BusquedaODT(): JSX.Element {
     e.preventDefault()
 
     //@ts-ignore no te preocupes por los errores, va a funcionar
-    formdata.finalizadas === '1' ? (formdata.finalizadas = true) : (formdata.finalizadas = false)
+
+    console.log('formdata', formdata)
+
+    formdata.finalizadas === 1 ? (formdata.finalizadas = true) : (formdata.finalizadas = false)
 
     const toastLoading = toast.loading('Cargando órdenes de trabajo...')
     getODTFiltered(
@@ -221,7 +225,7 @@ export default function BusquedaODT(): JSX.Element {
       patente: '',
       fechaDesde: undefined,
       fechaHasta: undefined,
-      finalizadas: false
+      finalizadas: formdata.finalizadas ? 1 : 0
     })
     setCliente(null)
     setVehiculo(null)
@@ -240,7 +244,6 @@ export default function BusquedaODT(): JSX.Element {
     })
   }, [Cliente])
 
-  // console.log(vehiculos ? 'Vehiculos
   return (
     <>
       <div className="">
@@ -252,7 +255,10 @@ export default function BusquedaODT(): JSX.Element {
         <div className="flex gap-2">
           <form
             onSubmit={handleFilter}
-            onReset={limpiarFiltros}
+            onReset={() => {
+              setOrdenes(undefined)
+              limpiarFiltros()
+            }}
             className="flex flex-wrap gap-3"
             id="formBusquedaClientes"
           >
@@ -328,6 +334,7 @@ export default function BusquedaODT(): JSX.Element {
                   name="finalizadas"
                   value={1}
                   className="radio radio-success outline-1"
+                  defaultChecked={formdata.finalizadas === 1} // Use 'checked' instead of 'defaultChecked'
                   onChange={handleChange}
                 />
                 <span> Si </span>
@@ -336,7 +343,7 @@ export default function BusquedaODT(): JSX.Element {
                   name="finalizadas"
                   value={0}
                   className="radio radio-error outline-1"
-                  defaultChecked
+                  defaultChecked={formdata.finalizadas === 0} // Use 'checked' instead of 'defaultChecked'
                   onChange={handleChange}
                 />
                 <span> No </span>
@@ -365,81 +372,80 @@ export default function BusquedaODT(): JSX.Element {
       <div className="divider"></div>
       <div>LISTA DE CLIENTES</div>
       <div>
-        {clientes && !cargando ? (
+        {ordenes && !cargando ? (
           <table className="table outline-1">
             <th>Tipo Cuenta</th>
             <th>Numero Documento</th>
             <th>Nombre</th>
             <th>Patente</th>
             <th>Fecha inicio de orden</th>
-            <th>Fecha de fin de orden</th>
             <th>Estado</th>
             <th>Acciones</th>
             <tbody>
-              {clientes.length > 0 ? (
-                clientes
-                  .filter((cliente) => cliente.id !== 0)
-                  .map((cliente) => {
-                    return (
-                      <tr key={cliente.id}>
-                        <td>{`${tiposDocumento.find((tipo) => tipo.id === cliente.Tipo_Documento)?.['Tipo de cliente']} - ${tiposDocumento.find((tipo) => tipo.id === cliente.Tipo_Documento)?.['Nombre']} `}</td>
-                        <td>{cliente.Numero_Documento.toString().padStart(8, '0')}</td>
-                        <td>{cliente.Nombre}</td>
-                        <td>{cliente.Telefono ? cliente.Telefono : 'Sin teléfono'}</td>
-                        <td>{cliente.Email ? cliente.Email : 'Sin email'}</td>
-                        <td>{cliente.Direccion ? cliente.Direccion : 'Sin dirección'}</td>
-                        <td>
-                          {cliente.Numero_Socio ? cliente.Numero_Socio : 'Sin número de socio'}
-                        </td>
-                        <td>
-                          {cliente.Dado_de_baja ? (
-                            <span className="text-red-400">Inactivo</span>
-                          ) : (
-                            <span className="text-green-400">Activo</span>
-                          )}
-                        </td>
-                        <td>
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              className="btn btn-warning btn-soft tooltip"
-                              data-tip="Editar Cliente"
-                              onClick={() => {
-                                setClienteSeleccionado(cliente)
-                                //@ts-ignore siempre existe el modal
-                                document.getElementById('EditarCliente').showModal()
-                              }}
-                            >
-                              <Pencil size={16} />
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-error btn-soft tooltip"
-                              data-tip="Eliminar Producto"
-                              disabled={cliente.Dado_de_baja}
-                              onClick={() => {
-                                setClienteSeleccionado(cliente)
-                                //@ts-ignore siempre existe el modal
-                                document.getElementById('EliminarCliente').showModal()
-                              }}
-                            >
-                              <Trash size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })
+              {ordenes.length > 0 ? (
+                ordenes.map((orden) => {
+                  return (
+                    <tr key={orden.id}>
+                      <td>
+                        {
+                          tiposDocumento.find((tipo) => tipo.id === orden.Tipo_Documento_Cliente)?.[
+                            'Tipo de cliente'
+                          ]
+                        }
+                      </td>
+                      <td>{orden.Numero_Documento_Cliente}</td>
+                      <td>
+                        {
+                          clientes.find(
+                            (cliente) =>
+                              cliente.Tipo_Documento === orden.Tipo_Documento_Cliente &&
+                              cliente.Numero_Documento === orden.Numero_Documento_Cliente
+                          )?.Nombre
+                        }
+                      </td>
+                      <td>{orden.Patente_Vehiculo}</td>
+                      <td>{new Date(orden.Fecha_creacion).toLocaleDateString('es-AR')}</td>
+                      <td>
+                        {orden.Completada ? (
+                          <span className="badge badge-soft badge-success">Finalizada</span>
+                        ) : (
+                          <span className="badge badge-soft badge-error">Pendiente</span>
+                        )}
+                      </td>
+                      <td className="flex gap-2">
+                        <button
+                          className="btn btn-sm btn-primary"
+                          onClick={() => {
+                            setClienteSeleccionado(orden.Cliente)
+                            setEditarClienteKey((prev) => prev + 1)
+                            document.getElementById('EditarCliente').showModal()
+                          }}
+                        >
+                          <Pencil />
+                        </button>
+                        <button
+                          className="btn btn-sm btn-error"
+                          onClick={() => {
+                            setClienteSeleccionado(orden.Cliente)
+                            document.getElementById('EliminarCliente').showModal()
+                          }}
+                        >
+                          <Trash />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })
               ) : (
                 <tr>
-                  <td colSpan={8}>No se encontraron Clientes</td>
+                  <td colSpan={8}>No se encontraron Ordenes</td>
                 </tr>
               )}
             </tbody>
           </table>
         ) : (
           <div className="flex justify-center items-center text-2xl">
-            <h2>Realize una busqueda filtrada para encontrar los clientes</h2>
+            <h2>Realize una busqueda filtrada para encontrar las ordenes</h2>
           </div>
         )}
       </div>
