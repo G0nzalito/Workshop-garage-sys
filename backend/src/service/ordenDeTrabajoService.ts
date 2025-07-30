@@ -48,6 +48,43 @@ async function getOrdenDeTrabajoById(id: number) {
   return data as OrdenDeTrabajo
 }
 
+async function obtenerOrdenesDeTrabajoPorFiltros(
+  Tipo_Documento?: number,
+  Numero_Documento?: number,
+  Patente?: string,
+  FechaDesde?: string,
+  FechaHasta?: string,
+  Finalizadas?: boolean
+) {
+  console.log(arguments)
+  const query = supabase.from("Ordenes de trabajo").select("*")
+
+  if (Tipo_Documento) {
+    query.eq("Tipo_Documento_Cliente", Tipo_Documento)
+  }
+  if (Numero_Documento) {
+    query.eq("Numero_Documento_Cliente", Numero_Documento)
+  }
+  if (Patente) {
+    query.eq("Patente_Vehiculo", Patente)
+  }
+  if (FechaDesde) {
+    query.gte("Fecha_creacion", convertirFechaLocal(new Date(FechaDesde)))
+  }
+  if (FechaHasta) {
+    query.lte("Fecha_creacion", convertirFechaLocal(new Date(FechaHasta)))
+  }
+  if (!Finalizadas) {
+    query.is("Completada", false)
+  }
+
+  const { data, error } = await query
+  if (error) {
+    throw error
+  }
+  return data as OrdenDeTrabajo[]
+}
+
 async function createOrdenTrabajo(
   orden: OrdenDeTrabajoAInsertar,
   Detalles?: DetalleOrdenDeTrabajoAInsertar[]
@@ -191,6 +228,7 @@ export {
   getOrdenDeTrabajoById,
   getOrdenesDeTrabajo,
   getOrdenesDeTrabajoActivas,
+  obtenerOrdenesDeTrabajoPorFiltros,
   agregarDetallesOrdenDeTrabajo,
   completarOrdenDeTrabajo,
 }

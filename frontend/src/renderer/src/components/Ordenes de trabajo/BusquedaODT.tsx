@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { Calendar } from '@/components/ui/calendar'
 import { es } from 'react-day-picker/locale'
 import React from 'react'
+import { getODTFiltered } from '@/src/servicies/ODTService'
 
 const customStyles = {
   container: (provided: any) => ({
@@ -65,20 +66,22 @@ const customStyles = {
 
 interface formDataCliente {
   cliente: string
-  patente: string
-  fecha: string
-  activas: boolean
+  patente?: string
+  fechaDesde?: Date
+  fechaHasta?: Date
+  finalizadas?: boolean
 }
 
 type Cliente = Database['public']['Tables']['Cliente']['Row']
 type Vehiculo = Database['public']['Tables']['Vehiculo']['Row']
+type ODT = Database['public']['Tables']['Ordenes de trabajo']['Row']
 
 export default function BusquedaODT(): JSX.Element {
   const [formdata, setFormData] = useState<formDataCliente>({
     cliente: '',
     patente: '',
-    fecha: '',
-    activas: false
+    fechaDesde: undefined,
+    finalizadas: false
   })
 
   const {
@@ -95,7 +98,9 @@ export default function BusquedaODT(): JSX.Element {
   const [Vehiculo, setVehiculo] = useState(null)
   const [vehiculosDeCliente, setVehiculosDeCliente] = useState<Vehiculo[]>([])
 
-  const [date, setDate] = React.useState<Date | undefined>(new Date())
+  const [ordenes, setOrdenes] = useState<ODT[]>([])
+
+  // const [date, setDate] = React.useState<Date | undefined>(new Date())
 
   const [cargando, setCargando] = useState(false)
 
@@ -116,11 +121,19 @@ export default function BusquedaODT(): JSX.Element {
     }
   }
 
-  const handleSelectDate = (e) => {
+  const handleSelectDateFrom = (e) => {
     console.log('Fecha seleccionada:', e)
     setFormData((prev) => ({
       ...prev,
-      fecha: e ? e.toISOString().split('T')[0] : ''
+      fechaDesde: e ? e : new Date()
+    }))
+  }
+
+  const handleSelectDateUntil = (e) => {
+    console.log('Fecha seleccionada:', e)
+    setFormData((prev) => ({
+      ...prev,
+      fechaHasta: e ? e : new Date()
     }))
   }
 
@@ -132,50 +145,86 @@ export default function BusquedaODT(): JSX.Element {
     }))
   }
 
-  // const handleFilter = (e): void => {
-  //   e.preventDefault()
+  const handleFilter = (e): void => {
+    e.preventDefault()
 
-  //   formdata.nombre === '' ? (formdata.nombre = undefined) : formdata.nombre
+    //@ts-ignore no te preocupes por los errores, va a funcionar
+    formdata.finalizadas === '1' ? (formdata.finalizadas = true) : (formdata.finalizadas = false)
 
-  //   const toastLoading = toast.loading('Cargando vehiculos...')
-  //   getClientesByFiltros(
-  //     formdata.tipoDocumento,
-  //     formdata.numeroDocumento,
-  //     formdata.nombre,
-  //     formdata.numeroSocio
-  //   )
-  //     .then((data) => {
-  //       console.log(data)
-  //       if (typeof data === 'string') {
-  //         toast.dismiss(toastLoading)
-  //         toast.error('Error al cargar los clientes', {
-  //           description: 'Contacte al administrador de red inmediatamente',
-  //           duration: 5000,
-  //           icon: <X />
-  //         })
-  //         return
-  //       }
-  //       setClientes(data)
-  //       setCargando(false)
-  //       toast.dismiss(toastLoading)
-  //       toast.success('Vehiculos cargados correctamente')
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error al cargar los vehiculos:', error)
-  //       toast.dismiss(toastLoading)
-  //       toast.error('Error al cargar los vehiculos')
-  //     })
-  // }
+    const toastLoading = toast.loading('Cargando órdenes de trabajo...')
+    getODTFiltered(
+      parseInt(formdata.cliente.split('-')[0]),
+      parseInt(formdata.cliente.split('-')[1]),
+      formdata.patente,
+      formdata.fechaDesde,
+      formdata.fechaHasta,
+      formdata.finalizadas
+    )
+      .then((data) => {
+        if (typeof data === 'string') {
+          toast.dismiss(toastLoading)
+          toast.error('Error al cargar las órdenes de trabajo', {
+            description: 'Contacte al administrador del sistema',
+            duration: 5000,
+            icon: <X />
+          })
+          return
+        }
+        setCargando(false)
+        toast.dismiss(toastLoading)
+        toast.success('Órdenes de trabajo cargadas correctamente')
+        setOrdenes(data)
+        limpiarFiltros()
+      })
+      .catch((error) => {
+        console.error('Error al cargar las órdenes de trabajo:', error)
+        toast.dismiss(toastLoading)
+        toast.error('Error al cargar las órdenes de trabajo', {
+          description: 'Contacte al administrador del sistema',
+          duration: 5000,
+          icon: <X />
+        })
+      })
+    // const toastLoading = toast.loading('Cargando vehiculos...')
+    // getClientesByFiltros(
+    //   formdata.tipoDocumento,
+    //   formdata.numeroDocumento,
+    //   formdata.nombre,
+    //   formdata.numeroSocio
+    // )
+    //   .then((data) => {
+    //     console.log(data)
+    //     if (typeof data === 'string') {
+    //       toast.dismiss(toastLoading)
+    //       toast.error('Error al cargar los clientes', {
+    //         description: 'Contacte al administrador de red inmediatamente',
+    //         duration: 5000,
+    //         icon: <X />
+    //       })
+    //       return
+    //     }
+    //     setClientes(data)
+    //     setCargando(false)
+    //     toast.dismiss(toastLoading)
+    //     toast.success('Vehiculos cargados correctamente')
+    //   })
+    //   .catch((error) => {
+    //     console.error('Error al cargar los vehiculos:', error)
+    //     toast.dismiss(toastLoading)
+    //     toast.error('Error al cargar los vehiculos')
+    //   })
+  }
 
   const limpiarFiltros = (): void => {
     setFormData({
-      tipoDocumento: 0,
-      numeroDocumento: 0,
-      nombre: '',
-      numeroSocio: 0
+      cliente: '',
+      patente: '',
+      fechaDesde: undefined,
+      fechaHasta: undefined,
+      finalizadas: false
     })
-    setTipoDocumento(null)
-    setClientes(null)
+    setCliente(null)
+    setVehiculo(null)
     setCargando(false)
   }
 
@@ -202,9 +251,7 @@ export default function BusquedaODT(): JSX.Element {
         </h2>
         <div className="flex gap-2">
           <form
-            onSubmit={(e) => {
-              e.preventDefault()
-            }}
+            onSubmit={handleFilter}
             onReset={limpiarFiltros}
             className="flex flex-wrap gap-3"
             id="formBusquedaClientes"
@@ -254,30 +301,47 @@ export default function BusquedaODT(): JSX.Element {
               <input
                 type="date"
                 className="input input-md outline-1"
-                value={formdata.fecha}
+                value={new Date(formdata.fechaDesde).toLocaleDateString('en-CA')}
                 onClick={() => {
                   //@ts-ignore no va a ser null
-                  document.getElementById('IngresarFecha').showModal()
+                  document.getElementById('IngresarFechaDesde').showModal()
                 }}
               />
-
-              {/* <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-lg border bg-base-100"
-              /> */}
             </fieldset>
-            {/* <fieldset>
-              <legend className="fieldset-legend"> Numero de socio:</legend>
+            <fieldset>
+              <legend className="fieldset-legend"> Hasta:</legend>
               <input
-                type="number"
-                className="input input-md outline-1 w-60 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                placeholder="Ingresa el numero de socio a buscar..."
-                name="numeroSocio"
-                onChange={handleChange}
+                type="date"
+                className="input input-md outline-1"
+                value={new Date(formdata.fechaHasta).toLocaleDateString('en-CA')}
+                onClick={() => {
+                  //@ts-ignore no va a ser null
+                  document.getElementById('IngresarFechaHasta').showModal()
+                }}
               />
-            </fieldset> */}
+            </fieldset>
+            <fieldset>
+              <legend className="fieldset-legend"> ¿Incluir órdenes finalizadas?</legend>
+              <div className="flex justify-center gap-4">
+                <input
+                  type="radio"
+                  name="finalizadas"
+                  value={1}
+                  className="radio radio-success outline-1"
+                  onChange={handleChange}
+                />
+                <span> Si </span>
+                <input
+                  type="radio"
+                  name="finalizadas"
+                  value={0}
+                  className="radio radio-error outline-1"
+                  defaultChecked
+                  onChange={handleChange}
+                />
+                <span> No </span>
+              </div>
+            </fieldset>
           </form>
         </div>
       </div>
@@ -306,10 +370,9 @@ export default function BusquedaODT(): JSX.Element {
             <th>Tipo Cuenta</th>
             <th>Numero Documento</th>
             <th>Nombre</th>
-            <th>Teléfono</th>
-            <th>Email</th>
-            <th>Dirección</th>
-            <th>Numero de socio</th>
+            <th>Patente</th>
+            <th>Fecha inicio de orden</th>
+            <th>Fecha de fin de orden</th>
             <th>Estado</th>
             <th>Acciones</th>
             <tbody>
@@ -437,7 +500,7 @@ export default function BusquedaODT(): JSX.Element {
         </form>
       </dialog>
       <dialog
-        id="IngresarFecha"
+        id="IngresarFechaDesde"
         className="modal"
         onClose={(): void => {
           // formData.Marca = 0
@@ -460,8 +523,8 @@ export default function BusquedaODT(): JSX.Element {
           <div className="flex justify-center items-center mb-4">
             <Calendar
               mode="single"
-              selected={formdata.fecha ? new Date(formdata.fecha) : undefined}
-              onSelect={handleSelectDate}
+              selected={formdata.fechaDesde ? new Date(formdata.fechaDesde) : undefined}
+              onSelect={handleSelectDateFrom}
               className="rounded-lg border bg-base-100"
               classNames={{
                 today: 'text-[#ea6943]',
@@ -472,15 +535,70 @@ export default function BusquedaODT(): JSX.Element {
           </div>
           <div className="flex items-center justify-between">
             <div className="badge badge-outline badge-info ">
-              {date
-                ? `Fecha seleccionada: ${new Date(formdata.fecha).toLocaleDateString('es-ES')}`
+              {formdata.fechaDesde
+                ? `Fecha seleccionada: ${new Date(formdata.fechaDesde).toLocaleDateString('es-ES')}`
                 : 'Seleccione una fecha'}
             </div>
             <button
               className="btn btn-primary"
               onClick={() => {
                 //@ts-ignore no va a ser nulo
-                document.getElementById('IngresarFecha').close()
+                document.getElementById('IngresarFechaDesde').close()
+              }}
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+      <dialog
+        id="IngresarFechaHasta"
+        className="modal"
+        onClose={(): void => {
+          // formData.Marca = 0
+        }}
+      >
+        <div className="modal-box">
+          <div className="flex justify-between items-center mb-4">
+            <div className="badge badge-soft badge-success mb-4">
+              <span className="font-bold italic text-3xl">Hasta la fecha:</span>
+            </div>
+            <div className="modal-action">
+              <form method="dialog">
+                {/* if there is a button in form, it will close the modal */}
+                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+                  ✕
+                </button>
+              </form>
+            </div>
+          </div>
+          <div className="flex justify-center items-center mb-4">
+            <Calendar
+              mode="single"
+              selected={formdata.fechaHasta ? new Date(formdata.fechaHasta) : undefined}
+              onSelect={handleSelectDateUntil}
+              className="rounded-lg border bg-base-100"
+              classNames={{
+                today: 'text-[#ea6943]',
+                selected: 'bg-[#262a27] text-[#4da287]'
+              }}
+              locale={es}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="badge badge-outline badge-info ">
+              {formdata.fechaHasta
+                ? `Fecha seleccionada: ${new Date(formdata.fechaHasta).toLocaleDateString('es-ES')}`
+                : 'Seleccione una fecha'}
+            </div>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                //@ts-ignore no va a ser nulo
+                document.getElementById('IngresarFechaHasta').close()
               }}
             >
               Aceptar
@@ -494,4 +612,3 @@ export default function BusquedaODT(): JSX.Element {
     </>
   )
 }
-

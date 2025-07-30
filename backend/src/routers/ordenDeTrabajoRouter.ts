@@ -5,6 +5,7 @@ import {
   createOrdenTrabajo,
   agregarDetallesOrdenDeTrabajo,
   completarOrdenDeTrabajo,
+  obtenerOrdenesDeTrabajoPorFiltros,
 } from "../service/ordenDeTrabajoService"
 import {
   getDateWithTimeZone,
@@ -55,6 +56,33 @@ ordenDeTrabajoRouter.get("/specific", async (req, res) => {
     } catch (error) {
       res.status(500).json({ error })
     }
+  }
+})
+
+ordenDeTrabajoRouter.get("/filter", async (req, res) => {
+  const {
+    Tipo_Documento,
+    Numero_Documento,
+    Patente,
+    FechaDesde,
+    FechaHasta,
+    Finalizadas,
+  } = req.query
+
+  console.log(req.query)
+
+  try {
+    const ordenes = await obtenerOrdenesDeTrabajoPorFiltros(
+      Tipo_Documento ? Number(Tipo_Documento) : undefined,
+      Numero_Documento ? Number(Numero_Documento) : undefined,
+      Patente ? String(Patente) : undefined,
+      FechaDesde ? String(FechaDesde) : undefined,
+      FechaHasta ? String(FechaHasta) : undefined,
+      Finalizadas === "false" ? false : true
+    )
+    res.status(200).json(ordenes)
+  } catch (error) {
+    res.status(500).json({ error })
   }
 })
 

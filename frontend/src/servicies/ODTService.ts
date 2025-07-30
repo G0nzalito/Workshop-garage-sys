@@ -15,6 +15,46 @@ export const getAllODT = async (): Promise<OrdenDeTrabajo[]> => {
   }
 }
 
+export const getODTFiltered = async (
+  Tipo_Documento?: number,
+  Numero_Documento?: number,
+  Patente?: string,
+  FechaDesde?: Date,
+  FechaHasta?: Date,
+  Finalizadas?: boolean
+): Promise<OrdenDeTrabajo[] | string> => {
+  try {
+    const response = await axios.get(`${baseUrl}/filter`, {
+      params: {
+        Tipo_Documento,
+        Numero_Documento,
+        Patente,
+        FechaDesde,
+        FechaHasta,
+        Finalizadas
+      }
+    })
+    if (response.status === 200) {
+      return response.data
+    } else {
+      console.log(response)
+      return 'Error Desconocido'
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status
+      if (status === 400) {
+        return 'Error de validación'
+      } else {
+        console.log(error.response)
+        return 'Error Desconocido'
+      }
+    } else {
+      return 'Error Desconocido'
+    }
+  }
+}
+
 export const createODT = async (
   Tipo_Documento: number,
   Numero_Documento: number,
@@ -50,4 +90,3 @@ export const createODT = async (
     }
   }
 }
-
