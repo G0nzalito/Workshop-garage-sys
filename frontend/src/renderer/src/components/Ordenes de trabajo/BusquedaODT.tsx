@@ -4,7 +4,7 @@ import { Database } from '../../../../types/database.types'
 import EditarCliente from '@renderer/components/Clientes/AccionesCliente/EditarCliente'
 import EliminarCliente from '@renderer/components/Clientes/AccionesCliente/EliminarCliente'
 import { useConsts } from '@renderer/Contexts/constsContext'
-import { Pencil, Trash, X } from 'lucide-react'
+import { DollarSign, Info, Pencil, PlusCircle, Trash, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { toast } from 'sonner'
@@ -12,6 +12,8 @@ import { Calendar } from '@/components/ui/calendar'
 import { es } from 'react-day-picker/locale'
 import React from 'react'
 import { getODTFiltered } from '@/src/servicies/ODTService'
+import AgregarDetallesODT from '@renderer/components/Ordenes de trabajo/AgregarDetallesODT'
+import AgregarDetallesODTModal from '@renderer/components/Ordenes de trabajo/AccionesODT/AgregarDetallesODTModal'
 
 const customStyles = {
   container: (provided: any) => ({
@@ -84,19 +86,17 @@ export default function BusquedaODT(): JSX.Element {
     finalizadas: undefined
   })
 
-  const {
-    tiposDocumento,
-    clienteSeleccionado,
-    setClienteSeleccionado,
-    clientes,
-    modelos,
-    vehiculos
-  } = useConsts()
+  const { tiposDocumento, clientes, ordenDeTrabajoSeleccionada, setOrdenDeTrabajoSeleccionada } =
+    useConsts()
 
   // const [clientes, setClientes] = useState<Cliente[] | null>(null)
   const [Cliente, setCliente] = useState(null)
   const [Vehiculo, setVehiculo] = useState(null)
   const [vehiculosDeCliente, setVehiculosDeCliente] = useState<Vehiculo[]>([])
+
+  const [cesta, setCesta] = useState<
+    { Producto: Producto; cantidad: number; stockMaximo: number }[]
+  >([])
 
   const [ordenes, setOrdenes] = useState<ODT[]>()
 
@@ -414,23 +414,25 @@ export default function BusquedaODT(): JSX.Element {
                       </td>
                       <td className="flex gap-2">
                         <button
-                          className="btn btn-sm btn-primary"
+                          className="btn btn-soft btn-warning btn-sm tooltip"
+                          data-tip="Agregar Detalles"
                           onClick={() => {
-                            setClienteSeleccionado(orden.Cliente)
+                            setOrdenDeTrabajoSeleccionada(orden)
                             setEditarClienteKey((prev) => prev + 1)
-                            document.getElementById('EditarCliente').showModal()
+                            document.getElementById('EditarODT').showModal()
                           }}
                         >
-                          <Pencil />
+                          <PlusCircle size={16} />
                         </button>
                         <button
-                          className="btn btn-sm btn-error"
+                          className={`btn btn-soft ${orden.Completada ? 'btn-info' : 'btn-success'} btn-sm tooltip`}
+                          data-tip={`${orden.Completada ? 'Ver Comprobante' : 'Cobrar Orden'}`}
                           onClick={() => {
-                            setClienteSeleccionado(orden.Cliente)
+                            setOrdenDeTrabajoSeleccionada(orden)
                             document.getElementById('EliminarCliente').showModal()
                           }}
                         >
-                          <Trash />
+                          {orden.Completada ? <Info size={16} /> : <DollarSign size={16} />}
                         </button>
                       </td>
                     </tr>
@@ -450,17 +452,17 @@ export default function BusquedaODT(): JSX.Element {
         )}
       </div>
       <dialog
-        id="EditarCliente"
+        id="EditarODT"
         className="modal"
         onClose={(): void => {
-          setClienteSeleccionado(undefined)
+          setOrdenDeTrabajoSeleccionada(undefined)
           // formData.Marca = 0
         }}
       >
         <div className="modal-box">
           <div className="flex justify-between items-center mb-4">
             <div className="badge badge-soft badge-success">
-              <span className="font-bold italic text-3xl">Editar Cliente</span>
+              <span className="font-bold italic text-3xl">Agregar detalles a orden</span>
             </div>
             <div className="modal-action">
               <form method="dialog">
@@ -471,35 +473,9 @@ export default function BusquedaODT(): JSX.Element {
               </form>
             </div>
           </div>
-          {clienteSeleccionado !== undefined && <EditarCliente setClientes={setClientes} />}
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
-      <dialog
-        id="EliminarCliente"
-        className="modal"
-        onClose={(): void => {
-          setClienteSeleccionado(undefined)
-          // formData.Marca = 0
-        }}
-      >
-        <div className="modal-box">
-          <div className="flex justify-between items-center mb-4">
-            <div className="badge badge-soft badge-error">
-              <span className="font-bold italic text-3xl">Eliminar Cliente</span>
-            </div>
-            <div className="modal-action">
-              <form method="dialog">
-                {/* if there is a button in form, it will close the modal */}
-                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-                  ✕
-                </button>
-              </form>
-            </div>
-          </div>
-          {clienteSeleccionado !== undefined && <EliminarCliente setClientes={setClientes} />}
+          {ordenDeTrabajoSeleccionada !== undefined && (
+            <>{<AgregarDetallesODTModal cesta={cesta} setCesta={setCesta} />}</>
+          )}
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>

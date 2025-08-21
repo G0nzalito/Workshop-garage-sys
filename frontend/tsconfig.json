@@ -10,5 +10,10 @@
       "@servicies/*": ["src/servicies/*"],
     },
     "allowJs": true
-  }
+  },
+    "exclude": [ // Add this section
+    "node_modules",
+    "build",
+    "out" // Assuming 'out' is another output dir you want to ignore
+  ]
 }

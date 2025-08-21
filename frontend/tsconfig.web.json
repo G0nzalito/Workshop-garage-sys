@@ -17,10 +17,15 @@
       "@renderer/*": [
         "src/renderer/src/*"
       ],
-      "@/*": ["."], 
+      "@/*": ["./*"], 
       "@components/*": ["./components/*"],
       "@types": ["./src/types/database.types.ts"],
       "@servicies/*": ["src/servicies/*"],
     }
-  }
+  },
+  "exclude": [ // Add this section
+    "node_modules",
+    "build",
+    "out"
+  ]
 }

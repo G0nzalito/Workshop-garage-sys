@@ -19,6 +19,7 @@ type Vehiculo = Database['public']['Tables']['Vehiculo']['Row']
 type VehiculoSeleccionado = Database['public']['Tables']['Vehiculo']['Row'] & {
   Cliente: string
 }
+type OrdensDeTrabajo = Database['public']['Tables']['Ordenes de trabajo']['Row']
 
 type ConstContextData = {
   sucursalSeleccionada: number
@@ -57,6 +58,8 @@ type ConstContextData = {
   setVehiculos: React.Dispatch<React.SetStateAction<Vehiculo[]>>
   vehiculoSeleccionado: VehiculoSeleccionado
   setVehiculoSeleccionado: React.Dispatch<React.SetStateAction<VehiculoSeleccionado>>
+  ordenDeTrabajoSeleccionada: OrdensDeTrabajo
+  setOrdenDeTrabajoSeleccionada: React.Dispatch<React.SetStateAction<OrdensDeTrabajo>>
 }
 
 export const ConstContext = createContext<ConstContextData | undefined>(undefined)
@@ -85,6 +88,9 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [sucursales, setSucursales] = useState<Sucursal[]>([])
   const [productoSeleccionado, setProductoSeleccionado] = useState<Producto>({} as Producto)
   const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState<VehiculoSeleccionado>(null)
+  const [ordenDeTrabajoSeleccionada, setOrdenDeTrabajoSeleccionada] = useState<OrdensDeTrabajo>(
+    {} as OrdensDeTrabajo
+  )
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([])
 
   // useEffect(() => {
@@ -136,6 +142,8 @@ export const ConstsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         setProductoSeleccionado,
         vehiculoSeleccionado,
         setVehiculoSeleccionado,
+        ordenDeTrabajoSeleccionada,
+        setOrdenDeTrabajoSeleccionada,
         vehiculos,
         setVehiculos
       }}

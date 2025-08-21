@@ -12,6 +12,7 @@ import {
   hayStockParaVenta,
   obtenerStockProductos
 } from '../../../../servicies/productosService'
+import AgregarDetallesODT from '@renderer/components/Ordenes de trabajo/AgregarDetallesODT'
 
 type formDataNuevoCliente = {
   Cliente: string
@@ -448,92 +449,7 @@ export default function NuevaODT(): JSX.Element {
         <span className="fieldset-legend text-right self-center font-medium"></span>
         <div className="flex flex-col">
           <div className="overflow-x-auto">
-            <table className="table">
-              {/* head */}
-              <thead>
-                <tr>
-                  <th>Codigo</th>
-                  <th>Cantidad</th>
-                  <th>Precio</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {cesta.map((detalle, index) => (
-                  <tr key={index}>
-                    <td>{detalle.Producto.Codigo}</td>
-                    <td>{detalle.cantidad}</td>
-                    <td>${detalle.Producto.Precio * detalle.cantidad}</td>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn btn-error btn-sm btn-soft"
-                        onClick={() => {
-                          setCesta((prevDetalles) => prevDetalles.filter((_, i) => i !== index))
-                        }}
-                      >
-                        <X size={20} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                <tr>
-                  <td>
-                    <form
-                      id="formVenta"
-                      onSubmit={(e) => {
-                        e.preventDefault()
-                        handleAddDetail(formDataDetail)
-                      }}
-                    >
-                      <input
-                        type="text"
-                        name="Codigo"
-                        className="input input-bordered outline-1"
-                        placeholder="Codigo de producto"
-                        value={formDataDetail.Codigo}
-                        form="formVenta"
-                        onChange={handleDetailChange}
-                      />
-                    </form>
-                  </td>
-                  <td>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault()
-                        handleAddDetail(formDataDetail)
-                      }}
-                    >
-                      <input
-                        type="number"
-                        name="Cantidad"
-                        className="input input-bordered outline-1 w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        placeholder="Cantidad"
-                        form="formVenta"
-                        value={formDataDetail.Cantidad}
-                        onChange={handleDetailChange}
-                      />
-                    </form>
-                  </td>
-                  <td></td>
-                </tr>
-                <tr key={-1}>
-                  <td></td>
-                  <td>
-                    <button
-                      className="btn btn-success btn-sm btn-soft"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        handleAddDetail(formDataDetail)
-                      }}
-                    >
-                      <PlusCircle size={20} />
-                      <span>Agregar detalle</span>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <AgregarDetallesODT cesta={cesta} setCesta={setCesta} />
           </div>
         </div>
         <div className="pl-2 self-center"></div>
@@ -571,4 +487,3 @@ export default function NuevaODT(): JSX.Element {
     </div>
   )
 }
-

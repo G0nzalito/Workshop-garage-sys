@@ -3,6 +3,12 @@
   "include": ["electron.vite.config.*", "src/main/**/*", "src/preload/**/*"],
   "compilerOptions": {
     "composite": true,
-    "types": ["electron-vite/node"]
-  }
+    "types": ["electron-vite/node"],
+    "outDir": "build/main",
+    "allowSyntheticDefaultImports": true
+  },
+   "exclude": [ // Explicitly exclude build/main from being read as source
+    "node_modules",
+    "build"
+  ]
 }
